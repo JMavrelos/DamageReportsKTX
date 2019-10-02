@@ -1,0 +1,65 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion build_versions.target_sdk
+    buildToolsVersion build_versions.build_tools
+    testOptions.unitTests.includeAndroidResources = true
+    defaultConfig {
+        applicationId "gr.blackswamp.damagereports"
+        minSdkVersion build_versions.min_sdk
+        targetSdkVersion build_versions.target_sdk
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+        javaCompileOptions.annotationProcessorOptions.arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+    }
+    dataBinding {
+        enabled = true
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    // Kotlin
+    implementation deps.kotlin.stdlib
+    implementation deps.kotlin.reflect
+
+    // Support library
+    implementation deps.support.design
+    implementation deps.constraint_layout
+    // Architecture components
+    implementation deps.lifecycle.runtime
+    implementation deps.lifecycle.extensions
+    implementation deps.lifecycle.viewmodel_saved_state
+    kapt deps.lifecycle.compiler
+    // Coroutines
+    implementation deps.coroutines.android
+    // Room
+    implementation deps.room.runtime
+    implementation deps.room.kotlin
+    kapt deps.room.compiler
+    // Mockito
+    testImplementation deps.mockito.core
+    // Robolectric
+    testImplementation deps.robolectric
+    // Junit
+    testImplementation deps.junit
+
+    androidTestImplementation deps.atsl.runner
+    testImplementation deps.arch_core.testing
+    androidTestImplementation deps.arch_core.testing
+}

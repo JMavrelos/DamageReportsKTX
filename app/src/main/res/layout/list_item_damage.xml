@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/margin">
+
+        <TextView
+            android:id="@+id/damage_name"
+            style="@style/TextAppearance.MaterialComponents.Body2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin"
+            android:layout_marginTop="@dimen/margin"
+            android:contentDescription="@string/damage_thumbnail"
+            android:scaleType="centerInside"
+            android:src="@drawable/im_logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="this is the damage short name" />
+
+        <ImageView
+            android:id="@+id/damage_pictures_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:labelFor="@+id/damage_pictures"
+            android:tint="@color/secondaryColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias=".3"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/damage_name"
+            app:srcCompat="@drawable/ic_image"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/damage_pictures"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin"
+            app:layout_constraintBottom_toBottomOf="@+id/damage_pictures_icon"
+            app:layout_constraintStart_toEndOf="@+id/damage_pictures_icon"
+            app:layout_constraintTop_toTopOf="@+id/damage_pictures_icon"
+            tools:text="133" />
+
+        <ImageView
+            android:id="@+id/damage_parts_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tint="@color/secondaryColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias=".5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/damage_name"
+            app:srcCompat="@drawable/ic_build"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/damage_parts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin"
+            app:layout_constraintBottom_toBottomOf="@+id/damage_parts_icon"
+            app:layout_constraintStart_toEndOf="@+id/damage_parts_icon"
+            app:layout_constraintTop_toTopOf="@+id/damage_parts_icon"
+            tools:text="332" />
+
+        <ImageView
+            android:id="@+id/damage_cost_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tint="@color/secondaryColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias=".7"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/damage_name"
+            app:srcCompat="@drawable/ic_money"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/damage_cost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin"
+            app:layout_constraintBottom_toBottomOf="@+id/damage_cost_icon"
+            app:layout_constraintStart_toEndOf="@+id/damage_cost_icon"
+            app:layout_constraintTop_toTopOf="@+id/damage_cost_icon"
+            tools:text="1533.22" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
