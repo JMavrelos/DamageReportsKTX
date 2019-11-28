@@ -22,24 +22,7 @@ import java.util.*
 @TypeConverters(DateConverter::class, UUIDConverter::class)
 abstract class AppDatabase : RoomDatabase(), IDatabase {
     companion object {
-        private const val DBNAME = "data.db"
-
-        @Volatile
-        private var INSTANCE: IDatabase? = null
-
-        @JvmStatic
-        fun instance(context: Context): IDatabase {
-            return synchronized(this) {
-                INSTANCE ?: buildDatabase(context).also { INSTANCE = it }
-            }
-        }
-
-        private fun buildDatabase(context: Context) =
-            Room.databaseBuilder(
-                context.applicationContext,
-                AppDatabase::class.java, DBNAME
-            )
-                .build()
+        const val DATABASE = "data.db"
     }
 
     abstract val reportDao: ReportDao

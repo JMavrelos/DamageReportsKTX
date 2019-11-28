@@ -17,9 +17,6 @@ android {
         vectorDrawables.useSupportLibrary = true
         javaCompileOptions.annotationProcessorOptions.arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
     }
-    dataBinding {
-        enabled = true
-    }
     buildTypes {
         release {
             minifyEnabled false
@@ -34,32 +31,29 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    // Kotlin
-    implementation deps.kotlin.stdlib
-    implementation deps.kotlin.reflect
+    implementation project(path: ':core')
 
-    // Support library
+    implementation deps.koin.android_viewmodel //koin
+    implementation deps.kotlin.stdlib //kotlin
+    implementation deps.coroutines.android //coroutines
+    implementation deps.support.app_compat
     implementation deps.support.design
+    implementation deps.support.annotations
+    implementation deps.support.core_ktx
     implementation deps.constraint_layout
-    // Architecture components
+    implementation deps.lifecycle.extensions
     implementation deps.lifecycle.runtime
     implementation deps.lifecycle.extensions
-    implementation deps.lifecycle.viewmodel_saved_state
     kapt deps.lifecycle.compiler
-    // Coroutines
-    implementation deps.coroutines.android
-    // Room
     implementation deps.room.runtime
     implementation deps.room.kotlin
     kapt deps.room.compiler
-    // Mockito
-    testImplementation deps.mockito.core
-    // Robolectric
-    testImplementation deps.robolectric
-    // Junit
-    testImplementation deps.junit
-
-    androidTestImplementation deps.atsl.runner
+    // tests
+    testImplementation deps.junit // Junit
+    testImplementation deps.robolectric // Robolectric
+    testImplementation deps.koin.test // Koin
+    testImplementation deps.mockito.core // Mockito
     testImplementation deps.arch_core.testing
+    androidTestImplementation deps.atsl.runner
     androidTestImplementation deps.arch_core.testing
 }

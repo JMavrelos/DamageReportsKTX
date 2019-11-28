@@ -1,48 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <data>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
 
-        <variable
-            name="loading"
-            type="boolean" />
-    </data>
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/base"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:id="@+id/base"
+
+    <FrameLayout
+        android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent" />
 
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:indeterminate="true"
+        android:paddingTop="?attr/actionBarSize"
+        android:translationY="-6dp" />
 
-        <FrameLayout
-            android:id="@+id/content"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    <View
+        android:id="@+id/input_block"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha=".06"
+        android:background="#000"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center_vertical|start"
+        android:padding="@dimen/padding" />
 
-        <androidx.core.widget.ContentLoadingProgressBar
-            android:id="@+id/progress"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:translationY="-6dp"
-            android:indeterminate="true"
-            android:paddingTop="?attr/actionBarSize"
-            app:shown="@{loading}" />
-
-        <View
-            android:id="@+id/input_block"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:alpha=".06"
-            android:background="#000"
-            android:clickable="true"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:gravity="center_vertical|start"
-            android:padding="@dimen/padding"
-            app:shown="@{loading}" />
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-</layout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
