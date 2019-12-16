@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:imeOptions="actionDone"
-        android:textColor="?colorPanelText"
+        android:textColor="?colorOnSurface"
         tools:hint="hello world"
         tools:text="test" />
 </android.support.design.widget.TextInputLayout>

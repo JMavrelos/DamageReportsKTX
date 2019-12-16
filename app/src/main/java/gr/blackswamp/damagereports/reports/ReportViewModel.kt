@@ -4,13 +4,42 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.logging.ILog
-import gr.blackswamp.damagereports.data.db.IDatabase
 import gr.blackswamp.damagereports.data.repos.IReportRepository
+import java.util.*
 
-class ReportViewModel(val repo: IReportRepository, application: Application, val dispatchers: IDispatchers, val log: ILog) : AndroidViewModel(application) {
+class ReportViewModel(val repo: IReportRepository, application: Application, val dispatchers: IDispatchers, val log: ILog, runInit: Boolean = true) :
+    AndroidViewModel(application) {
+
+
     companion object {
         const val TAG = "ReportViewModel"
     }
+
+    init {
+        if (runInit) {
+        }
+    }
+
+    fun deleteReport(id: UUID) {
+
+    }
+
+    fun selectReport(id: UUID) {
+
+    }
+
+    fun newReport() {
+
+    }
+
+    fun newReportFilter(text: String, submitted: Boolean): Boolean {
+        if (submitted) {
+//            vm.newReportFilter(text)
+            return true
+        }
+        return false
+    }
+
 
 //    private val logic = ReportListLogic(this, db, dispatchers)
 //    private val mDisposables = CompositeDisposable()

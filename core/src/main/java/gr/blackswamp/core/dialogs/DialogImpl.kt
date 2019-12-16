@@ -45,7 +45,7 @@ internal class DialogImpl : DialogFragment(), IDialog {
         val positive = arguments!!.getString(POSITIVE) ?: ""
         val negative = arguments!!.getString(NEGATIVE) ?: ""
         val neutral = arguments!!.getString(NEUTRAL) ?: ""
-        val cancelable = arguments!!.getBoolean(CANCELABLE) ?: true
+        val cancelable = arguments!!.getBoolean(CANCELABLE)
         dialogView = LayoutInflater.from(activity).inflate(arguments!!.getInt(RESOURCE_ID), null, false)
         initViewCallback?.invoke(dialogView)
         val dialog = AlertDialog

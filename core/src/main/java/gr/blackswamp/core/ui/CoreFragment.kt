@@ -12,9 +12,11 @@ abstract class CoreFragment<T : Any> : Fragment() {
     abstract val vm: T
     @get:LayoutRes
     abstract val layoutId: Int
+    protected open val withOptionsMenu = false
 
     final override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(layoutId, container, false)
+        setHasOptionsMenu(withOptionsMenu)
         setUpBindings(view)
         setUpView(savedInstanceState)
         setUpListeners()

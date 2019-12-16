@@ -25,7 +25,7 @@ import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
 class BrandDaoTest : KoinTest {
-    private val db: AppDatabase by inject()
+    private lateinit var db: AppDatabase
     private lateinit var dao: BrandDao
 
     @get:Rule

@@ -29,6 +29,10 @@ dependencies {
 
     implementation deps.support.app_compat
     implementation deps.support.design
+    implementation deps.constraint_layout
     implementation deps.support.core_ktx
     implementation deps.lifecycle.kotlin
+
+    implementation deps.junit // Junit
+    implementation deps.coroutines.test // coroutines
 }

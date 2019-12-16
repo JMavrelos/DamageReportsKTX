@@ -9,7 +9,7 @@
     <color name="primaryTextColor">#000000</color>
     <color name="secondaryTextColor">#fff</color>
 
-    <color name="backgroundColor">#F5F6F6</color>
+    <color name="backgroundColor">#fffafafa</color>
     <color name="textColor">#212121</color>
-    <color name="panelColor">#EEE</color>
+    <color name="panelColor">#FFFFFFFF</color>
 </resources>

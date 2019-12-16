@@ -36,24 +36,29 @@ dependencies {
     implementation deps.koin.android_viewmodel //koin
     implementation deps.kotlin.stdlib //kotlin
     implementation deps.coroutines.android //coroutines
-    implementation deps.support.app_compat
-    implementation deps.support.design
-    implementation deps.support.annotations
-    implementation deps.support.core_ktx
-    implementation deps.constraint_layout
-    implementation deps.lifecycle.extensions
-    implementation deps.lifecycle.runtime
-    implementation deps.lifecycle.extensions
+    implementation deps.coroutines.core //coroutines
+    implementation deps.room.kotlin //room
+    implementation deps.room.runtime //room
+    implementation deps.support.app_compat //design
+    implementation deps.support.design //design
+    implementation deps.support.annotations //design
+    implementation deps.support.core_ktx //design
+    implementation deps.constraint_layout //design
+    implementation deps.swipe_refresh //design
+    implementation deps.lifecycle.extensions //lifecycle
+    implementation deps.lifecycle.runtime //lifecycle
+    implementation deps.lifecycle.extensions //lifecycle
+    implementation deps.lifecycle.kotlin
     kapt deps.lifecycle.compiler
-    implementation deps.room.runtime
-    implementation deps.room.kotlin
-    kapt deps.room.compiler
+    kapt deps.room.compiler //room
+
     // tests
     testImplementation deps.junit // Junit
     testImplementation deps.robolectric // Robolectric
-    testImplementation deps.koin.test // Koin
     testImplementation deps.mockito.core // Mockito
+    testImplementation deps.mockito.kotlin // Mockito
+    testImplementation deps.mockito.all //mockito
     testImplementation deps.arch_core.testing
-    androidTestImplementation deps.atsl.runner
-    androidTestImplementation deps.arch_core.testing
+    testImplementation deps.coroutines.test // coroutines
+    testImplementation deps.room.testing
 }
