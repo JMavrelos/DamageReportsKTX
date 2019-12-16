@@ -1,4 +1,4 @@
-package gr.blackswamp.damagereports.reports.adapters
+package gr.blackswamp.damagereports.ui.reports.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import gr.blackswamp.core.widget.CItemTouchAdapter
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.reports.model.ReportHeader
+import gr.blackswamp.damagereports.ui.reports.model.ReportHeader
 import java.util.*
 
 class ReportListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CItemTouchAdapter {
@@ -19,9 +19,33 @@ class ReportListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CItem
     }
 
     private val headers = mutableListOf<ReportHeader>()
-    private var listener: OnListAction? = null
-    fun setListener(listener: OnListAction) {
+    private var listener: onReportListAction? = null
+    fun setListener(listener: onReportListAction) {
         this.listener = listener
+    }
+
+    fun setReports(reports: List<ReportHeader>) {
+        headers.clear()
+        headers.addAll(reports)
+        notifyDataSetChanged()
+    }
+
+    fun addReport(report: ReportHeader) {
+        headers.add(report)
+        notifyItemInserted(headers.size - 1)
+    }
+
+    fun addReports(reports: List<ReportHeader>) {
+        headers.addAll(reports)
+        notifyItemRangeInserted(headers.size - reports.size - 1, reports.size)
+    }
+
+    fun updateReport(report: ReportHeader) {
+        val idx = headers.indexOfFirst { it.id == report.id }
+        if (idx >= 0) {
+            headers[idx] = report
+            notifyItemChanged(idx)
+        }
     }
 
 
@@ -64,9 +88,10 @@ class ReportListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CItem
 
     override fun allowDismiss(position: Int): Boolean = (headers[position].id != EMPTY_ID)
 
-    fun onItemClick(position: Int) {
+    private fun onItemClick(position: Int) {
         listener?.click(headers[position].id)
     }
+
     //endregion
 
 

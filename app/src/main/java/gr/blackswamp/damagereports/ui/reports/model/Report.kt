@@ -1,4 +1,4 @@
-package gr.blackswamp.damagereports.reports.model
+package gr.blackswamp.damagereports.ui.reports.model
 
 import java.util.*
 

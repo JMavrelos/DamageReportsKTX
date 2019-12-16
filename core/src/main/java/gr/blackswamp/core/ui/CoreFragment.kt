@@ -18,7 +18,7 @@ abstract class CoreFragment<T : Any> : Fragment() {
         val view = inflater.inflate(layoutId, container, false)
         setHasOptionsMenu(withOptionsMenu)
         setUpBindings(view)
-        setUpView(savedInstanceState)
+        initView(savedInstanceState)
         setUpListeners()
         setUpObservers(vm)
         return view
@@ -26,7 +26,7 @@ abstract class CoreFragment<T : Any> : Fragment() {
 
     protected open fun setUpBindings(view: View) {}
 
-    protected open fun setUpView(state: Bundle?) {}
+    protected open fun initView(state: Bundle?) {}
 
     protected open fun setUpListeners() {}
 

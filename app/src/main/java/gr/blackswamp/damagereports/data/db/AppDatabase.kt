@@ -25,13 +25,10 @@ abstract class AppDatabase : RoomDatabase(), IDatabase {
         const val DATABASE = "data.db"
     }
 
-    abstract val reportDao: ReportDao
-    abstract val modelDao: ModelDao
-    abstract val brandDao: BrandDao
-    abstract val damageDao: DamageDao
+    abstract override val reportDao: ReportDao
+    abstract override val modelDao: ModelDao
+    abstract override val brandDao: BrandDao
+    abstract override val damageDao: DamageDao
 
-    override suspend fun loadReportHeaders(filter: String) = reportDao.loadReportHeaders(filter)
-    override suspend fun saveReport(report: ReportEntity) = reportDao.saveReport(report)
-    override suspend fun deleteReportById(id: UUID) = reportDao.deleteReportById(id)
 
 }

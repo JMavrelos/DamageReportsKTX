@@ -1,13 +1,16 @@
 package gr.blackswamp.damagereports.data.db
 
+import gr.blackswamp.damagereports.data.db.dao.BrandDao
+import gr.blackswamp.damagereports.data.db.dao.DamageDao
+import gr.blackswamp.damagereports.data.db.dao.ModelDao
+import gr.blackswamp.damagereports.data.db.dao.ReportDao
 import gr.blackswamp.damagereports.data.db.entities.ReportEntity
 import gr.blackswamp.damagereports.data.db.entities.ReportHeaderEntity
 import java.util.*
 
 interface IDatabase {
-    suspend fun loadReportHeaders(filter: String = ""): List<ReportHeaderEntity>
-
-    suspend fun saveReport(report: ReportEntity)
-
-    suspend fun deleteReportById(id: UUID)
+    val reportDao:ReportDao
+    val damageDao: DamageDao
+    val brandDao: BrandDao
+    val modelDao: ModelDao
 }

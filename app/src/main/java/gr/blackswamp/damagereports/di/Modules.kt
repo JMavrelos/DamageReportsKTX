@@ -9,7 +9,7 @@ import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.IDatabase
 import gr.blackswamp.damagereports.data.repos.IReportRepository
 import gr.blackswamp.damagereports.data.repos.ReportRepository
-import gr.blackswamp.damagereports.reports.ReportViewModel
+import gr.blackswamp.damagereports.vms.reports.ReportViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.viewmodel.dsl.viewModel

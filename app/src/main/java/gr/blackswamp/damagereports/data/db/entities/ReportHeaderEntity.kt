@@ -1,7 +1,7 @@
 package gr.blackswamp.damagereports.data.db.entities
 
 import androidx.room.ColumnInfo
-import gr.blackswamp.damagereports.reports.model.ReportHeader
+import gr.blackswamp.damagereports.ui.reports.model.ReportHeader
 import java.util.*
 
 data class ReportHeaderEntity(

@@ -1,38 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <androidx.coordinatorlayout.widget.CoordinatorLayout
-
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/base"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
 
     <FrameLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <androidx.core.widget.ContentLoadingProgressBar
+    <FrameLayout
         android:id="@+id/progress"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:indeterminate="true"
-        android:paddingTop="?attr/actionBarSize"
-        android:translationY="-6dp" />
-
-    <View
-        android:id="@+id/input_block"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha=".06"
-        android:background="#000"
-        android:clickable="true"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:gravity="center_vertical|start"
-        android:padding="@dimen/padding" />
+        android:background="#06000000"
+        android:focusableInTouchMode="true">
+
+        <androidx.core.widget.ContentLoadingProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="@android:color/transparent"
+            android:indeterminate="true"
+            android:paddingTop="?attr/actionBarSize"
+            android:translationY="-6dp" />
+    </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
