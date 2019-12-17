@@ -22,7 +22,8 @@ abstract class CoreActivity<T : Any> : AppCompatActivity(), DialogListener {
     @get:LayoutRes
     abstract val layoutId: Int
 
-    final override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
+    final override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setContentView(layoutId)
         setUpBindings()
         initView(savedInstanceState)

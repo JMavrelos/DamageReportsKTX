@@ -4,10 +4,8 @@
     style="@style/TextAppearance.MaterialComponents.Body1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/secondaryColor"
     android:gravity="center"
     android:padding="@dimen/padding"
-    android:textColor="@color/secondaryTextColor"
     android:textStyle="bold"
     tools:text="22-02-2019" />
 

@@ -42,7 +42,14 @@ class ReportViewModel(private val repo: IReportRepository, application: Applicat
 
     }
 
+    private var newRepId = 0
     override fun newReport() {
+        viewModelScope.launch {
+            val error = repo.newReport("test ${newRepId++}", " desc ${newRepId}", UUID.randomUUID(), UUID.randomUUID())
+            if (error != null) {
+                this@ReportViewModel.error.setValue(error.message!!)
+            }
+        }
 
     }
 

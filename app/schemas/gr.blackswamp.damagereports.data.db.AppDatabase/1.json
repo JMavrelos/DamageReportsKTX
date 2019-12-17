@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0cb6538539573b3fc84c17162ae5a3a2",
+    "identityHash": "64595bb1ba34144c3aca985e139f8ca0",
     "entities": [
       {
         "tableName": "brands",
@@ -388,7 +388,7 @@
       },
       {
         "tableName": "reports",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `brand` TEXT NOT NULL, `model` TEXT NOT NULL, `created` TEXT NOT NULL, `updated` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`brand`) REFERENCES `brands`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`model`) REFERENCES `models`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `brand` TEXT NOT NULL, `model` TEXT NOT NULL, `created` TEXT NOT NULL, `updated` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -481,36 +481,13 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_reports_model` ON `${TABLE_NAME}` (`model`)"
           }
         ],
-        "foreignKeys": [
-          {
-            "table": "brands",
-            "onDelete": "RESTRICT",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "brand"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          },
-          {
-            "table": "models",
-            "onDelete": "RESTRICT",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "model"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
-        ]
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0cb6538539573b3fc84c17162ae5a3a2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '64595bb1ba34144c3aca985e139f8ca0')"
     ]
   }
 }

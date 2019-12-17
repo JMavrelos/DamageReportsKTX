@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
@@ -18,10 +17,10 @@ import gr.blackswamp.core.ui.CoreFragment
 import gr.blackswamp.core.widget.CItemTouchHelperCallback
 import gr.blackswamp.core.widget.SearchListener
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.vms.reports.ReportViewModel
 import gr.blackswamp.damagereports.ui.reports.adapters.ReportListAdapter
 import gr.blackswamp.damagereports.ui.reports.adapters.onReportListAction
 import gr.blackswamp.damagereports.ui.reports.commands.ReportListCommand
+import gr.blackswamp.damagereports.vms.reports.ReportViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportListViewModel
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 import java.util.*
@@ -51,7 +50,6 @@ class ReportListFragment : CoreFragment<IReportListViewModel>(), onReportListAct
     }
 
     override fun initView(state: Bundle?) {
-        (this.activity as? AppCompatActivity)?.setSupportActionBar(mToolbar)
         mList.adapter = mAdapter
         ItemTouchHelper(CItemTouchHelperCallback(mAdapter, allowSwipe = true, allowDrag = false)).attachToRecyclerView(mList)
     }

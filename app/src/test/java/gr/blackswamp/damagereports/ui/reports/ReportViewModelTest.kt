@@ -32,7 +32,7 @@ class ReportViewModelTest {
     }
 
     @Test
-    fun `when the app starts load all reports`() {
-
+    fun `load reports with no filter from the start`() {
+        vm.loadReports("",0)
     }
 }

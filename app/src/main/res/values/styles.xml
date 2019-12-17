@@ -1,20 +1,18 @@
 <resources>
 
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light">
-        <item name="android:windowFullscreen">true</item>
+    <style name="AppTheme" parent="Theme.MaterialComponents.NoActionBar">
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryDark">@color/primaryDarkColor</item>
         <item name="colorOnPrimary">@color/primaryTextColor</item>
         <item name="colorPrimaryVariant">@color/primaryDarkColor</item>
-        <item name="colorAccent">@color/secondaryColor</item>
         <item name="colorSecondary">@color/secondaryColor</item>
+        <item name="colorAccent">@color/secondaryColor</item>
         <item name="colorSecondaryVariant">@color/primaryDarkColor</item>
         <item name="colorOnSecondary">@color/secondaryTextColor</item>
-        <item name="android:background">@color/backgroundColor</item>
+        <item name="android:background">#ff424242</item>
         <item name="colorSurface">@color/panelColor</item>
-        <item name="colorOnSurface">@color/textColor</item>
-        <item name="colorOnBackground">@color/textColor</item>
-<!--        <item name="android:dialogTheme">@style/AppDialog</item>-->
+        <item name="colorOnSurface">@color/panelTextColor</item>
+        <item name="colorOnBackground">#fff</item>
     </style>
 
     <style name="AppTheme.WithBackground">
@@ -23,23 +21,22 @@
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
-<!--    <style name="AppTheme.Toolbar" parent="ThemeOverlay.AppCompat.Dark">-->
-<!--        <item name="android:textColorPrimary">@color/textColor</item>-->
-<!--        <item name="android:textColorSecondary">@color/textColor</item>-->
-<!--        <item name="android:textColorTertiary">@color/textColor</item>-->
-<!--        <item name="iconTint">@color/primaryTextColor</item>-->
-<!--        <item name="colorControlNormal">@color/primaryTextColor</item>-->
-<!--    </style>-->
+    <style name="AppToolbar">
+        <item name="iconTint">?colorOnPrimary</item>
+        <item name="android:background">?colorPrimary</item>
+<!--        <item name="android:titleTextAppearance">@style/AppToolbarTitle</item>-->
+<!--        <item name="android:subtitleTextAppearance">@style/AppToolbarTitle</item>-->
+<!--        <item name="colorControlNormal">?colorOnPrimary</item>-->
+<!--        <item name="android:itemTextAppearance">?colorOnPrimary</item>-->
+<!--        <item name="android:textColorPrimary">?colorOnPrimary</item>-->
+<!--        <item name="android:textColorSecondary">?colorOnPrimary</item>-->
+<!--        <item name="android:backgroundTint">?colorPrimary</item>-->
+    </style>
 
-<!--    <style name="AppDialog" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">-->
-<!--        <item name="colorPrimary">@color/primaryColor</item>-->
-<!--        <item name="colorPrimaryDark">@color/primaryDarkColor</item>-->
-<!--        <item name="colorAccent">@color/secondaryColor</item>-->
-<!--        <item name="android:padding">2dp</item>-->
-<!--    </style>-->
-
-
-<!--    <style name="AppTextView" parent="TextAppearance.MaterialComponents.Body1" />-->
+    <style name="AppToolbarTitle">
+        <item name="android:textColor">?colorOnPrimary</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
 
     <style name="AppCardView">
         <item name="android:layout_width">match_parent</item>

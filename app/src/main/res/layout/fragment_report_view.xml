@@ -8,13 +8,15 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="?attr/actionBarSize">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
+            style="@style/AppToolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            app:subtitle="subtest"
+            app:title="test" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -147,7 +149,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="@dimen/fab_margin"
-        android:tint="@color/secondaryTextColor"
+        android:tint="?colorSecondary"
         app:layout_anchor="@+id/report_damages"
         app:layout_anchorGravity="bottom|end|right"
         app:srcCompat="@drawable/ic_add" />
