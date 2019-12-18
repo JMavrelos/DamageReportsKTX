@@ -7,16 +7,18 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
 
-        <androidx.appcompat.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
-            style="@style/AppToolbar"
+            style="?toolbarStyle"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="wrap_content"
+            app:menu="@menu/report_list"
+            app:navigationIcon="@drawable/ic_nav_back"
             app:subtitle="@string/select_create_report"
             app:title="@string/damage_reports" />
-
     </com.google.android.material.appbar.AppBarLayout>
 
 

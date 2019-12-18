@@ -5,6 +5,7 @@ import android.os.PersistableBundle
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.LayoutRes
+import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import gr.blackswamp.core.R
@@ -21,8 +22,13 @@ abstract class CoreActivity<T : Any> : AppCompatActivity(), DialogListener {
     abstract val vm: T
     @get:LayoutRes
     abstract val layoutId: Int
+    @StyleRes
+    open val theme:Int? = null
 
     final override fun onCreate(savedInstanceState: Bundle?) {
+        theme?.let{
+            setTheme(it)
+        }
         super.onCreate(savedInstanceState)
         setContentView(layoutId)
         setUpBindings()

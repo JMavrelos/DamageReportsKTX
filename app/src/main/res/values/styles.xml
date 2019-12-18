@@ -1,52 +1,39 @@
 <resources>
 
-    <style name="AppTheme" parent="Theme.MaterialComponents.NoActionBar">
-        <item name="colorPrimary">@color/primaryColor</item>
-        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
-        <item name="colorOnPrimary">@color/primaryTextColor</item>
-        <item name="colorPrimaryVariant">@color/primaryDarkColor</item>
-        <item name="colorSecondary">@color/secondaryColor</item>
-        <item name="colorAccent">@color/secondaryColor</item>
-        <item name="colorSecondaryVariant">@color/primaryDarkColor</item>
-        <item name="colorOnSecondary">@color/secondaryTextColor</item>
-        <item name="android:background">#ff424242</item>
-        <item name="colorSurface">@color/panelColor</item>
-        <item name="colorOnSurface">@color/panelTextColor</item>
-        <item name="colorOnBackground">#fff</item>
-    </style>
+<!--    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>-->
 
-    <style name="AppTheme.WithBackground">
-        <item name="android:windowBackground">@drawable/im_logo</item>
-    </style>
-
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
-
-    <style name="AppToolbar">
-        <item name="iconTint">?colorOnPrimary</item>
-        <item name="android:background">?colorPrimary</item>
-<!--        <item name="android:titleTextAppearance">@style/AppToolbarTitle</item>-->
-<!--        <item name="android:subtitleTextAppearance">@style/AppToolbarTitle</item>-->
+<!--    <style name="AppToolbar" parent="ThemeOverlay.AppCompat.ActionBar">-->
+<!--        <item name="iconTint">?colorOnPrimary</item>-->
+<!--        <item name="titleTextColor">?colorOnPrimary</item>-->
 <!--        <item name="colorControlNormal">?colorOnPrimary</item>-->
 <!--        <item name="android:itemTextAppearance">?colorOnPrimary</item>-->
 <!--        <item name="android:textColorPrimary">?colorOnPrimary</item>-->
 <!--        <item name="android:textColorSecondary">?colorOnPrimary</item>-->
-<!--        <item name="android:backgroundTint">?colorPrimary</item>-->
-    </style>
+<!--    </style>-->
 
-    <style name="AppToolbarTitle">
-        <item name="android:textColor">?colorOnPrimary</item>
-        <item name="android:background">@android:color/transparent</item>
-    </style>
+<!--    <style name="AppToolbar.Dark" parent="ThemeOverlay.MaterialComponents.ActionBar.Surface">-->
+<!--        <item name="iconTint">?colorOnSurface</item>-->
+<!--        <item name="titleTextColor">?colorOnSurface</item>-->
+<!--        <item name="colorControlNormal">?colorOnSurface</item>-->
+<!--        <item name="android:itemTextAppearance">?colorOnSurface</item>-->
+<!--        <item name="android:textColorPrimary">?colorOnSurface</item>-->
+<!--        <item name="android:textColorSecondary">?colorOnSurface</item>-->
+<!--    </style>-->
 
-    <style name="AppCardView">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginBottom">@dimen/card_radius</item>
-        <item name="android:clickable">true</item>
-        <item name="android:focusable">true</item>
-        <item name="android:foreground">?attr/selectableItemBackground</item>
-        <item name="cardCornerRadius">@dimen/card_radius</item>
-        <item name="cardElevation">@dimen/card_elevation</item>
-    </style>
+<!--    <style name="AppToolbarTitle">-->
+<!--        <item name="android:textColor">?colorOnPrimary</item>-->
+<!--        <item name="android:background">@android:color/transparent</item>-->
+<!--    </style>-->
+
+<!--    <style name="AppCardView">-->
+<!--        <item name="android:layout_width">match_parent</item>-->
+<!--        <item name="android:layout_height">wrap_content</item>-->
+<!--        <item name="android:layout_marginBottom">@dimen/card_radius</item>-->
+<!--        <item name="android:clickable">true</item>-->
+<!--        <item name="android:focusable">true</item>-->
+<!--        <item name="android:foreground">?attr/selectableItemBackground</item>-->
+<!--        <item name="cardCornerRadius">@dimen/card_radius</item>-->
+<!--        <item name="cardElevation">@dimen/card_elevation</item>-->
+<!--    </style>-->
 
 </resources>

@@ -18,13 +18,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.koin.test.KoinTest
-import org.koin.test.inject
 import org.robolectric.RobolectricTestRunner
 import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
-class BrandDaoTest : KoinTest {
+class BrandDaoTest {
     private lateinit var db: AppDatabase
     private lateinit var dao: BrandDao
 

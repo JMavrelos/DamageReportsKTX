@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.textview.MaterialTextView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/TextAppearance.MaterialComponents.Body1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?colorPrimary"
     android:gravity="center"
     android:padding="@dimen/padding"
+    android:textColor="?colorOnPrimary"
     android:textStyle="bold"
     tools:text="22-02-2019" />
-

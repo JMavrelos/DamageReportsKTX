@@ -1,12 +1,20 @@
 package gr.blackswamp.damagereports.data.repos
 
+import androidx.lifecycle.LiveData
+import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.damagereports.data.db.IDatabase
 import gr.blackswamp.damagereports.data.db.entities.ReportEntity
 import gr.blackswamp.damagereports.data.db.entities.ReportHeaderEntity
+import gr.blackswamp.damagereports.data.prefs.IPreferences
+import kotlinx.coroutines.withContext
 import java.util.*
 
-class ReportRepository(val db: IDatabase) : IReportRepository {
+class ReportRepository(private val db: IDatabase, private val prefs: IPreferences, val dispatchers: IDispatchers) : IReportRepository {
+    override val darkTheme: Boolean
+        get() = prefs.darkTheme
+    override val darkThemeLive: LiveData<Boolean> = prefs.darkThemeLive
+
     override suspend fun loadReports(filter: String, skip: Int): Response<List<ReportHeaderEntity>> {
         return try {
             Response.success(db.reportDao.loadReportHeaders(filter))
@@ -22,6 +30,12 @@ class ReportRepository(val db: IDatabase) : IReportRepository {
             null
         } catch (t: Throwable) {
             t
+        }
+    }
+
+    override suspend fun switchTheme() {
+        withContext(dispatchers.IO) {
+            prefs.darkTheme = !prefs.darkTheme
         }
     }
 }

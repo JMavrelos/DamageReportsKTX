@@ -8,7 +8,7 @@ versions.atsl_runner = "1.2.0"
 versions.constraint_layout = "1.1.3"
 versions.swipe_refresh = "1.0.0"
 versions.core_ktx = "1.1.0"
-versions.coroutines = "1.3.0-RC"
+versions.coroutines = "1.3.0"
 versions.dagger = "2.16"
 versions.dexmaker = "2.2.0"
 versions.espresso = "3.2.0"
@@ -170,7 +170,7 @@ glide.compiler = "com.github.bumptech.glide:compiler:$versions.glide"
 deps.glide = glide
 
 def build_versions = [:]
-build_versions.min_sdk = 21
+build_versions.min_sdk = 23
 build_versions.target_sdk = 28
 build_versions.build_tools = "28.0.3"
 ext.build_versions = build_versions

@@ -2,13 +2,16 @@ package gr.blackswamp.damagereports.vms.reports
 
 import android.app.Application
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.lifecycle.SingleLiveEvent
 import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.damagereports.data.repos.IReportRepository
+import gr.blackswamp.damagereports.ui.reports.commands.ReportActivityCommand
 import gr.blackswamp.damagereports.ui.reports.commands.ReportListCommand
+import gr.blackswamp.damagereports.vms.base.BaseViewModel
 import gr.blackswamp.damagereports.vms.reports.model.ReportHeaderData
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportActivityViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportListViewModel
@@ -17,23 +20,48 @@ import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.CancellationException
 
-class ReportViewModel(private val repo: IReportRepository, application: Application, private val dispatchers: IDispatchers, private val log: ILog) :
-    AndroidViewModel(application), IReportActivityViewModel, IReportListViewModel {
+class ReportViewModel(private val repo: IReportRepository, application: Application, private val dispatchers: IDispatchers, private val log: ILog, runInit: Boolean = true) :
+    BaseViewModel(application), IReportActivityViewModel, IReportListViewModel {
     companion object {
         const val NEW_QUERY_CANCELLATION = "new_query"
         const val TAG = "ReportViewModel"
     }
 
     private var mLoadJob: Job? = null
-    private var filter: String = ""
-    override val reportListCommands = SingleLiveEvent<ReportListCommand>()
-    override val error = SingleLiveEvent<String>()
+    override val darkTheme: LiveData<Boolean> = repo.darkThemeLive
 
     init {
-        loadReports("", 0)
+        if (runInit) {
+            loadReports("", 0)
+        }
     }
+    //region IReportActivityViewModel implementation
+
+    override val loading = MutableLiveData<Boolean>()
+    override val error = SingleLiveEvent<String>()
+    override val reportActivityCommands = SingleLiveEvent<ReportActivityCommand>()
+
+    override fun toggleTheme() {
+        viewModelScope.launch {
+            try {
+                loading.postValue(true)
+                repo.switchTheme()
+                loading.postValue(false)
+            } catch (t: Throwable) {
+                error.setValue(t.message ?: "Error switching theme")
+            } finally {
+                loading.postValue(false)
+            }
+        }
+    }
+    //endregion
+
 
     //region IReportListViewModel implementation
+    private var filter: String = ""
+    override val reportListCommands = SingleLiveEvent<ReportListCommand>()
+
+
     override fun deleteReport(id: UUID) {
 
     }

@@ -81,4 +81,6 @@
     <string name="error_incorrect_part">Αυτό το ανταλακτικό δε μπορεί να χρησιμοποιηθεί σε αυτό το συνδυασμό μοντέλου/μάρκας</string>
     <string name="total_damage_price">Συνολική αξία ζημιάς</string>
     <string name="error">Error %1$s</string>
+    <string name="switch_to_dark">Αλλαγή σε σκοτεινό Θέμα</string>
+    <string name="switch_to_light">Αλλαγή σε φωτεινό Θέμα</string>
 </resources>
