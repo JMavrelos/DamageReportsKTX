@@ -6,19 +6,33 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            style="?toolbarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:menu="@menu/report_list"
+            app:navigationIcon="@drawable/ic_nav_back"
+            app:subtitle="@string/select_create_report"
+            app:title="@string/damage_reports" />
+    </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <TextView
-            android:id="@+id/report_id"
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/id"
             style="@style/TextAppearance.MaterialComponents.Body2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_margin="@dimen/margin"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -26,101 +40,106 @@
 
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/report_name"
+            android:id="@+id/name_til"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="@+id/report_id"
-            app:layout_constraintStart_toStartOf="@+id/report_id"
-            app:layout_constraintTop_toBottomOf="@+id/report_id">
+            android:layout_margin="@dimen/margin"
+            android:layout_marginTop="@dimen/margin"
+            android:hint="@string/name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/id">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/name"
                 android:imeOptions="actionNext"
                 android:inputType="text"
-                android:maxLines="1" />
+                android:maxLines="1"
+                tools:text="hello" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/report_description"
+            android:id="@+id/description_til"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="@+id/report_name"
-            app:layout_constraintStart_toStartOf="@+id/report_name"
-            app:layout_constraintTop_toBottomOf="@+id/report_name">
+            android:layout_margin="@dimen/margin"
+            android:hint="@string/description"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/name_til">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/description"
                 android:imeOptions="actionDone"
-                android:inputType="text" />
+                android:inputType="text"
+                tools:text="world" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:id="@+id/report_brand_caption"
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/brand_caption"
+            style="@style/TextAppearance.MaterialComponents.Caption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin"
             android:text="@string/brand"
-            app:layout_constraintBottom_toBottomOf="@+id/report_brand"
-            app:layout_constraintStart_toStartOf="@+id/report_description"
-            app:layout_constraintTop_toTopOf="@+id/report_brand" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/description_til" />
 
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/report_barrier"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:barrierDirection="right"
-            app:constraint_referenced_ids="report_brand_caption,report_model_caption" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/report_brand"
+            android:id="@+id/brand"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin"
-            android:layout_marginTop="@dimen/margin"
+            android:layout_marginEnd="@dimen/margin"
             android:text="@string/select_brand"
-            app:layout_constraintEnd_toEndOf="@+id/report_description"
-            app:layout_constraintStart_toEndOf="@+id/report_barrier"
-            app:layout_constraintTop_toBottomOf="@+id/report_description" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/brand_caption" />
 
-        <TextView
-            android:id="@+id/report_model_caption"
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/model_caption"
+            style="@style/TextAppearance.MaterialComponents.Caption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin"
             android:text="@string/model"
-            app:layout_constraintBottom_toBottomOf="@+id/report_model"
-            app:layout_constraintStart_toStartOf="@+id/report_brand_caption"
-            app:layout_constraintTop_toTopOf="@+id/report_model" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/brand" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/report_model"
+            android:id="@+id/model"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin"
+            android:layout_marginStart="@dimen/margin"
+            android:layout_marginEnd="@dimen/margin"
             android:text="@string/select_model"
-            app:layout_constraintEnd_toEndOf="@+id/report_brand"
-            app:layout_constraintStart_toStartOf="@+id/report_brand"
-            app:layout_constraintTop_toBottomOf="@+id/report_brand" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/model_caption" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/report_refresh"
+            android:id="@+id/refresh"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_margin="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/report_model"
-            app:layout_constraintStart_toStartOf="@+id/report_model_caption"
-            app:layout_constraintTop_toBottomOf="@+id/report_model">
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/model">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/report_damages"
+                android:id="@+id/damages"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
@@ -130,13 +149,13 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/report_action"
+        android:id="@+id/action"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="@dimen/fab_margin"
         android:tint="?colorSecondary"
-        app:layout_anchor="@+id/report_damages"
+        app:layout_anchor="@+id/damages"
         app:layout_anchorGravity="bottom|end|right"
         app:srcCompat="@drawable/ic_add" />
 

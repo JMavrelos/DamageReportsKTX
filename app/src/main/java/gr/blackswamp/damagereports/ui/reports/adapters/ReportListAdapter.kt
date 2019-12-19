@@ -4,118 +4,115 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import gr.blackswamp.core.widget.CItemTouchAdapter
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.ui.reports.model.ReportHeader
 import java.util.*
 
-class ReportListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CItemTouchAdapter {
+@Suppress("unused")
+class ReportListAdapter : PagedListAdapter<ReportHeader, ReportListAdapter.ReportHeaderViewHolder>(DIFF_CALLBACK), CItemTouchAdapter {
     companion object {
         private const val TAG = "ReportListAdapter"
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<ReportHeader>() {
+            override fun areItemsTheSame(oldItem: ReportHeader, newItem: ReportHeader): Boolean = oldItem.id == newItem.id
+            override fun areContentsTheSame(oldItem: ReportHeader, newItem: ReportHeader): Boolean {
+                return oldItem.id == newItem.id
+                        && oldItem.date == newItem.date
+                        && oldItem.description == newItem.description
+                        && oldItem.name == newItem.name
+            }
+
+        }
+
         private val EMPTY_ID = UUID(0L, 0L)
         private const val LABEL = 0
         private const val HEADER = 1
     }
 
-    private val headers = mutableListOf<ReportHeader>()
-    private var listener: onReportListAction? = null
-    fun setListener(listener: onReportListAction) {
+    private var listener: ReportListAction? = null
+
+    fun setListener(listener: ReportListAction) {
         this.listener = listener
     }
 
-    fun setReports(reports: List<ReportHeader>) {
-        headers.clear()
-        headers.addAll(reports)
-        notifyDataSetChanged()
-    }
+    override fun getItemViewType(position: Int): Int = if (getItem(position)?.id == EMPTY_ID) LABEL else HEADER
 
-    fun addReport(report: ReportHeader) {
-        headers.add(report)
-        notifyItemInserted(headers.size - 1)
-    }
-
-    fun addReports(reports: List<ReportHeader>) {
-        headers.addAll(reports)
-        notifyItemRangeInserted(headers.size - reports.size - 1, reports.size)
-    }
-
-    fun updateReport(report: ReportHeader) {
-        val idx = headers.indexOfFirst { it.id == report.id }
-        if (idx >= 0) {
-            headers[idx] = report
-            notifyItemChanged(idx)
-        }
-    }
-
-
-    override fun getItemCount(): Int = headers.size
-
-
-    override fun getItemViewType(position: Int): Int =
-        if (headers[position].id == EMPTY_ID) LABEL else HEADER
-
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReportHeaderViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
-            HEADER -> ReportHeaderViewHolder(inflater.inflate(R.layout.list_item_report, parent, false))
-            else -> ReportLabelViewHolder(inflater.inflate(R.layout.list_item_report_label, parent, false))
+            HEADER -> HeaderViewHolder(inflater.inflate(R.layout.list_item_report_header, parent, false))
+            else -> LabelViewHolder(inflater.inflate(R.layout.list_item_report_label, parent, false))
         }
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val reportItem = headers[position]
-        when (getItemViewType(position)) {
-            HEADER -> (holder as ReportHeaderViewHolder).update(reportItem)
-            LABEL -> (holder as ReportLabelViewHolder).update(reportItem)
+    override fun onBindViewHolder(holder: ReportHeaderViewHolder, position: Int) {
+        getItem(position)?.let {
+            holder.update(it)
         }
     }
 
-    //region touch events
-    override fun onItemMove(fromPosition: Int, toPosition: Int) =
-        Unit //we do not handle rearranging
+
+    //region events
+    override fun onItemMove(fromPosition: Int, toPosition: Int) = Unit //we do not handle rearranging
 
     override fun onItemMoveFinished(fromPosition: Int, toPosition: Int) =
         Unit //we do not handle rearranging
 
     override fun onItemDismissed(position: Int) {
-        headers[position].let {
+        getItem(position)?.let {
             if (it.id != EMPTY_ID)
                 listener?.delete(it.id)
         }
     }
 
-    override fun allowDismiss(position: Int): Boolean = (headers[position].id != EMPTY_ID)
+    override fun allowDismiss(position: Int): Boolean = (getItem(position)?.id != EMPTY_ID)
 
     private fun onItemClick(position: Int) {
-        listener?.click(headers[position].id)
+        getItem(position)?.let {
+            listener?.select(it.id)
+        }
     }
 
+    private fun onLongItemClick(position: Int) {
+        getItem(position)?.let {
+            listener?.edit(it.id)
+        }
+    }
     //endregion
 
+    //region view holders
+    abstract class ReportHeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        abstract fun update(header: ReportHeader)
+    }
 
-    inner class ReportHeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    private inner class HeaderViewHolder(view: View) : ReportHeaderViewHolder(view) {
         val name: TextView = view.findViewById(R.id.report_name)
         val description: TextView = view.findViewById(R.id.report_description)
-        fun update(reportItem: ReportHeader) {
-            name.text = reportItem.name
-            description.text = reportItem.description
+        override fun update(header: ReportHeader) {
+            name.text = header.name
+            description.text = header.description
         }
 
         init {
             itemView.setOnClickListener {
                 this@ReportListAdapter.onItemClick(adapterPosition)
             }
+            itemView.setOnLongClickListener {
+                this@ReportListAdapter.onLongItemClick(adapterPosition)
+                true
+            }
         }
     }
 
-    class ReportLabelViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    private class LabelViewHolder(view: View) : ReportHeaderViewHolder(view) {
         val label: TextView = view as TextView
-        fun update(reportItem: ReportHeader) {
-            label.text = reportItem.description
+        override fun update(header: ReportHeader) {
+            label.text = header.name
         }
-
-
     }
+    //endregion
 }
+

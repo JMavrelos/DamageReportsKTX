@@ -159,9 +159,11 @@ coroutines.test = "org.jetbrains.kotlinx:kotlinx-coroutines-test:$versions.corou
 deps.coroutines = coroutines
 
 def paging = [:]
-paging.runtime = "androidx.paging:paging-runtime-ktx:$versions.paging"
+paging.runtime = "androidx.paging:paging-runtime:$versions.paging"
+paging.kotlin = "androidx.paging:paging-runtime-ktx:$versions.paging"
 paging.rxjava = "androidx.paging:paging-rxjava2:$versions.paging"
 paging.common = "androidx.paging:paging-common:$versions.paging"
+paging.common_kotlin = "androidx.paging:paging-common-ktx:$versions.paging"
 deps.paging = paging
 
 def glide = [:]

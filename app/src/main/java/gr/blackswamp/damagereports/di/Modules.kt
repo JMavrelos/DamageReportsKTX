@@ -28,5 +28,5 @@ val applicationModule = module {
 
     single<IReportRepository> { ReportRepository(get(), get(), get()) }
 
-    viewModel { ReportViewModel(get(), androidApplication(), get(), get()) }
+    viewModel { ReportViewModel(get(), androidApplication(), get(), true) }
 }

@@ -16,7 +16,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:menu="@menu/report_list"
-            app:navigationIcon="@drawable/ic_nav_back"
             app:subtitle="@string/select_create_report"
             app:title="@string/damage_reports" />
     </com.google.android.material.appbar.AppBarLayout>
@@ -26,7 +25,6 @@
         android:id="@+id/refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/padding"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -36,7 +34,7 @@
             android:orientation="vertical"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:itemCount="40"
-            tools:listitem="@layout/list_item_report" />
+            tools:listitem="@layout/list_item_report_header" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

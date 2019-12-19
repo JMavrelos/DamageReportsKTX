@@ -1,5 +1,6 @@
 package gr.blackswamp.damagereports.data.db.dao
 
+import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -11,26 +12,27 @@ import java.util.*
 
 @Dao
 interface ReportDao {
-    @Query("SELECT * FROM reports WHERE id = :id")
+    @Query("select * from reports where id = :id")
     suspend fun loadReport(id: UUID): ReportEntity
 
     @Query(
-        "SELECT id, name, description,created " +
-                "FROM   (SELECT id, name, description, created, created AS sort " +
-                "        FROM   reports " +
-                "        WHERE  :filter = '' " +
-                "                OR name LIKE '%' || :filter || '%' " +
-                "                OR description LIKE '%' || :filter || '%' " +
-                "        UNION " +
-                "        SELECT '00000000-0000-0000-0000-000000000000' as id, Substr(created, 0, 9) as name, '' as description, Substr(created, 0, 9) || '000000' AS created, Substr(created, 0, 9) || '256060' AS sort " +
-                "        FROM   reports " +
-                "        WHERE  :filter = '' " +
-                "                OR name LIKE '%' || :filter || '%' " +
-                "                OR description LIKE '%' || :filter || '%' " +
-                "        GROUP  BY Substr(created, 0, 9)) " +
-                "ORDER  BY sort DESC ")
+        "select id, name, description,created " +
+                "from   (select id, name, description, created, created as sort " +
+                "        from   reports " +
+                "        where  :filter = '' " +
+                "                or name like '%' || :filter || '%' " +
+                "                or description like '%' || :filter || '%' " +
+                "        union " +
+                "        select '00000000-0000-0000-0000-000000000000' as id, substr(created, 0, 9) as name, '' as description, Substr(created, 0, 9) || '000000' as created, substr(created, 0, 9) || '256060' AS sort " +
+                "        from   reports " +
+                "        where  :filter = '' " +
+                "                or name like '%' || :filter || '%' " +
+                "                or description like '%' || :filter || '%' " +
+                "        group  by substr(created, 0, 9)) " +
+                "order  by sort desc "
+    )
+    fun reportHeaders(filter: String): DataSource.Factory<Int, ReportHeaderEntity>
 
-    suspend fun loadReportHeaders(filter: String = ""): List<ReportHeaderEntity>
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun saveReport(report: ReportEntity)

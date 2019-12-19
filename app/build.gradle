@@ -49,6 +49,7 @@ dependencies {
     implementation deps.lifecycle.runtime //lifecycle
     implementation deps.lifecycle.extensions //lifecycle
     implementation deps.lifecycle.kotlin
+    implementation deps.paging.kotlin //paging library
     kapt deps.lifecycle.compiler
     kapt deps.room.compiler //room
 
