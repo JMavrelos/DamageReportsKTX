@@ -20,8 +20,14 @@ import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportViewViewModel
 import kotlinx.coroutines.launch
 import java.util.*
 
-class ReportViewModel(private val repo: IReportRepository, application: Application, private val log: ILog, runInit: Boolean = true) :
-    BaseViewModel(application), IReportActivityViewModel, IReportListViewModel , IReportViewViewModel {
+class ReportViewModel(
+    private val repo: IReportRepository,
+    application: Application,
+    private val log: ILog,
+    runInit: Boolean = true
+) :
+    BaseViewModel(application), IReportActivityViewModel, IReportListViewModel,
+    IReportViewViewModel {
     companion object {
         const val TAG = "ReportViewModel"
         private const val LIST_PAGE_SIZE = 30
@@ -58,18 +64,23 @@ class ReportViewModel(private val repo: IReportRepository, application: Applicat
 
     //region IReportListViewModel implementation
 
-    override var reportHeaderList: LiveData<PagedList<ReportHeader>> = Transformations.switchMap(filter, this::dbHeaderToUi)
+    override var reportHeaderList: LiveData<PagedList<ReportHeader>> =
+        Transformations.switchMap(filter, this::dbHeaderToUi)
 
     override val refreshing = MutableLiveData<Boolean>()
 
     private fun dbHeaderToUi(filter: String?): LiveData<PagedList<ReportHeader>> {
         log.d(TAG, "transforming for $filter")
-        return repo.getReportHeaders(filter ?: "")
-            .map { entity ->
+        val response = repo.getReportHeaders(filter ?: "")
+        return if (response.hasError) {
+            error.postValue(response.errorMessage)
+            MutableLiveData()
+        } else {
+            response.get.map { entity ->
                 log.d(TAG, "Loaded $entity")
                 ReportHeaderData(entity) as ReportHeader
-            }
-            .toLiveData(pageSize = LIST_PAGE_SIZE)
+            }.toLiveData(pageSize = LIST_PAGE_SIZE)
+        }
     }
 
     override fun deleteReport(id: UUID) {
@@ -96,7 +107,12 @@ class ReportViewModel(private val repo: IReportRepository, application: Applicat
     private var newRepId = 0
     override fun newReport() {
         viewModelScope.launch {
-            val error = repo.newReport("test ${newRepId++}", " desc ${newRepId}", UUID.randomUUID(), UUID.randomUUID())
+            val error = repo.newReport(
+                "test ${newRepId++}",
+                " desc ${newRepId}",
+                UUID.randomUUID(),
+                UUID.randomUUID()
+            )
             if (error != null) {
                 this@ReportViewModel.error.setValue(error.message!!)
             }

@@ -56,9 +56,7 @@ dependencies {
     // tests
     testImplementation deps.junit // Junit
     testImplementation deps.robolectric // Robolectric
-    testImplementation deps.mockito.core // Mockito
     testImplementation deps.mockito.kotlin // Mockito
-    testImplementation deps.mockito.all //mockito
     testImplementation deps.arch_core.testing
     testImplementation deps.coroutines.test // coroutines
     testImplementation deps.room.testing

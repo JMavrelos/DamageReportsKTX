@@ -15,6 +15,10 @@ class Response<T : Any?>(private val value: Any?) {
 
     val error: Throwable
         get() = (value as Failure).exception
+    val errorMessage:String
+        get() = (value as Failure).let {
+            it.exception.message ?: it.exception::class.java.name
+        }
 
     internal data class Failure(val exception: Throwable)
 

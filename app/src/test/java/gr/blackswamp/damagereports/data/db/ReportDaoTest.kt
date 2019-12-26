@@ -1,46 +1,35 @@
 package gr.blackswamp.damagereports.data.db
-//
-//import android.database.sqlite.SQLiteConstraintException
-//import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-//import androidx.room.Room
-//import androidx.room.RoomDatabase
-//import androidx.test.InstrumentationRegistry
-//import gr.blackswamp.damagereports.data.TestData
-//import gr.blackswamp.damagereports.data.ToObservable
-//import gr.blackswamp.damagereports.data.countWhere
-//import gr.blackswamp.damagereports.data.db.dao.ReportDao
-//import gr.blackswamp.damagereports.data.db.entities.ReportEntity
-//import org.junit.After
-//import org.junit.Assert.assertEquals
-//import org.junit.Before
-//import org.junit.Rule
-//import org.junit.Test
-//import java.util.*
-//
-//class ReportDaoTest {
-//    lateinit var db: AppDatabase
-//    lateinit var dao: ReportDao
-//
-//    @get:Rule
-//    var instantTaskExecutorRule = InstantTaskExecutorRule()
-//
-//
-//    @Before
-//    fun setUp() {
-//        db = Room.inMemoryDatabaseBuilder(
-//            InstrumentationRegistry.getContext(),
-//            AppDatabase::class.java
-//        )
-//            .allowMainThreadQueries()
-//            .build()
-//
-//        dao = db.reportDao
-//    }
-//
-//    @After
-//    fun tearDown() {
-//        (db as RoomDatabase).close()
-//    }
+
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.room.Room
+import androidx.test.platform.app.InstrumentationRegistry
+import gr.blackswamp.damagereports.data.db.dao.ReportDao
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+class ReportDaoTest {
+    lateinit var db: AppDatabase
+    lateinit var dao: ReportDao
+
+    @get:Rule
+    var instantTaskExecutorRule = InstantTaskExecutorRule()
+
+    @Before
+    fun setUp() {
+        db = Room.inMemoryDatabaseBuilder(
+            InstrumentationRegistry.getInstrumentation().targetContext,
+            AppDatabase::class.java
+        )
+            .allowMainThreadQueries()
+            .build()
+
+        dao = db.reportDao
+    }
+
 //
 //    @Test
 //    fun countRowsEmpty() {
@@ -166,4 +155,9 @@ package gr.blackswamp.damagereports.data.db
 //        }
 //
 //    }
-//}
+
+    @After
+    fun tearDown() {
+        (db ).close()
+    }
+}
