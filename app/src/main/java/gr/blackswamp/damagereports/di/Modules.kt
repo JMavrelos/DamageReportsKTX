@@ -26,7 +26,7 @@ val applicationModule = module {
             .build()
     }
 
-    single<IReportRepository> { ReportRepository(get(), get(), get()) }
+    single<IReportRepository> { ReportRepository() }
 
-    viewModel { ReportViewModel(get(), androidApplication(), get(), true) }
+    viewModel { ReportViewModel(androidApplication(),true) }
 }

@@ -31,7 +31,7 @@ interface ReportDao {
                 "        group  by substr(created, 0, 9)) " +
                 "order  by sort desc "
     )
-    fun reportHeaders(filter: String): DataSource.Factory<Int, ReportHeaderEntity>
+    fun loadReportHeaders(filter: String): DataSource.Factory<Int, ReportHeaderEntity>
 
 
     @Insert(onConflict = OnConflictStrategy.ABORT)

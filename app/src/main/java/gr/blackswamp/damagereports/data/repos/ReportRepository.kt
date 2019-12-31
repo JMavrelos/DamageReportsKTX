@@ -9,14 +9,16 @@ import gr.blackswamp.damagereports.data.db.entities.ReportEntity
 import gr.blackswamp.damagereports.data.db.entities.ReportHeaderEntity
 import gr.blackswamp.damagereports.data.prefs.IPreferences
 import kotlinx.coroutines.withContext
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 import java.util.*
 import kotlin.random.Random
 
-class ReportRepository(
-    private val db: IDatabase,
-    private val prefs: IPreferences,
-    val dispatchers: IDispatchers
-) : IReportRepository {
+class ReportRepository : IReportRepository, KoinComponent {
+    private val db: IDatabase by inject()
+    private val prefs: IPreferences by inject()
+    private val dispatchers: IDispatchers by inject()
+
     override val darkTheme: Boolean
         get() = prefs.darkTheme
     override val darkThemeLive: LiveData<Boolean> = prefs.darkThemeLive
@@ -47,7 +49,7 @@ class ReportRepository(
 
     override fun getReportHeaders(filter: String): Response<DataSource.Factory<Int, ReportHeaderEntity>> {
         return try {
-            Response.success(db.reportDao.reportHeaders(filter))
+            Response.success(db.reportDao.loadReportHeaders(filter))
         } catch (t: Throwable) {
             Response.failure(t)
         }
