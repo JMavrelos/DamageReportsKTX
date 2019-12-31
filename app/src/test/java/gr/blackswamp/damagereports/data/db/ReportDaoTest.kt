@@ -74,7 +74,6 @@ class ReportDaoTest {
             }
             assertNotNull(error)
             assertTrue(error is SQLiteConstraintException)
-//            assertTrue(error!!.message!!.contains("FOREIGN KEY"))
         }
     }
 
@@ -95,7 +94,6 @@ class ReportDaoTest {
 
             assertNotNull(error)
             assertTrue(error is SQLiteConstraintException)
-//            assertTrue(error!!.message!!.contains("FOREIGN KEY"))
         }
     }
 
@@ -117,7 +115,6 @@ class ReportDaoTest {
 
             assertNotNull(error)
             assertTrue(error is SQLiteConstraintException)
-//            assertTrue(error!!.message!!.contains("FOREIGN KEY"))
         }
     }
 
