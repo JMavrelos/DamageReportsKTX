@@ -14,11 +14,10 @@ import java.util.*
         , Index(value = ["brand"])
         , Index(value = ["model"])
     ]
-    //temporarily disabled
-//    , foreignKeys = [
-//        ForeignKey(entity = BrandEntity::class, parentColumns = ["id"], childColumns = ["brand"], onDelete = ForeignKey.RESTRICT)
-//        , ForeignKey(entity = ModelEntity::class, parentColumns = ["id"], childColumns = ["model"], onDelete = ForeignKey.RESTRICT)
-//    ]
+    , foreignKeys = [
+        ForeignKey(entity = BrandEntity::class, parentColumns = ["id"], childColumns = ["brand"], onDelete = ForeignKey.RESTRICT)
+        , ForeignKey(entity = ModelEntity::class, parentColumns = ["id"], childColumns = ["model"], onDelete = ForeignKey.RESTRICT)
+    ]
 )
 data class ReportEntity(
     @PrimaryKey val id: UUID

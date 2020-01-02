@@ -1,5 +1,6 @@
 package gr.blackswamp.damagereports.data.db.dao
 
+import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -13,8 +14,8 @@ interface ModelDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveModel(model: ModelEntity)
 
-    @Query("SELECT * FROM models WHERE NOT deleted AND (:filter = '' OR lower(name) LIKE '%' || lower(:filter) || '%') ORDER BY name LIMIT :skip, :take  ")
-    suspend fun searchModels(filter: String, skip: Int = 0, take: Int = -1): List<ModelEntity>
+    @Query("SELECT * FROM models WHERE NOT deleted AND (:filter = '' OR lower(name) LIKE '%' || lower(:filter) || '%') ORDER BY name ")
+    fun loadModels(filter: String): DataSource.Factory<Int, ModelEntity>
 
     @Query("DELETE FROM models WHERE id = :id")
     suspend fun deleteModelById(id: UUID)

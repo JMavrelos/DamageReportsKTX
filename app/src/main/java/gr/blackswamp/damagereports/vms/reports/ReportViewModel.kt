@@ -1,6 +1,7 @@
 package gr.blackswamp.damagereports.vms.reports
 
 import android.app.Application
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
@@ -12,28 +13,38 @@ import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.damagereports.data.repos.IReportRepository
 import gr.blackswamp.damagereports.ui.reports.model.Report
 import gr.blackswamp.damagereports.ui.reports.model.ReportHeader
+import gr.blackswamp.damagereports.util.StaticDataSource
 import gr.blackswamp.damagereports.vms.base.BaseViewModel
 import gr.blackswamp.damagereports.vms.reports.model.ReportHeaderData
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportActivityViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportListViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportViewViewModel
 import kotlinx.coroutines.launch
+import org.koin.core.inject
 import java.util.*
 
-class ReportViewModel(private val repo: IReportRepository, application: Application, private val log: ILog, runInit: Boolean = true) :
-    BaseViewModel(application), IReportActivityViewModel, IReportListViewModel , IReportViewViewModel {
+class ReportViewModel(application: Application, runInit: Boolean = true) : BaseViewModel(application), IReportActivityViewModel, IReportListViewModel, IReportViewViewModel {
     companion object {
         const val TAG = "ReportViewModel"
-        private const val LIST_PAGE_SIZE = 30
+        @VisibleForTesting
+        internal const val LIST_PAGE_SIZE = 30
     }
 
-    private val filter = MutableLiveData<String>()
+    private val log: ILog by inject()
+    private val repo: IReportRepository by inject()
+    @VisibleForTesting
+    internal val filter = MutableLiveData<String>()
     override val darkTheme: LiveData<Boolean> = repo.darkThemeLive
 
     init {
         if (runInit) {
-            filter.postValue("")
+            initialize()
         }
+    }
+
+    @VisibleForTesting
+    internal fun initialize() {
+        filter.postValue("")
     }
 
     //region IReportActivityViewModel implementation
@@ -58,18 +69,23 @@ class ReportViewModel(private val repo: IReportRepository, application: Applicat
 
     //region IReportListViewModel implementation
 
-    override var reportHeaderList: LiveData<PagedList<ReportHeader>> = Transformations.switchMap(filter, this::dbHeaderToUi)
+    override var reportHeaderList: LiveData<PagedList<ReportHeader>> =
+        Transformations.switchMap(filter, this::dbHeaderToUi)
 
     override val refreshing = MutableLiveData<Boolean>()
 
     private fun dbHeaderToUi(filter: String?): LiveData<PagedList<ReportHeader>> {
-        log.d(TAG, "transforming for $filter")
-        return repo.getReportHeaders(filter ?: "")
-            .map { entity ->
+        log.d(TAG, "transforming for \"$filter\"")
+        val response = repo.getReportHeaders(filter ?: "")
+        return if (response.hasError) {
+            error.postValue(response.errorMessage)
+            StaticDataSource.factory(listOf<ReportHeader>())
+        } else {
+            response.get.map { entity ->
                 log.d(TAG, "Loaded $entity")
                 ReportHeaderData(entity) as ReportHeader
             }
-            .toLiveData(pageSize = LIST_PAGE_SIZE)
+        }.toLiveData(pageSize = LIST_PAGE_SIZE)
     }
 
     override fun deleteReport(id: UUID) {
@@ -96,7 +112,12 @@ class ReportViewModel(private val repo: IReportRepository, application: Applicat
     private var newRepId = 0
     override fun newReport() {
         viewModelScope.launch {
-            val error = repo.newReport("test ${newRepId++}", " desc ${newRepId}", UUID.randomUUID(), UUID.randomUUID())
+            val error = repo.newReport(
+                "test ${newRepId++}",
+                " desc $newRepId",
+                UUID.randomUUID(),
+                UUID.randomUUID()
+            )
             if (error != null) {
                 this@ReportViewModel.error.setValue(error.message!!)
             }
