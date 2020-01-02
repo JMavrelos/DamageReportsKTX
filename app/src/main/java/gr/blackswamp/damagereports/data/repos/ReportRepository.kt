@@ -1,9 +1,11 @@
 package gr.blackswamp.damagereports.data.repos
 
+import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.data.Response
+import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.db.IDatabase
 import gr.blackswamp.damagereports.data.db.entities.ReportEntity
 import gr.blackswamp.damagereports.data.db.entities.ReportHeaderEntity
@@ -18,6 +20,7 @@ class ReportRepository : IReportRepository, KoinComponent {
     private val db: IDatabase by inject()
     private val prefs: IPreferences by inject()
     private val dispatchers: IDispatchers by inject()
+    private val application: Application by inject()
 
     override val darkTheme: Boolean
         get() = prefs.darkTheme
@@ -55,12 +58,25 @@ class ReportRepository : IReportRepository, KoinComponent {
         }
     }
 
-    override suspend fun deleteReport(id: UUID): Throwable? {
+    override suspend fun deleteReport(id: UUID): String? {
         return try {
-            db.reportDao.deleteReportById(id)
+            val affected = db.reportDao.flagReportDeleted(id)
+            if (affected == 0)
+                return application.getString(R.string.error_report_not_found, id)
             null
         } catch (t: Throwable) {
-            t
+            application.getString(R.string.error_deleting, (t.message ?: t::class.java.name))
+        }
+    }
+
+    override suspend fun unDeleteReport(id: UUID): String? {
+        return try {
+            val affected = db.reportDao.unFlagReportDeleted(id)
+            if (affected == 0)
+                return application.getString(R.string.error_no_deleted_report,id)
+            null
+        }catch (t:Throwable){
+            application.getString(R.string.error_un_deleting, (t.message ?: t::class.java.name))
         }
     }
 }

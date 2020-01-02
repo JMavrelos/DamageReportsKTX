@@ -7,7 +7,8 @@ import gr.blackswamp.damagereports.vms.base.IBaseViewModel
 import java.util.*
 
 interface IReportListViewModel : IBaseViewModel {
-    val refreshing:LiveData<Boolean>
+    val refreshing: LiveData<Boolean>
+    var reportHeaderList: LiveData<PagedList<ReportHeader>>
 
     fun newReport()
     fun reloadReports()
@@ -16,6 +17,4 @@ interface IReportListViewModel : IBaseViewModel {
     fun selectReport(id: UUID)
     fun editReport(id: UUID)
     fun toggleTheme()
-
-    var reportHeaderList: LiveData<PagedList<ReportHeader>>
 }

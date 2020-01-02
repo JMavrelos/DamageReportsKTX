@@ -1,15 +1,14 @@
 package gr.blackswamp.core.ui
 
+import android.content.Context
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.annotation.LayoutRes
 import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
-import gr.blackswamp.core.R
-import gr.blackswamp.core.dialogs.DialogBuilder
 import gr.blackswamp.core.dialogs.DialogBuilders
 import gr.blackswamp.core.dialogs.DialogListener
 import gr.blackswamp.core.dialogs.DialogResult
@@ -23,10 +22,10 @@ abstract class CoreActivity<T : Any> : AppCompatActivity(), DialogListener {
     @get:LayoutRes
     abstract val layoutId: Int
     @StyleRes
-    open val theme:Int? = null
+    open val theme: Int? = null
 
     final override fun onCreate(savedInstanceState: Bundle?) {
-        theme?.let{
+        theme?.let {
             setTheme(it)
         }
         super.onCreate(savedInstanceState)
@@ -71,4 +70,15 @@ abstract class CoreActivity<T : Any> : AppCompatActivity(), DialogListener {
     }
 
     protected open fun dialogFinished(result: DialogResult, id: Int, dialog: View, data: Bundle?): Boolean = true
+
+    protected fun hideKeyboard() {
+        try {
+            currentFocus?.windowToken?.let {
+                (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
+                    ?.hideSoftInputFromWindow(it, 0)
+            }
+        } catch (ignored: Throwable) {
+        }
+    }
+
 }

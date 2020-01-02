@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.lifecycle.Observer
 import gr.blackswamp.core.ui.CoreActivity
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.ui.base.commands.ScreenCommand
 import gr.blackswamp.damagereports.vms.base.IBaseViewModel
 
 abstract class BaseActivity<T : IBaseViewModel> : CoreActivity<T>() {
@@ -15,5 +16,14 @@ abstract class BaseActivity<T : IBaseViewModel> : CoreActivity<T>() {
                 delegate.localNightMode = if (it) MODE_NIGHT_YES else MODE_NIGHT_NO
             }
         })
+        vm.command.observe(this, Observer {
+            if (!executeCommand(it)) {
+                when (it) {
+                    is ScreenCommand.HideKeyboard -> hideKeyboard()
+                }
+            }
+        })
     }
+
+    protected open fun executeCommand(command: ScreenCommand): Boolean = false
 }

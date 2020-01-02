@@ -3,6 +3,7 @@ package gr.blackswamp.damagereports.data.repos
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import gr.blackswamp.core.data.Response
+import gr.blackswamp.damagereports.data.db.entities.ReportEntity
 import gr.blackswamp.damagereports.data.db.entities.ReportHeaderEntity
 import java.util.*
 
@@ -24,7 +25,14 @@ interface IReportRepository {
     fun getReportHeaders(filter: String): Response<DataSource.Factory<Int, ReportHeaderEntity>>
 
     /**
-     * deletes a report with a specific id
+     * flags a report with a specific id as deleted
+     * @return null if there was no error otherwise a message
      */
-    suspend fun deleteReport(id: UUID): Throwable?
+    suspend fun deleteReport(id: UUID): String?
+
+    /**
+     * unflags a report with a specific id as deleted
+     * @return null if there was no error otherwise a message
+     */
+    suspend fun unDeleteReport(id:UUID) : String?
 }

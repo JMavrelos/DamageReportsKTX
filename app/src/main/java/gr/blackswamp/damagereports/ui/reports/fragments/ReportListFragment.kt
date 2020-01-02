@@ -1,6 +1,5 @@
 package gr.blackswamp.damagereports.ui.reports.fragments
 
-
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -24,7 +23,6 @@ import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportListViewModel
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 import java.util.*
 
-
 class ReportListFragment : CoreFragment<IReportListViewModel>(), ReportListAction {
     companion object {
         const val TAG = "ReportListFragment"
@@ -35,49 +33,49 @@ class ReportListFragment : CoreFragment<IReportListViewModel>(), ReportListActio
     override val vm: IReportListViewModel by sharedViewModel<ReportViewModel>()
     override val layoutId: Int = R.layout.fragment_report_list
 
-    private lateinit var mRefresh: SwipeRefreshLayout
-    private lateinit var mAdd: FloatingActionButton
-    private lateinit var mList: RecyclerView
-    private lateinit var mAdapter: ReportListAdapter
-    private lateinit var mToolbar: MaterialToolbar
-    private lateinit var mTheme: MenuItem
+    private lateinit var refresh: SwipeRefreshLayout
+    private lateinit var add: FloatingActionButton
+    private lateinit var list: RecyclerView
+    private lateinit var adapter: ReportListAdapter
+    private lateinit var toolbar: MaterialToolbar
+    private lateinit var theme: MenuItem
 
     override fun setUpBindings(view: View) {
-        mRefresh = view.findViewById(R.id.refresh)
-        mAdd = view.findViewById(R.id.add)
-        mList = view.findViewById(R.id.list)
-        mAdapter = ReportListAdapter()
-        mToolbar = view.findViewById(R.id.toolbar)
-        mTheme = mToolbar.menu.findItem(R.id.switch_theme)
+        refresh = view.findViewById(R.id.refresh)
+        add = view.findViewById(R.id.add)
+        list = view.findViewById(R.id.list)
+        adapter = ReportListAdapter()
+        toolbar = view.findViewById(R.id.toolbar)
+        theme = toolbar.menu.findItem(R.id.switch_theme)
     }
 
     override fun initView(state: Bundle?) {
-        mList.adapter = mAdapter
-        ItemTouchHelper(CItemTouchHelperCallback(mAdapter, allowSwipe = true, allowDrag = false)).attachToRecyclerView(mList)
+        list.adapter = adapter
+        ItemTouchHelper(CItemTouchHelperCallback(adapter, allowSwipe = true, allowDrag = false)).attachToRecyclerView(list)
     }
 
     override fun setUpListeners() {
-        mAdapter.setListener(this)
-        mAdd.setOnClickListener { vm.newReport() }
-        mRefresh.setOnRefreshListener { vm.reloadReports() }
-        (mToolbar.menu?.findItem(R.id.search_reports)?.actionView as? SearchView)?.setOnQueryTextListener(SearchListener(vm::newReportFilter))
-        mToolbar.menu?.findItem(R.id.switch_theme)?.setOnMenuItemClickListener { vm.toggleTheme();true }
-        mToolbar.setNavigationOnClickListener { Toast.makeText(activity!!, "BACK", Toast.LENGTH_LONG).show() }
+        adapter.setListener(this)
+        add.setOnClickListener { vm.newReport() }
+        refresh.setOnRefreshListener { vm.reloadReports() }
+        (toolbar.menu?.findItem(R.id.search_reports)?.actionView as? SearchView)?.setOnQueryTextListener(SearchListener(vm::newReportFilter))
+        toolbar.menu?.findItem(R.id.switch_theme)?.setOnMenuItemClickListener { vm.toggleTheme();true }
+        toolbar.setNavigationOnClickListener { Toast.makeText(activity!!, "BACK", Toast.LENGTH_LONG).show() }
     }
 
     override fun setUpObservers(vm: IReportListViewModel) {
-        vm.reportHeaderList.observe(this, Observer { mAdapter.submitList(it) })
+        vm.reportHeaderList.observe(this, Observer { adapter.submitList(it) })
         vm.refreshing.observe(this, Observer {
             if (it == false)
-                mRefresh.isRefreshing = false
+                refresh.isRefreshing = false
         })
         vm.darkTheme.observe(this, Observer {
             if (it == true) {
-                mTheme.setTitle(R.string.switch_to_light)
-                mTheme.setIcon(R.drawable.ic_brightness_7_on_control)
+                theme.setTitle(R.string.switch_to_light)
+                theme.setIcon(R.drawable.ic_brightness_7_on_control)
             } else {
-                mTheme.setTitle(R.string.switch_to_dark)
-                mTheme.setIcon(R.drawable.ic_brightness_4_on_control)
+                theme.setTitle(R.string.switch_to_dark)
+                theme.setIcon(R.drawable.ic_brightness_4_on_control)
             }
         })
     }

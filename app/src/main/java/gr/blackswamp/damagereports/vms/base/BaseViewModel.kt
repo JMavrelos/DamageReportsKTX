@@ -1,9 +1,10 @@
 package gr.blackswamp.damagereports.vms.base
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import org.koin.core.KoinComponent
+import gr.blackswamp.core.lifecycle.SingleLiveEvent
+import gr.blackswamp.core.vms.CoreViewModel
+import gr.blackswamp.damagereports.ui.base.commands.ScreenCommand
 
-abstract class BaseViewModel(app: Application) : AndroidViewModel(app) , IBaseViewModel,
-    KoinComponent {
+abstract class BaseViewModel(app: Application) : CoreViewModel(app), IBaseViewModel {
+    override val command = SingleLiveEvent<ScreenCommand>()
 }

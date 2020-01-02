@@ -8,7 +8,7 @@ import gr.blackswamp.core.logging.AppLog
 import gr.blackswamp.core.logging.ILog
 import java.util.concurrent.atomic.AtomicBoolean
 
-class SingleLiveEvent<T>(val log: ILog = AppLog) : MutableLiveData<T>() {
+class SingleLiveEvent<T>(private val log: ILog = AppLog) : MutableLiveData<T>() {
     companion object {
         const val TAG = "SingleLiveEvent"
     }
@@ -36,5 +36,13 @@ class SingleLiveEvent<T>(val log: ILog = AppLog) : MutableLiveData<T>() {
     override fun postValue(value: T) {
         pending.set(true)
         super.postValue(value)
+    }
+
+    /**
+     * I just added this because for some reason I couldn't access this otherwise in tests
+     */
+    @Suppress("RedundantOverride")
+    override fun getValue(): T? {
+        return super.getValue()
     }
 }

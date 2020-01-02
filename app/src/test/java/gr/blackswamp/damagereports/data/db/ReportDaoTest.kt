@@ -2,11 +2,13 @@ package gr.blackswamp.damagereports.data.db
 
 import android.database.sqlite.SQLiteConstraintException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.paging.toLiveData
 import androidx.room.Room
 import androidx.room.paging.LimitOffsetDataSource
 import androidx.test.platform.app.InstrumentationRegistry
 import gr.blackswamp.core.count
 import gr.blackswamp.core.countWhere
+import gr.blackswamp.core.test
 import gr.blackswamp.damagereports.TestApp
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.db.dao.ReportDao
@@ -139,34 +141,35 @@ class ReportDaoTest {
         }
     }
 
-    @Test
-    fun `delete a report`() {
-        runBlockingTest {
-            initData()
-            val deleted = UnitTestData.REPORTS[3]
-            val expected = db.count("reports") - 1
-
-            dao.deleteReportById(deleted.id)
-
-            val count = db.count("reports")
-
-            assertEquals(expected, count)
-        }
-    }
-
-    @Test
-    fun `delete a report that doesn't exist`() {
-        runBlockingTest {
-            initData()
-            val expected = db.count("reports")
-
-            dao.deleteReportById(UUID.randomUUID())
-
-            val count = db.count("reports")
-
-            assertEquals(expected, count)
-        }
-    }
+    // not needed for now, I'll keep them for a few versions in case they are
+//    @Test
+//    fun `delete a report`() {
+//        runBlockingTest {
+//            initData()
+//            val deleted = UnitTestData.REPORTS[3]
+//            val expected = db.count("reports") - 1
+//
+//            dao.deleteReportById(deleted.id)
+//
+//            val count = db.count("reports")
+//
+//            assertEquals(expected, count)
+//        }
+//    }
+//
+//    @Test
+//    fun `delete a report that doesn't exist`() {
+//        runBlockingTest {
+//            initData()
+//            val expected = db.count("reports")
+//
+//            dao.deleteReportById(UUID.randomUUID())
+//
+//            val count = db.count("reports")
+//
+//            assertEquals(expected, count)
+//        }
+//    }
 
     @Test
     fun `search a report with no arguments`() {
@@ -202,7 +205,7 @@ class ReportDaoTest {
     }
 
     @Test
-    fun searchReportByDescription() {
+    fun `search report by description`() {
         runBlockingTest {
             initData()
             val filter = "Hello World" //this is on purpose 11 characters so that the random models cannot possibly contain it in their name
@@ -223,7 +226,88 @@ class ReportDaoTest {
         }
     }
 
-    suspend fun initData() {
+    @Test
+    fun `flagging report as deleted works`() {
+        runBlockingTest {
+            initData()
+            val toDelete = UnitTestData.REPORTS.random()
+
+            val response = dao.flagReportDeleted(toDelete.id)
+
+            assertEquals(1, response)
+            val count = db.countWhere("reports", " id = '${toDelete.id}' and deleted = 1")
+            assertEquals(1, count)
+        }
+    }
+
+    @Test
+    fun `flagging an already deleted report returns that nothing is affected`() {
+        runBlockingTest {
+            initData()
+            val report = UnitTestData.REPORTS.random()
+
+            dao.flagReportDeleted(report.id)
+
+            var count = db.countWhere("reports", " id = '${report.id}' and deleted = 1")
+            assertEquals(1, count)
+
+            val response = dao.flagReportDeleted(report.id)
+            assertEquals(0, response)
+            count = db.countWhere("reports", " id = '${report.id}' and deleted = 1")
+            assertEquals(1, count)
+        }
+    }
+
+    @Test
+    fun `unDeleting a report works`() {
+        runBlockingTest {
+            initData()
+            val report = UnitTestData.REPORTS.random()
+
+            dao.flagReportDeleted(report.id)
+
+            var count = db.countWhere("reports", " id = '${report.id}' and deleted = 1")
+            assertEquals(1, count)
+
+            val response = dao.unFlagReportDeleted(report.id)
+            assertEquals(1, response)
+            count = db.countWhere("reports", " id = '${report.id}' and deleted = 0")
+            assertEquals(1, count)
+        }
+    }
+
+    @Test
+    fun `unDeleting a report that is not deleted returns that nothing is affected`() {
+        runBlockingTest {
+
+            initData()
+            val toDelete = UnitTestData.REPORTS.random()
+
+            val response = dao.unFlagReportDeleted(toDelete.id)
+
+            assertEquals(0, response)
+        }
+    }
+
+    @Test
+    fun `flagging a report as deleted retriggers the paging query source`() {
+        runBlockingTest {
+            initData()
+            val source = dao.loadReportHeaders("").toLiveData(1000).apply { test() }
+
+            //+1 because of the separator
+            assertEquals(UnitTestData.REPORTS.size + 1, source.value!!.size)
+
+            val toDelete = UnitTestData.REPORTS.random()
+
+            dao.flagReportDeleted(toDelete.id)
+
+            //+1 because of the separator
+            assertEquals(UnitTestData.REPORTS.size , source.value!!.size)
+        }
+    }
+
+    private suspend fun initData() {
         UnitTestData.BRANDS.union(UnitTestData.DELETED_BRANDS).forEach {
             db.brandDao.saveBrand(it)
         }

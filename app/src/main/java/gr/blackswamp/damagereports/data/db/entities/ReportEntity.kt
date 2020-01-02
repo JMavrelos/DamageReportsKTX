@@ -6,7 +6,8 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.*
 
-@Entity(tableName = "reports"
+@Entity(
+    tableName = "reports"
     , indices = [
         Index(value = ["name"])
         , Index(value = ["description"])
@@ -26,4 +27,6 @@ data class ReportEntity(
     , val brand: UUID
     , val model: UUID
     , val created: Date = Date(System.currentTimeMillis())
-    , val updated: Date = Date(System.currentTimeMillis()))
+    , val updated: Date = Date(System.currentTimeMillis())
+    , val deleted: Boolean = false
+)

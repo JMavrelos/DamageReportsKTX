@@ -35,4 +35,5 @@ dependencies {
 
     implementation deps.junit // Junit
     implementation deps.coroutines.test // coroutines
+    implementation deps.koin.core //koin
 }

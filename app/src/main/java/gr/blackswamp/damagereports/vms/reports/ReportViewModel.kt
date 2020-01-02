@@ -10,7 +10,9 @@ import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import gr.blackswamp.core.lifecycle.SingleLiveEvent
 import gr.blackswamp.core.logging.ILog
+import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.repos.IReportRepository
+import gr.blackswamp.damagereports.ui.base.commands.ScreenCommand
 import gr.blackswamp.damagereports.ui.reports.model.Report
 import gr.blackswamp.damagereports.ui.reports.model.ReportHeader
 import gr.blackswamp.damagereports.util.StaticDataSource
@@ -68,6 +70,11 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     //endregion
 
     //region IReportListViewModel implementation
+    @VisibleForTesting
+    internal val lastDeleted = MutableLiveData<UUID>()
+
+    override val showUndo: LiveData<Boolean> =
+        Transformations.map(lastDeleted) { it != null }
 
     override var reportHeaderList: LiveData<PagedList<ReportHeader>> =
         Transformations.switchMap(filter, this::dbHeaderToUi)
@@ -92,10 +99,36 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
         viewModelScope.launch {
             try {
                 loading.postValue(true)
-                repo.deleteReport(id)?.also { throw(it) }
+                repo.deleteReport(id)?.also { throw(Throwable(it)) }
+                lastDeleted.postValue(id)
             } catch (t: Throwable) {
-                error.postValue(t.message ?: "Error deleting $id")
+                error.postValue(t.message ?: getString(R.string.error_deleting, id))
+                lastDeleted.postValue(null)
             } finally {
+                loading.postValue(false)
+            }
+        }
+    }
+
+    override fun dismissedUndo() {
+        lastDeleted.postValue(null)
+    }
+
+    override fun undoLastDelete() {
+        viewModelScope.launch {
+            val last = lastDeleted.value
+            try {
+                if (last == null) {
+                    throw Throwable(getString(R.string.error_un_deleting_no_saved_value))
+                }
+                loading.postValue(true)
+                repo.unDeleteReport(last)?.also {
+                    throw Throwable(it)
+                }
+            } catch (t: Throwable) {
+                error.postValue(t.message ?: getString(R.string.error_un_deleting, last))
+            } finally {
+                lastDeleted.postValue(null)
                 loading.postValue(false)
             }
         }
@@ -126,11 +159,10 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     }
 
     override fun newReportFilter(filter: String, submitted: Boolean): Boolean {
-//        if (submitted && this.filter.value != filter) {
         this.filter.postValue(filter)
+        if (submitted)
+            command.postValue(ScreenCommand.HideKeyboard())
         return true
-//        }
-//        return false
     }
 
     override fun reloadReports() {
