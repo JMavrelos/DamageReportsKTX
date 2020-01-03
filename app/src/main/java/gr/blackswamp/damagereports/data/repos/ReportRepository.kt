@@ -8,8 +8,9 @@ import gr.blackswamp.core.data.Response
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.db.IDatabase
 import gr.blackswamp.damagereports.data.db.entities.ReportEntity
-import gr.blackswamp.damagereports.data.db.entities.ReportHeaderEntity
 import gr.blackswamp.damagereports.data.prefs.IPreferences
+import gr.blackswamp.damagereports.vms.ReportData
+import gr.blackswamp.damagereports.vms.ReportHeaderData
 import kotlinx.coroutines.withContext
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -50,33 +51,45 @@ class ReportRepository : IReportRepository, KoinComponent {
         }
     }
 
-    override fun getReportHeaders(filter: String): Response<DataSource.Factory<Int, ReportHeaderEntity>> {
+    override fun getReportHeaders(filter: String): Response<DataSource.Factory<Int, ReportHeaderData>> {
         return try {
-            Response.success(db.reportDao.loadReportHeaders(filter))
+            Response.success(db.reportDao.loadReportHeaders(filter)
+                .map { entity -> entity.toData() })
         } catch (t: Throwable) {
             Response.failure(t)
         }
     }
 
-    override suspend fun deleteReport(id: UUID): String? {
-        return try {
-            val affected = db.reportDao.flagReportDeleted(id)
-            if (affected == 0)
-                return application.getString(R.string.error_report_not_found, id)
-            null
+    override suspend fun loadReport(id: UUID): Response<ReportData> {
+        try {
+            val report = db.reportDao.loadReport(id)
+
+            return Response.failure("error")
         } catch (t: Throwable) {
-            application.getString(R.string.error_deleting, (t.message ?: t::class.java.name))
+            return Response.failure(t)
         }
     }
 
-    override suspend fun unDeleteReport(id: UUID): String? {
+    override suspend fun deleteReport(id: UUID): Response<Unit> {
+        return try {
+            val affected = db.reportDao.flagReportDeleted(id)
+            if (affected == 0)
+                return Response.failure(application.getString(R.string.error_report_not_found, id))
+            Response.success()
+        } catch (t: Throwable) {
+            return Response.failure(application.getString(R.string.error_deleting, (t.message ?: t::class.java.name)),t)
+        }
+    }
+
+    override suspend fun unDeleteReport(id: UUID): Response<Unit> {
         return try {
             val affected = db.reportDao.unFlagReportDeleted(id)
             if (affected == 0)
-                return application.getString(R.string.error_no_deleted_report,id)
-            null
-        }catch (t:Throwable){
-            application.getString(R.string.error_un_deleting, (t.message ?: t::class.java.name))
+                return Response.failure(application.getString(R.string.error_no_deleted_report, id))
+            Response.success()
+        } catch (t: Throwable) {
+            return Response.failure(application.getString(R.string.error_un_deleting, (t.message ?: t::class.java.name)),t)
         }
     }
 }
+

@@ -115,7 +115,7 @@ class ReportRepositoryTest : KoinTest {
             val result = repo.deleteReport(id)
 
             verify(dao).flagReportDeleted(id)
-            assertNull(result)
+            assertFalse(result.hasError)
         }
     }
 
@@ -130,7 +130,7 @@ class ReportRepositoryTest : KoinTest {
             val response = repo.deleteReport(id)
 
             verify(dao).flagReportDeleted(id)
-            assertEquals(ERROR, response)
+            assertEquals(ERROR, response.errorMessage)
         }
     }
 
@@ -144,7 +144,7 @@ class ReportRepositoryTest : KoinTest {
             val response = repo.deleteReport(id)
 
             verify(dao).flagReportDeleted(id)
-            assertEquals(ERROR, response)
+            assertEquals(ERROR, response.errorMessage)
         }
     }
 
@@ -158,7 +158,7 @@ class ReportRepositoryTest : KoinTest {
             val result = repo.unDeleteReport(id)
 
             verify(dao).unFlagReportDeleted(id)
-            assertNull(result)
+            assertFalse(result.hasError)
         }
     }
 
@@ -173,7 +173,7 @@ class ReportRepositoryTest : KoinTest {
             val response = repo.unDeleteReport(id)
 
             verify(dao).unFlagReportDeleted(id)
-            assertEquals(ERROR, response)
+            assertEquals(ERROR, response.errorMessage)
         }
     }
 
@@ -187,7 +187,7 @@ class ReportRepositoryTest : KoinTest {
             val response = repo.unDeleteReport(id)
 
             verify(dao).unFlagReportDeleted(id)
-            assertEquals(ERROR, response)
+            assertEquals(ERROR, response.errorMessage)
         }
     }
 }

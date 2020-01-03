@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import gr.blackswamp.core.widget.CItemTouchAdapter
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.ui.reports.model.ReportHeader
+import gr.blackswamp.damagereports.ui.model.ReportHeader
 import java.util.*
 
 @Suppress("unused")

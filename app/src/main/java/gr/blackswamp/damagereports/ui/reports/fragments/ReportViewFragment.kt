@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import gr.blackswamp.core.ui.CoreFragment
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.ui.reports.model.Report
+import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.vms.reports.ReportViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportViewViewModel
 import org.koin.android.viewmodel.ext.android.sharedViewModel

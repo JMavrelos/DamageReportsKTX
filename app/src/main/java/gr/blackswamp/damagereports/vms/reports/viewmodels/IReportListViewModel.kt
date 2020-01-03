@@ -2,7 +2,7 @@ package gr.blackswamp.damagereports.vms.reports.viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.paging.PagedList
-import gr.blackswamp.damagereports.ui.reports.model.ReportHeader
+import gr.blackswamp.damagereports.ui.model.ReportHeader
 import gr.blackswamp.damagereports.vms.base.IBaseViewModel
 import java.util.*
 

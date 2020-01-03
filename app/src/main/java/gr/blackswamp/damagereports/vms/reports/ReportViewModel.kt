@@ -13,11 +13,10 @@ import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.repos.IReportRepository
 import gr.blackswamp.damagereports.ui.base.commands.ScreenCommand
-import gr.blackswamp.damagereports.ui.reports.model.Report
-import gr.blackswamp.damagereports.ui.reports.model.ReportHeader
+import gr.blackswamp.damagereports.ui.model.Report
+import gr.blackswamp.damagereports.ui.model.ReportHeader
 import gr.blackswamp.damagereports.util.StaticDataSource
 import gr.blackswamp.damagereports.vms.base.BaseViewModel
-import gr.blackswamp.damagereports.vms.reports.model.ReportHeaderData
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportActivityViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportListViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportViewViewModel
@@ -88,9 +87,9 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
             error.postValue(response.errorMessage)
             StaticDataSource.factory(listOf<ReportHeader>())
         } else {
-            response.get.map { entity ->
-                log.d(TAG, "Loaded $entity")
-                ReportHeaderData(entity) as ReportHeader
+            response.get.map{
+                log.d(TAG, "Loaded $it")
+                it as ReportHeader
             }
         }.toLiveData(pageSize = LIST_PAGE_SIZE)
     }
@@ -99,7 +98,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
         viewModelScope.launch {
             try {
                 loading.postValue(true)
-                repo.deleteReport(id)?.also { throw(Throwable(it)) }
+                repo.deleteReport(id).throwIfError()
                 lastDeleted.postValue(id)
             } catch (t: Throwable) {
                 error.postValue(t.message ?: getString(R.string.error_deleting, id))
@@ -122,9 +121,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
                     throw Throwable(getString(R.string.error_un_deleting_no_saved_value))
                 }
                 loading.postValue(true)
-                repo.unDeleteReport(last)?.also {
-                    throw Throwable(it)
-                }
+                repo.unDeleteReport(last).throwIfError()
             } catch (t: Throwable) {
                 error.postValue(t.message ?: getString(R.string.error_un_deleting, last))
             } finally {
@@ -135,7 +132,9 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     }
 
     override fun selectReport(id: UUID) {
-
+        viewModelScope.launch {
+            val report = repo.loadReport(id)
+        }
     }
 
     override fun editReport(id: UUID) {
