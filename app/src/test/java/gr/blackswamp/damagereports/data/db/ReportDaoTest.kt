@@ -6,7 +6,6 @@ import androidx.paging.toLiveData
 import androidx.room.Room
 import androidx.room.paging.LimitOffsetDataSource
 import androidx.test.platform.app.InstrumentationRegistry
-import gr.blackswamp.core.count
 import gr.blackswamp.core.countWhere
 import gr.blackswamp.core.test
 import gr.blackswamp.damagereports.TestApp
@@ -82,10 +81,10 @@ class ReportDaoTest {
     @Test
     fun `insert report with valid brand but no model`() {
         runBlockingTest {
-            val model = UnitTestData.MODELS[0]
-            val brand = UnitTestData.BRANDS.first { it.id == model.brand }
+            val model = UnitTestData.MODELS.random()
+            val brand = UnitTestData.BRANDS.filter { it.id == model.brand }.random()
             db.brandDao.saveBrand(brand)
-            val report = ReportEntity(UUID.randomUUID(), "hello", "world", UnitTestData.MODELS[0].brand, UnitTestData.MODELS[0].id)
+            val report = ReportEntity(UUID.randomUUID(), "hello", "world", model.brand, model.id)
 
             var error: Throwable? = null
             try {
@@ -102,11 +101,11 @@ class ReportDaoTest {
     @Test
     fun `insert report with valid model but no brand`() {
         runBlockingTest {
-            val model = UnitTestData.MODELS[0]
-            val brand = UnitTestData.BRANDS.first { it.id == model.brand }
+            val model = UnitTestData.MODELS.random()
+            val brand = UnitTestData.BRANDS.filter { it.id == model.brand }.random()
             db.brandDao.saveBrand(brand)
             db.modelDao.saveModel(model)
-            val report = ReportEntity(UUID.randomUUID(), "hello", "world", UUID.randomUUID(), UnitTestData.MODELS[0].id)
+            val report = ReportEntity(UUID.randomUUID(), "hello", "world", UUID.randomUUID(), model.id)
 
             var error: Throwable? = null
             try {
@@ -124,11 +123,11 @@ class ReportDaoTest {
     @Test
     fun `insert report with no constraint problem`() {
         runBlockingTest {
-            val model = UnitTestData.MODELS[0]
-            val brand = UnitTestData.BRANDS.first { it.id == model.brand }
+            val model = UnitTestData.MODELS.random()
+            val brand = UnitTestData.BRANDS.filter { it.id == model.brand }.random()
             db.brandDao.saveBrand(brand)
             db.modelDao.saveModel(model)
-            val report = ReportEntity(UUID.randomUUID(), "hello", "world", UnitTestData.MODELS[0].brand, UnitTestData.MODELS[0].id)
+            val report = ReportEntity(UUID.randomUUID(), "hello", "world", model.brand, model.id)
 
             dao.saveReport(report)
 
@@ -303,7 +302,30 @@ class ReportDaoTest {
             dao.flagReportDeleted(toDelete.id)
 
             //+1 because of the separator
-            assertEquals(UnitTestData.REPORTS.size , source.value!!.size)
+            assertEquals(UnitTestData.REPORTS.size, source.value!!.size)
+        }
+    }
+
+
+    @Test
+    fun `load report by id successfully`() {
+        runBlockingTest {
+            initData()
+            val expected = UnitTestData.REPORTS.random()
+
+            val report = dao.loadReportById(expected.id)
+            assertEquals(expected, report)
+        }
+    }
+
+    @Test
+    fun `load report that does not exist`() {
+        runBlockingTest {
+            initData()
+
+            val report = dao.loadReportById(UUID.randomUUID())
+
+            assertNull(report)
         }
     }
 

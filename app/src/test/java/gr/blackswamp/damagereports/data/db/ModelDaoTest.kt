@@ -16,8 +16,7 @@ import gr.blackswamp.damagereports.data.db.entities.ReportEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -55,8 +54,8 @@ class ModelDaoTest {
     @Test
     fun `insert new model`() {
         runBlockingTest {
-            val brand = UnitTestData.BRANDS[0]
-            val model = UnitTestData.MODELS.first { it.brand == brand.id }
+            val brand = UnitTestData.BRANDS.random()
+            val model = UnitTestData.MODELS.filter{ it.brand == brand.id }.random()
             db.brandDao.saveBrand(brand)
             dao.saveModel(model)
 
@@ -67,7 +66,7 @@ class ModelDaoTest {
     @Test
     fun `insert with invalid brand fails`() {
         runBlockingTest {
-            val brand = UnitTestData.BRANDS[0]
+            val brand = UnitTestData.BRANDS.random()
             val model = UnitTestData.MODELS.first { it.brand == brand.id }
             var error: Throwable? = null
             try {
@@ -86,7 +85,7 @@ class ModelDaoTest {
     fun `update model`() {
         runBlockingTest {
             initModels()
-            val updated = UnitTestData.MODELS[2].copy(name = "this is the new thang")
+            val updated = UnitTestData.MODELS.random().copy(name = "this is the new thang")
             dao.saveModel(updated)
             assertEquals(UnitTestData.MODELS.size + UnitTestData.DELETED_MODELS.size, db.count("models"))
             assertEquals(1, db.countWhere("models", " name = '${updated.name}'"))
@@ -125,7 +124,7 @@ class ModelDaoTest {
     fun `delete model`() {
         runBlockingTest {
             initModels()
-            val deleted = UnitTestData.MODELS[3].id
+            val deleted = UnitTestData.MODELS.random().id
             dao.deleteModelById(deleted)
 
             assertEquals(0, db.countWhere("models", " id = '$deleted'"))
@@ -136,7 +135,7 @@ class ModelDaoTest {
     fun `delete model used fails`() {
         runBlockingTest {
             initModels()
-            val toDelete = UnitTestData.MODELS[3]
+            val toDelete = UnitTestData.MODELS.random()
             db.reportDao.saveReport(ReportEntity(UUID.randomUUID(), "123", "123", toDelete.brand, toDelete.id))
             val expected = db.count("models")
 
@@ -152,6 +151,29 @@ class ModelDaoTest {
         }
     }
 
+    @Test
+    fun `load model by id successfully`() {
+        runBlockingTest {
+            initModels()
+            val expected = UnitTestData.MODELS.random()
+
+            val model = dao.loadModelById(expected.id)
+
+            assertEquals(expected,model)
+        }
+    }
+
+    @Test
+    fun `load model that does not exist`() {
+        runBlockingTest {
+            initModels()
+
+            val model = dao.loadModelById(UUID.randomUUID())
+
+            assertNull(model)
+        }
+    }
+
     private suspend fun initModels() {
         UnitTestData.BRANDS.union(UnitTestData.DELETED_BRANDS).forEach {
             db.brandDao.saveBrand(it)
@@ -160,5 +182,4 @@ class ModelDaoTest {
             dao.saveModel(it)
         }
     }
-
 }

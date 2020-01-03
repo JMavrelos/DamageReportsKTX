@@ -15,12 +15,9 @@ import gr.blackswamp.damagereports.data.db.entities.ReportEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.After
+import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -155,6 +152,29 @@ class BrandDaoTest {
             }
             assertTrue(error is SQLiteConstraintException)
             assertEquals(expected, db.count("brands"))
+        }
+    }
+
+    @Test
+    fun `load model by id successfully`() {
+        runBlockingTest {
+            initBrands()
+            val expected = UnitTestData.BRANDS.random()
+
+            val brand = dao.loadBrandById(expected.id)
+
+            assertEquals(expected,brand)
+        }
+    }
+
+    @Test
+    fun `load model that does not exist`() {
+        runBlockingTest {
+            initBrands()
+
+            val brand = dao.loadBrandById(UUID.randomUUID())
+
+            Assert.assertNull(brand)
         }
     }
 

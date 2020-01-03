@@ -20,6 +20,7 @@ abstract class BaseActivity<T : IBaseViewModel> : CoreActivity<T>() {
             if (!executeCommand(it)) {
                 when (it) {
                     is ScreenCommand.HideKeyboard -> hideKeyboard()
+                    is ScreenCommand.Back -> super.onBackPressed()
                 }
             }
         })

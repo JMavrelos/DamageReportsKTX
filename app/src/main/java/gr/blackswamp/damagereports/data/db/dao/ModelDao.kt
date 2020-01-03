@@ -17,6 +17,9 @@ interface ModelDao {
     @Query("SELECT * FROM models WHERE NOT deleted AND (:filter = '' OR lower(name) LIKE '%' || lower(:filter) || '%') ORDER BY name ")
     fun loadModels(filter: String): DataSource.Factory<Int, ModelEntity>
 
+    @Query("SELECT * FROM models WHERE id = :id")
+    suspend fun loadModelById(id: UUID): ModelEntity?
+
     @Query("DELETE FROM models WHERE id = :id")
     suspend fun deleteModelById(id: UUID)
 }

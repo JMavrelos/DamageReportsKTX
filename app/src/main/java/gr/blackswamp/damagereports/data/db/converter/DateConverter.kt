@@ -7,7 +7,7 @@ import java.util.*
 class DateConverter {
     companion object {
         @JvmStatic
-        val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH)
+        val formatter = SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.ENGLISH)
 
         @TypeConverter
         @JvmStatic

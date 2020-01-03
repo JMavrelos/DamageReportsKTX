@@ -12,16 +12,20 @@ import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.core.test
+import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.TestApp
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.repos.IReportRepository
 import gr.blackswamp.damagereports.data.repos.toData
+import gr.blackswamp.damagereports.ui.reports.ReportCommands
 import gr.blackswamp.damagereports.util.StaticDataSource
+import gr.blackswamp.damagereports.vms.BrandData
+import gr.blackswamp.damagereports.vms.ModelData
+import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.reports.ReportViewModel.Companion.LIST_PAGE_SIZE
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import org.apache.tools.ant.taskdefs.Tstamp
 import org.junit.*
 import org.junit.Assert.*
 import org.koin.android.ext.koin.androidContext
@@ -228,7 +232,74 @@ class ReportViewModelTest : KoinTest {
     fun `selecting a report displays it on screen`() {
         runBlockingTest {
             val id = UUID.randomUUID()
+            val report = ReportData(id, "a name", "a description", BrandData(UUID.randomUUID(), "a brand"), ModelData(UUID.randomUUID(), " a model", UUID.randomUUID()), Date(0))
+            whenever(repo.loadReport(id)).thenReturn(Response.success(report))
             vm.selectReport(id)
+
+            assertEquals(false, vm.editMode.value)
+            assertEquals(report, vm.report.value)
+            assertTrue(vm.command.value is ReportCommands.ShowReport)
+            assertFalse(vm.loading.value!!)
+        }
+    }
+
+    @Test
+    fun `long pressing a report displays it for edit`() {
+        runBlockingTest {
+            val id = UUID.randomUUID()
+            val report = ReportData(id, "a name", "a description", BrandData(UUID.randomUUID(), "a brand"), ModelData(UUID.randomUUID(), " a model", UUID.randomUUID()), Date())
+            whenever(repo.loadReport(id)).thenReturn(Response.success(report))
+            vm.editReport(id)
+
+            assertEquals(true, vm.editMode.value)
+            assertEquals(report, vm.report.value)
+            assertTrue(vm.command.value is ReportCommands.ShowReport)
+        }
+    }
+
+    @Test
+    fun `when selecting a report has a problem an error is shown`() {
+        runBlockingTest {
+            val id = UUID.randomUUID()
+            whenever(repo.loadReport(id)).thenReturn(Response.failure(ERROR))
+            vm.selectReport(id)
+
+            assertNull(vm.editMode.value)
+            assertNull(vm.report.value)
+            assertNull(vm.command.value)
+            assertEquals(ERROR, vm.error.value)
+        }
+    }
+
+    @Test
+    fun `when editing a report has a problem an error is shown`() {
+        runBlockingTest {
+            val id = UUID.randomUUID()
+            whenever(repo.loadReport(id)).thenReturn(Response.failure(ERROR))
+            vm.editReport(id)
+
+            assertNull(vm.editMode.value)
+            assertNull(vm.report.value)
+            assertNull(vm.command.value)
+            assertEquals(ERROR, vm.error.value)
+        }
+    }
+
+    @Test
+    fun `new report shows correctly`() {
+        runBlockingTest {
+            vm.newReport()
+
+            val report = vm.report.value!!
+            val timeDiff = System.currentTimeMillis() - report.created.time
+
+            assertTrue(vm.editMode.value!!)
+            assertTrue(timeDiff in 0..100) //this may fail if the test takes too much but 100 ms is long enough
+            assertEquals(EmptyUUID, report.id)
+            assertNull(report.brandName)
+            assertNull(report.modelName)
+            assertEquals("", report.description)
+            assertEquals("", report.name)
         }
     }
 }

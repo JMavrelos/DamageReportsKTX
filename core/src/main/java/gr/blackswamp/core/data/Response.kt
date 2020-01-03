@@ -23,8 +23,9 @@ class Response<T : Any?>(private val value: Any?) {
 
     internal data class Failure(val exception: Throwable)
 
-    fun throwIfError() {
+    fun throwOrGet() : T{
         if (hasError)
             throw error
+        return get
     }
 }

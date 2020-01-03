@@ -13,7 +13,7 @@ import java.util.*
 @Dao
 interface ReportDao {
     @Query("select * from reports where id = :id")
-    suspend fun loadReport(id: UUID): ReportEntity
+    suspend fun loadReportById(id: UUID): ReportEntity?
 
     @Query(
         "select id, name, description,created " +
@@ -24,7 +24,7 @@ interface ReportDao {
                 "                     or name like '%' || :filter || '%' " +
                 "                     or description like '%' || :filter || '%' )" +
                 "        union " +
-                "        select '00000000-0000-0000-0000-000000000000' as id, substr(created, 0, 9) as name, '' as description, Substr(created, 0, 9) || '000000' as created, substr(created, 0, 9) || '256060' AS sort " +
+                "        select '00000000-0000-0000-0000-000000000000' as id, substr(created, 0, 9) as name, '' as description, Substr(created, 0, 9) || '000000000' as created, substr(created, 0, 9) || '256060999' AS sort " +
                 "        from   reports " +
                 "        where  deleted = 0 " +
                 "               and (:filter = '' " +
@@ -34,7 +34,6 @@ interface ReportDao {
                 "order  by sort desc "
     )
     fun loadReportHeaders(filter: String): DataSource.Factory<Int, ReportHeaderEntity>
-
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun saveReport(report: ReportEntity)

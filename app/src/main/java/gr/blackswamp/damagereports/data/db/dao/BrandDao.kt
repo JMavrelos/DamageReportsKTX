@@ -17,6 +17,9 @@ interface BrandDao {
     @Query("DELETE FROM brands WHERE id = :id")
     suspend fun deleteBrandById(id: UUID)
 
+    @Query("SELECT * FROM brands WHERE id = :id")
+    suspend fun loadBrandById(id: UUID): BrandEntity?
+
     @Query("SELECT count(*) FROM brands WHERE NOT deleted")
     suspend fun count(): Int
 

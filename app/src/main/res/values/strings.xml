@@ -18,9 +18,14 @@
     <string name="error_un_deleting_no_saved_value">Υπήρξε πρόβλημα κατά την αναίρεση ERpR(1)</string>
     <string name="error_un_deleting">Υπήρξε πρόβλημα κατά την αναίρεση (%1$s)</string>
     <string name="error_report_not_found">Η αναφορά δεν βρέθηκε (%1$s)</string>
+    <string name="error_model_not_found">Το μοντέλο δεν βρέθηκε (%1$s)</string>
+    <string name="error_brand_not_found">Η μάρκα δεν βρέθηκε (%1$s)</string>
     <string name="save">Αποθήκευση</string>
     <string name="error_deleting">Υπήρξε πρόβλημα κατά την διαγραφή (%1$s)</string>
     <string name="error_no_deleted_report">Δεν βρέθηκε διαγεγραμμένη παραγγελία με κωδικό %1$s</string>
     <string name="undo_delete">Πιέστε το κουμπί για αναίρεση διαγραφής</string>
     <string name="undo">Αναίρεση</string>
+    <string name="error_loading_report">Υπήρξε πρόβλημα κατά την εύρεση της αναφοράς %1$s</string>
+    <string name="error_invalid_model_brand">Η σύνδεση μοντέλου/μάρκας είναι λάθος</string>
+    <string name="edit">Τροποποίηση</string>
 </resources>

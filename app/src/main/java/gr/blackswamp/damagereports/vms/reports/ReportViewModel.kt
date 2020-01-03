@@ -10,12 +10,15 @@ import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import gr.blackswamp.core.lifecycle.SingleLiveEvent
 import gr.blackswamp.core.logging.ILog
+import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.repos.IReportRepository
 import gr.blackswamp.damagereports.ui.base.commands.ScreenCommand
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.ui.model.ReportHeader
+import gr.blackswamp.damagereports.ui.reports.ReportCommands
 import gr.blackswamp.damagereports.util.StaticDataSource
+import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.base.BaseViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportActivityViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportListViewModel
@@ -87,7 +90,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
             error.postValue(response.errorMessage)
             StaticDataSource.factory(listOf<ReportHeader>())
         } else {
-            response.get.map{
+            response.get.map {
                 log.d(TAG, "Loaded $it")
                 it as ReportHeader
             }
@@ -98,7 +101,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
         viewModelScope.launch {
             try {
                 loading.postValue(true)
-                repo.deleteReport(id).throwIfError()
+                repo.deleteReport(id).throwOrGet()
                 lastDeleted.postValue(id)
             } catch (t: Throwable) {
                 error.postValue(t.message ?: getString(R.string.error_deleting, id))
@@ -121,7 +124,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
                     throw Throwable(getString(R.string.error_un_deleting_no_saved_value))
                 }
                 loading.postValue(true)
-                repo.unDeleteReport(last).throwIfError()
+                repo.unDeleteReport(last).throwOrGet()
             } catch (t: Throwable) {
                 error.postValue(t.message ?: getString(R.string.error_un_deleting, last))
             } finally {
@@ -131,36 +134,39 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
         }
     }
 
-    override fun selectReport(id: UUID) {
+    override fun selectReport(id: UUID) = showReport(id, false)
+
+    override fun editReport(id: UUID) = showReport(id, true)
+
+    private fun showReport(id: UUID, inEditMode: Boolean) {
         viewModelScope.launch {
-            val report = repo.loadReport(id)
-        }
-    }
-
-    override fun editReport(id: UUID) {
-
-    }
-
-    private var newRepId = 0
-    override fun newReport() {
-        viewModelScope.launch {
-            val error = repo.newReport(
-                "test ${newRepId++}",
-                " desc $newRepId",
-                UUID.randomUUID(),
-                UUID.randomUUID()
-            )
-            if (error != null) {
-                this@ReportViewModel.error.setValue(error.message!!)
+            loading.postValue(true)
+            try {
+                val data = repo.loadReport(id).throwOrGet()
+                report.postValue(data)
+                editMode.postValue(inEditMode)
+                command.postValue(ReportCommands.ShowReport)
+            } catch (t: Throwable) {
+                error.postValue(t.message ?: t::class.java.name)
+            } finally {
+                loading.postValue(false)
             }
         }
+    }
 
+    override fun newReport() {
+        viewModelScope.launch {
+            val newReport = ReportData(EmptyUUID, "", "", null, null, Date(System.currentTimeMillis()))
+            report.postValue(newReport)
+            editMode.postValue(true)
+            command.postValue(ReportCommands.ShowReport)
+        }
     }
 
     override fun newReportFilter(filter: String, submitted: Boolean): Boolean {
         this.filter.postValue(filter)
         if (submitted)
-            command.postValue(ScreenCommand.HideKeyboard())
+            command.postValue(ScreenCommand.HideKeyboard)
         return true
     }
 
@@ -174,6 +180,8 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     //endregion
 
     //region IReportViewViewModel implementation
+    override val editMode = MutableLiveData<Boolean>()
+
     override fun pickModel() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -183,7 +191,20 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     }
 
     override fun saveReport() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        this.editMode.postValue(false)
+        command.postValue(ScreenCommand.HideKeyboard)
+    }
+
+    override fun editReport() {
+        this.editMode.postValue(true)
+    }
+
+    override fun exitReport() {
+        if (this.editMode.value == true) {
+            editMode.postValue(false)
+        } else {
+            command.postValue(ScreenCommand.Back)
+        }
     }
     //endregion
 }

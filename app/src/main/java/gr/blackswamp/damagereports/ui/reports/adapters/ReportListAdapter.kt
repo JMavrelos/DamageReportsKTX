@@ -7,10 +7,10 @@ import android.widget.TextView
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.widget.CItemTouchAdapter
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.ui.model.ReportHeader
-import java.util.*
 
 @Suppress("unused")
 class ReportListAdapter : PagedListAdapter<ReportHeader, ReportListAdapter.ReportHeaderViewHolder>(DIFF_CALLBACK), CItemTouchAdapter {
@@ -27,7 +27,7 @@ class ReportListAdapter : PagedListAdapter<ReportHeader, ReportListAdapter.Repor
 
         }
 
-        private val EMPTY_ID = UUID(0L, 0L)
+        private val LABEL_ID = EmptyUUID
         private const val LABEL = 0
         private const val HEADER = 1
     }
@@ -38,7 +38,7 @@ class ReportListAdapter : PagedListAdapter<ReportHeader, ReportListAdapter.Repor
         this.listener = listener
     }
 
-    override fun getItemViewType(position: Int): Int = if (getItem(position)?.id == EMPTY_ID) LABEL else HEADER
+    override fun getItemViewType(position: Int): Int = if (getItem(position)?.id == LABEL_ID) LABEL else HEADER
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReportHeaderViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -63,12 +63,12 @@ class ReportListAdapter : PagedListAdapter<ReportHeader, ReportListAdapter.Repor
 
     override fun onItemDismissed(position: Int) {
         getItem(position)?.let {
-            if (it.id != EMPTY_ID)
+            if (it.id != LABEL_ID)
                 listener?.delete(it.id)
         }
     }
 
-    override fun allowDismiss(position: Int): Boolean = (getItem(position)?.id != EMPTY_ID)
+    override fun allowDismiss(position: Int): Boolean = (getItem(position)?.id != LABEL_ID)
 
     private fun onItemClick(position: Int) {
         getItem(position)?.let {

@@ -1,6 +1,7 @@
 package gr.blackswamp.damagereports.data.repos
 
 import android.app.Application
+import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import gr.blackswamp.core.coroutines.IDispatchers
@@ -61,12 +62,14 @@ class ReportRepository : IReportRepository, KoinComponent {
     }
 
     override suspend fun loadReport(id: UUID): Response<ReportData> {
-        try {
-            val report = db.reportDao.loadReport(id)
-
-            return Response.failure("error")
+        return try {
+            val report = db.reportDao.loadReportById(id) ?: return Response.failure(getString(R.string.error_report_not_found, id))
+            val brand = db.brandDao.loadBrandById(report.brand) ?: return Response.failure(getString(R.string.error_brand_not_found, report.brand))
+            val model = db.modelDao.loadModelById(report.model) ?: return Response.failure(getString(R.string.error_model_not_found, report.model))
+            if (model.brand != brand.id) return Response.failure(getString(R.string.error_invalid_model_brand))
+            Response.success(report.toData(brand, model))
         } catch (t: Throwable) {
-            return Response.failure(t)
+            Response.failure(getString(R.string.error_loading_report, id), t)
         }
     }
 
@@ -74,10 +77,10 @@ class ReportRepository : IReportRepository, KoinComponent {
         return try {
             val affected = db.reportDao.flagReportDeleted(id)
             if (affected == 0)
-                return Response.failure(application.getString(R.string.error_report_not_found, id))
+                return Response.failure(getString(R.string.error_report_not_found, id))
             Response.success()
         } catch (t: Throwable) {
-            return Response.failure(application.getString(R.string.error_deleting, (t.message ?: t::class.java.name)),t)
+            return Response.failure(getString(R.string.error_deleting, (t.message ?: t::class.java.name)), t)
         }
     }
 
@@ -85,11 +88,14 @@ class ReportRepository : IReportRepository, KoinComponent {
         return try {
             val affected = db.reportDao.unFlagReportDeleted(id)
             if (affected == 0)
-                return Response.failure(application.getString(R.string.error_no_deleted_report, id))
+                return Response.failure(getString(R.string.error_no_deleted_report, id))
             Response.success()
         } catch (t: Throwable) {
-            return Response.failure(application.getString(R.string.error_un_deleting, (t.message ?: t::class.java.name)),t)
+            return Response.failure(getString(R.string.error_un_deleting, (t.message ?: t::class.java.name)), t)
         }
     }
+
+    protected fun getString(@StringRes resId: Int): String = application.getString(resId)
+    protected fun getString(@StringRes resId: Int, vararg formatArgs: Any?): String = application.getString(resId, *formatArgs)
 }
 

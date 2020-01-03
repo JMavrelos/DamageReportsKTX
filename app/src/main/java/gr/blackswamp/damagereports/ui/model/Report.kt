@@ -6,7 +6,7 @@ interface Report {
     val id:UUID
     val name: String
     val description: String
-    val brand: String?
-    val model: String?
+    val brandName: String?
+    val modelName: String?
     val created: Date
 }

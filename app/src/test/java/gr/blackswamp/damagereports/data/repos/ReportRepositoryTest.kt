@@ -8,9 +8,15 @@ import gr.blackswamp.core.MainCoroutineScopeRule
 import gr.blackswamp.core.TestDispatchers
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.db.IDatabase
+import gr.blackswamp.damagereports.data.db.dao.BrandDao
+import gr.blackswamp.damagereports.data.db.dao.ModelDao
 import gr.blackswamp.damagereports.data.db.dao.ReportDao
 import gr.blackswamp.damagereports.data.prefs.IPreferences
+import gr.blackswamp.damagereports.vms.BrandData
+import gr.blackswamp.damagereports.vms.ModelData
+import gr.blackswamp.damagereports.vms.ReportData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.*
@@ -52,6 +58,8 @@ class ReportRepositoryTest : KoinTest {
     private val prefs = mock<IPreferences>()
     private lateinit var repo: IReportRepository
     private val dao = mock<ReportDao>()
+    private val mDao = mock<ModelDao>()
+    private val bDao = mock<BrandDao>()
 
     private val module = module {
         single { db }
@@ -70,6 +78,8 @@ class ReportRepositoryTest : KoinTest {
     fun setUp() {
         reset(db, prefs, app)
         whenever(db.reportDao).thenReturn(dao)
+        whenever(db.brandDao).thenReturn(bDao)
+        whenever(db.modelDao).thenReturn(mDao)
         loadKoinModules(module)
         repo = ReportRepository()
     }
@@ -188,6 +198,109 @@ class ReportRepositoryTest : KoinTest {
 
             verify(dao).unFlagReportDeleted(id)
             assertEquals(ERROR, response.errorMessage)
+        }
+    }
+
+    @Test
+    fun `load report that does not exist`() {
+        runBlockingTest {
+            val report = UnitTestData.REPORTS.random()
+            whenever(dao.loadReportById(report.id)).thenReturn(null)
+            whenever(app.getString(R.string.error_report_not_found, report.id)).thenReturn(ERROR)
+
+
+            val response = repo.loadReport(report.id)
+
+            verify(dao).loadReportById(report.id)
+            verifyZeroInteractions(mDao, bDao)
+            assertTrue(response.hasError)
+            assertEquals(ERROR, response.errorMessage)
+        }
+    }
+
+    @Test
+    fun `load report whose brand does not exist`() {
+        runBlockingTest {
+            val report = UnitTestData.REPORTS.random()
+
+            whenever(dao.loadReportById(report.id)).thenReturn(report)
+            whenever(bDao.loadBrandById(report.brand)).thenReturn(null)
+            whenever(app.getString(R.string.error_brand_not_found, report.brand)).thenReturn(ERROR)
+
+
+            val response = repo.loadReport(report.id)
+
+            verify(dao).loadReportById(report.id)
+            verify(bDao).loadBrandById(report.brand)
+            verifyZeroInteractions(mDao)
+            assertTrue(response.hasError)
+            assertEquals(ERROR, response.errorMessage)
+        }
+    }
+
+
+    @Test
+    fun `load report whose model does not exist`() {
+        runBlockingTest {
+            val report = UnitTestData.REPORTS.random()
+
+            whenever(dao.loadReportById(report.id)).thenReturn(report)
+            whenever(bDao.loadBrandById(report.brand)).thenReturn(UnitTestData.BRANDS.first { it.id == report.brand })
+            whenever(mDao.loadModelById(report.model)).thenReturn(null)
+            whenever(app.getString(R.string.error_model_not_found, report.model)).thenReturn(ERROR)
+
+
+            val response = repo.loadReport(report.id)
+
+            verify(dao).loadReportById(report.id)
+            verify(mDao).loadModelById(report.model)
+            verify(bDao).loadBrandById(report.brand)
+            assertTrue(response.hasError)
+            assertEquals(ERROR, response.errorMessage)
+        }
+    }
+
+
+    @Test
+    fun `load a report incorrect model-brand association`() {
+        runBlockingTest {
+            val report = UnitTestData.REPORTS.random()
+
+            whenever(dao.loadReportById(report.id)).thenReturn(report)
+            whenever(bDao.loadBrandById(report.brand)).thenReturn(UnitTestData.BRANDS.first { it.id == report.brand })
+            whenever(mDao.loadModelById(report.model)).thenReturn(UnitTestData.MODELS.filter { it.id != report.model }.random())
+            whenever(app.getString(R.string.error_invalid_model_brand)).thenReturn(ERROR)
+
+            val response = repo.loadReport(report.id)
+
+            assertTrue(response.hasError)
+            verify(dao).loadReportById(report.id)
+            verify(mDao).loadModelById(report.model)
+            verify(bDao).loadBrandById(report.brand)
+            assertEquals(ERROR, response.errorMessage)
+        }
+    }
+
+    @Test
+    fun `load a report with no problems`() {
+        runBlockingTest {
+            val report = UnitTestData.REPORTS.random()
+            val brand = UnitTestData.BRANDS.first { it.id == report.brand }
+            val model = UnitTestData.MODELS.first { it.id == report.model }
+
+            whenever(dao.loadReportById(report.id)).thenReturn(report)
+            whenever(bDao.loadBrandById(report.brand)).thenReturn(brand)
+            whenever(mDao.loadModelById(report.model)).thenReturn(model)
+
+            val expected = ReportData(report.id, report.name, report.description, BrandData(brand.id, brand.name), ModelData(model.id, model.name, brand.id), report.created)
+
+            val response = repo.loadReport(report.id)
+
+            verify(dao).loadReportById(report.id)
+            verify(mDao).loadModelById(report.model)
+            verify(bDao).loadBrandById(report.brand)
+            assertFalse(response.hasError)
+            assertEquals(expected, response.get)
         }
     }
 }

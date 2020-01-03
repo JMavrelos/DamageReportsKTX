@@ -8,6 +8,7 @@ import com.google.android.material.snackbar.Snackbar
 import gr.blackswamp.core.widget.visible
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.ui.base.activities.BaseActivity
+import gr.blackswamp.damagereports.ui.base.commands.ScreenCommand
 import gr.blackswamp.damagereports.ui.reports.fragments.ReportListFragment
 import gr.blackswamp.damagereports.ui.reports.fragments.ReportViewFragment
 import gr.blackswamp.damagereports.vms.reports.ReportViewModel
@@ -15,6 +16,11 @@ import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportActivityViewMod
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class ReportActivity : BaseActivity<IReportActivityViewModel>() {
+    companion object {
+        private const val TAG = "ReportActivity"
+        private const val SHOW_REPORT = "show_report"
+    }
+
     override val layoutId: Int = R.layout.activity_report
     override val vm: IReportActivityViewModel by viewModel<ReportViewModel>()
     private lateinit var progress: View
@@ -26,23 +32,13 @@ class ReportActivity : BaseActivity<IReportActivityViewModel>() {
 
     override fun initView(state: Bundle?) {
         if (state == null) {
-            if (vm.report.value == null) {
-                supportFragmentManager
-                    .beginTransaction()
-                    .add(
-                        R.id.content,
-                        ReportListFragment.newInstance(),
-                        ReportListFragment.TAG
-                    ).commit()
-            } else {
-                supportFragmentManager
-                    .beginTransaction()
-                    .add(
-                        R.id.content,
-                        ReportViewFragment.newInstance(),
-                        ReportViewFragment.TAG
-                    ).commit()
-            }
+            supportFragmentManager
+                .beginTransaction()
+                .add(
+                    R.id.content,
+                    ReportListFragment.newInstance(),
+                    ReportListFragment.TAG
+                ).commit()
         }
     }
 
@@ -67,5 +63,17 @@ class ReportActivity : BaseActivity<IReportActivityViewModel>() {
                 }
             }
         })
+    }
+
+    override fun executeCommand(command: ScreenCommand): Boolean {
+        if (command is ReportCommands.ShowReport) {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.content, ReportViewFragment.newInstance(), ReportViewFragment.TAG)
+                .addToBackStack(SHOW_REPORT)
+                .commit()
+            return true
+        }
+        return false
     }
 }

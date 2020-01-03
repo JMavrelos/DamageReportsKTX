@@ -5,10 +5,10 @@ import gr.blackswamp.damagereports.ui.model.Report
 
 interface IReportViewViewModel {
     val report: LiveData<Report>
-
+    val editMode: LiveData<Boolean>
     fun pickModel()
     fun pickBrand()
     fun saveReport()
-
-
+    fun editReport()
+    fun exitReport()
 }

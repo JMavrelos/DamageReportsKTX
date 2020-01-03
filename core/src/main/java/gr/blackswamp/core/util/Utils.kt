@@ -25,3 +25,5 @@ fun Date.toDateString() = this.asString("yyyy-MM-dd")
 fun Date.toDateTimeString() = this.asString("yyyy-MM-dd HH:mm:ss")
 
 fun Date.toTimestamp() = this.asString("yyyyMMddHHmmss")
+
+val EmptyUUID by lazy { UUID(0L, 0L) }

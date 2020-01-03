@@ -10,7 +10,7 @@ object UnitTestData {
     val BRANDS = (0 until 100)
         .map { BrandEntity(UUID.randomUUID(), "${randomString(10)} Brand ", false) }
 
-    val MODELS = (0 until 100)
+    val MODELS = (0 until 200)
         .map { ModelEntity(UUID.randomUUID(), "${randomString(10)} Model", BRANDS[it / 2].id, false) }
 
     val DELETED_BRANDS = listOf(
@@ -26,7 +26,8 @@ object UnitTestData {
 
     val REPORTS = (0 until 30)
         .map {
-            ReportEntity(UUID.randomUUID(), "${randomString(10)} Report", "${randomString(10)} description",
+            ReportEntity(
+                UUID.randomUUID(), "${randomString(10)} Report", "${randomString(10)} description",
                 BRANDS[40 - it].id, MODELS.first { model -> model.brand == BRANDS[40 - it].id }.id, Date(System.currentTimeMillis() + (it * 100))
             )
         }

@@ -16,7 +16,7 @@
             style="?toolbarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:menu="@menu/report_list"
+            app:menu="@menu/report_view"
             app:navigationIcon="@drawable/ic_nav_back"
             app:subtitle="@string/select_create_report"
             app:title="@string/damage_reports" />
@@ -155,8 +155,7 @@
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="@dimen/fab_margin"
         android:tint="?colorSecondary"
-        app:layout_anchor="@+id/damages"
-        app:layout_anchorGravity="bottom|end|right"
+        android:layout_gravity="bottom|end"
         app:srcCompat="@drawable/ic_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

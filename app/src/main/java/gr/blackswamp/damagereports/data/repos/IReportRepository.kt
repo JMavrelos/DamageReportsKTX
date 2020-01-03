@@ -36,5 +36,9 @@ interface IReportRepository {
      */
     suspend fun unDeleteReport(id: UUID): Response<Unit>
 
+    /**
+     * loads all data needed to display a report
+     * @return the report or the error thrown when loading it
+     */
     suspend fun loadReport(id: UUID): Response<ReportData>
 }
