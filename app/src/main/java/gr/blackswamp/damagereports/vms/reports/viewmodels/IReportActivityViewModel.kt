@@ -11,4 +11,5 @@ interface IReportActivityViewModel : IBaseViewModel {
 
     fun undoLastDelete()
     fun dismissedUndo()
+    fun confirmDiscardChanges()
 }

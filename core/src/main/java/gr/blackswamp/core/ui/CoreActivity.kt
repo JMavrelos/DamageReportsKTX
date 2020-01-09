@@ -10,10 +10,9 @@ import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import gr.blackswamp.core.dialogs.DialogBuilders
-import gr.blackswamp.core.dialogs.DialogListener
-import gr.blackswamp.core.dialogs.DialogResult
+import gr.blackswamp.core.dialogs.DialogFinishedListener
 
-abstract class CoreActivity<T : Any> : AppCompatActivity(), DialogListener {
+abstract class CoreActivity<T : Any> : AppCompatActivity(), DialogFinishedListener {
     companion object {
         protected const val MESSAGE_DIALOG_ID: Int = 8008135
     }
@@ -63,13 +62,13 @@ abstract class CoreActivity<T : Any> : AppCompatActivity(), DialogListener {
         }
     }
 
-    final override fun onDialogFinished(result: DialogResult, id: Int, dialog: View, data: Bundle?): Boolean {
+    final override fun onDialogFinished(id: Int, which: Int, dialog: View, payload: Bundle?): Boolean {
         if (id == MESSAGE_DIALOG_ID)
             return true
-        return dialogFinished(result, id, dialog, data)
+        return dialogFinished(id, which, dialog, payload)
     }
 
-    protected open fun dialogFinished(result: DialogResult, id: Int, dialog: View, data: Bundle?): Boolean = true
+    protected open fun dialogFinished(id: Int, which: Int, dialog: View, payload: Bundle?): Boolean = true
 
     protected fun hideKeyboard() {
         try {

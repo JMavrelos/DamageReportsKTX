@@ -5,20 +5,24 @@ import android.view.View
 import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import gr.blackswamp.core.dialogs.Dialog.Companion.BUTTON_POSITIVE
+import gr.blackswamp.core.dialogs.DialogBuilders
+import gr.blackswamp.core.dialogs.DialogFinishedListener
 import gr.blackswamp.core.widget.visible
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.ui.base.activities.BaseActivity
-import gr.blackswamp.damagereports.ui.base.commands.ScreenCommand
+import gr.blackswamp.damagereports.ui.base.BaseActivity
+import gr.blackswamp.damagereports.ui.base.ScreenCommand
 import gr.blackswamp.damagereports.ui.reports.fragments.ReportListFragment
 import gr.blackswamp.damagereports.ui.reports.fragments.ReportViewFragment
 import gr.blackswamp.damagereports.vms.reports.ReportViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportActivityViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class ReportActivity : BaseActivity<IReportActivityViewModel>() {
+class ReportActivity : BaseActivity<IReportActivityViewModel>(), DialogFinishedListener {
     companion object {
         private const val TAG = "ReportActivity"
         private const val SHOW_REPORT = "show_report"
+        private const val DISCARD_CONFIRM_ID = 39012
     }
 
     override val layoutId: Int = R.layout.activity_report
@@ -65,15 +69,38 @@ class ReportActivity : BaseActivity<IReportActivityViewModel>() {
         })
     }
 
-    override fun executeCommand(command: ScreenCommand): Boolean {
-        if (command is ReportCommands.ShowReport) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.content, ReportViewFragment.newInstance(), ReportViewFragment.TAG)
-                .addToBackStack(SHOW_REPORT)
-                .commit()
-            return true
+    override fun dialogFinished(id: Int, which: Int, dialog: View, payload: Bundle?): Boolean {
+        return when (id) {
+            DISCARD_CONFIRM_ID -> {
+                //on cancel
+                if (which == BUTTON_POSITIVE) {
+                    vm.confirmDiscardChanges()
+                }
+                true
+            }
+            else -> true
         }
-        return false
+    }
+
+    override fun executeCommand(command: ScreenCommand): Boolean {
+        return when (command) {
+            is ReportCommand.ShowReport -> {
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.content, ReportViewFragment.newInstance(), ReportViewFragment.TAG)
+                    .addToBackStack(SHOW_REPORT)
+                    .commit()
+                true
+            }
+            is ReportCommand.ConfirmDiscard -> {
+                DialogBuilders
+                    .messageDialogBuilder(DISCARD_CONFIRM_ID, getString(R.string.confirm_discard_changes))
+                    .setCancelable(true)
+                    .setButtons(positive = true, negative = true, neutral = true)
+                    .show(this)
+                true
+            }
+            else -> false
+        }
     }
 }

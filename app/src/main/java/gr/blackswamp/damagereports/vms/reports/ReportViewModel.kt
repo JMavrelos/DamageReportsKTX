@@ -11,12 +11,13 @@ import androidx.paging.toLiveData
 import gr.blackswamp.core.lifecycle.SingleLiveEvent
 import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.core.util.EmptyUUID
+import gr.blackswamp.core.util.isNullOrBlank
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.repos.IReportRepository
-import gr.blackswamp.damagereports.ui.base.commands.ScreenCommand
+import gr.blackswamp.damagereports.ui.base.ScreenCommand
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.ui.model.ReportHeader
-import gr.blackswamp.damagereports.ui.reports.ReportCommands
+import gr.blackswamp.damagereports.ui.reports.ReportCommand
 import gr.blackswamp.damagereports.util.StaticDataSource
 import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.base.BaseViewModel
@@ -26,6 +27,7 @@ import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportViewViewModel
 import kotlinx.coroutines.launch
 import org.koin.core.inject
 import java.util.*
+import kotlin.contracts.ExperimentalContracts
 
 class ReportViewModel(application: Application, runInit: Boolean = true) : BaseViewModel(application), IReportActivityViewModel, IReportListViewModel, IReportViewViewModel {
     companion object {
@@ -145,7 +147,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
                 val data = repo.loadReport(id).throwOrGet()
                 report.postValue(data)
                 editMode.postValue(inEditMode)
-                command.postValue(ReportCommands.ShowReport)
+                command.postValue(ReportCommand.ShowReport)
             } catch (t: Throwable) {
                 error.postValue(t.message ?: t::class.java.name)
             } finally {
@@ -156,10 +158,10 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
 
     override fun newReport() {
         viewModelScope.launch {
-            val newReport = ReportData(EmptyUUID, "", "", null, null, Date(System.currentTimeMillis()))
+            val newReport = ReportData(EmptyUUID, "", "", null, null, Date(System.currentTimeMillis()), true)
             report.postValue(newReport)
             editMode.postValue(true)
-            command.postValue(ReportCommands.ShowReport)
+            command.postValue(ReportCommand.ShowReport)
         }
     }
 
@@ -180,6 +182,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     //endregion
 
     //region IReportViewViewModel implementation
+    @VisibleForTesting
     override val editMode = MutableLiveData<Boolean>()
 
     override fun pickModel() {
@@ -188,6 +191,16 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
 
     override fun pickBrand() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun nameChanged(name: String) {
+        val current = report.value as? ReportData ?: return
+        report.postValue(current.copy(name = name, changed = true))
+    }
+
+    override fun descriptionChanged(description: String) {
+        val current = report.value as? ReportData ?: return
+        report.postValue(current.copy(description = description, changed = true))
     }
 
     override fun saveReport() {
@@ -201,9 +214,23 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
 
     override fun exitReport() {
         if (this.editMode.value == true) {
-            editMode.postValue(false)
+            if ((report.value as? ReportData)?.changed == true) {
+                command.postValue(ReportCommand.ConfirmDiscard)
+            } else {
+                editMode.postValue(false)
+            }
         } else {
             command.postValue(ScreenCommand.Back)
+        }
+    }
+
+    @ExperimentalContracts
+    override fun confirmDiscardChanges() {
+        val reportId = this.report.value?.id
+        if (reportId.isNullOrBlank()) {
+            command.postValue(ScreenCommand.Back)
+        } else {
+            showReport(reportId, false)
         }
     }
     //endregion

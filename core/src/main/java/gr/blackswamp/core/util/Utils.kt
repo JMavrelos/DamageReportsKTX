@@ -3,6 +3,8 @@ package gr.blackswamp.core.util
 import androidx.annotation.VisibleForTesting
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 @Suppress("SpellCheckingInspection")
 @VisibleForTesting
@@ -27,3 +29,11 @@ fun Date.toDateTimeString() = this.asString("yyyy-MM-dd HH:mm:ss")
 fun Date.toTimestamp() = this.asString("yyyyMMddHHmmss")
 
 val EmptyUUID by lazy { UUID(0L, 0L) }
+
+@ExperimentalContracts
+fun UUID?.isNullOrBlank(): Boolean {
+    contract {
+        returns(false) implies (this@isNullOrBlank != null)
+    }
+    return this == null || this == EmptyUUID
+}

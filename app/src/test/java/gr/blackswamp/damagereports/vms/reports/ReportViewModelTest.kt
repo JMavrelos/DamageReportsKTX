@@ -18,7 +18,8 @@ import gr.blackswamp.damagereports.TestApp
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.repos.IReportRepository
 import gr.blackswamp.damagereports.data.repos.toData
-import gr.blackswamp.damagereports.ui.reports.ReportCommands
+import gr.blackswamp.damagereports.ui.base.ScreenCommand
+import gr.blackswamp.damagereports.ui.reports.ReportCommand
 import gr.blackswamp.damagereports.util.StaticDataSource
 import gr.blackswamp.damagereports.vms.BrandData
 import gr.blackswamp.damagereports.vms.ModelData
@@ -39,6 +40,7 @@ import org.koin.test.KoinTest
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.reset
 import java.util.*
+import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalCoroutinesApi
 class ReportViewModelTest : KoinTest {
@@ -238,7 +240,7 @@ class ReportViewModelTest : KoinTest {
 
             assertEquals(false, vm.editMode.value)
             assertEquals(report, vm.report.value)
-            assertTrue(vm.command.value is ReportCommands.ShowReport)
+            assertTrue(vm.command.value is ReportCommand.ShowReport)
             assertFalse(vm.loading.value!!)
         }
     }
@@ -253,7 +255,7 @@ class ReportViewModelTest : KoinTest {
 
             assertEquals(true, vm.editMode.value)
             assertEquals(report, vm.report.value)
-            assertTrue(vm.command.value is ReportCommands.ShowReport)
+            assertTrue(vm.command.value is ReportCommand.ShowReport)
         }
     }
 
@@ -300,6 +302,126 @@ class ReportViewModelTest : KoinTest {
             assertNull(report.modelName)
             assertEquals("", report.description)
             assertEquals("", report.name)
+        }
+    }
+
+
+    @Test
+    fun `when name changes then the selected report is updated`() {
+        vm.newReport()
+
+        vm.nameChanged("hello world")
+
+        assertTrue((vm.report.value as ReportData).changed)
+        assertEquals("hello world", vm.report.value!!.name)
+    }
+
+    @Test
+    fun `when description changes then the selected report is updated`() {
+
+        vm.newReport()
+
+        vm.descriptionChanged("hello world")
+
+        assertTrue((vm.report.value as ReportData).changed)
+        assertEquals("hello world", vm.report.value!!.description)
+    }
+
+
+    @Test
+    fun `the user presses exit on a non edited screen`() {
+        val report =
+            ReportData(
+                UUID.randomUUID()
+                , "a name"
+                , "a description"
+                , BrandData(UUID.randomUUID(), "a brand")
+                , ModelData(UUID.randomUUID(), " a model", UUID.randomUUID())
+                , Date(0)
+            )
+        vm.report.value = report
+        vm.editMode.value = false
+
+        vm.exitReport()
+
+        assertTrue(vm.command.value is ScreenCommand.Back)
+    }
+
+    @Test
+    fun `the user presses exit we are in edit mode but no changes have been made`() {
+        val report = ReportData(
+            UUID.randomUUID()
+            , "a name"
+            , "a description"
+            , BrandData(UUID.randomUUID(), "a brand")
+            , ModelData(UUID.randomUUID(), " a model", UUID.randomUUID())
+            , Date(0),
+            false
+        )
+
+        vm.report.value = report
+        vm.editMode.value = true
+
+        vm.exitReport()
+
+        assertFalse(vm.editMode.value!!)
+        assertEquals(report, vm.report.value)
+    }
+
+    @Test
+    fun `user presses exit in edit mode and there are changes`() {
+        val id = UUID.randomUUID()
+        val report = ReportData(
+            id, "a name"
+            , "a description"
+            , BrandData(UUID.randomUUID(), "a brand")
+            , ModelData(UUID.randomUUID(), " a model", UUID.randomUUID())
+            , Date(0)
+            , true
+        )
+        vm.report.value = report
+        vm.editMode.value = true
+
+        vm.exitReport()
+
+        assertTrue(vm.command.value is ReportCommand.ConfirmDiscard)
+    }
+
+
+    @ExperimentalContracts
+    @Test
+    fun `when the user confirms discard on a new report back is pressed`() {
+        vm.report.value = ReportData(EmptyUUID, "", "", null, null, Date(), true)
+        vm.editMode.value = true
+
+        vm.confirmDiscardChanges()
+
+        assertTrue(vm.command.value is ScreenCommand.Back)
+    }
+
+    @ExperimentalContracts
+    @Test
+    fun `when the user confirms discard on an editted report it is reloaded`() {
+        runBlockingTest {
+            val id = UUID.randomUUID()
+            val report = ReportData(
+                id
+                , "a name"
+                , "a description"
+                , BrandData(UUID.randomUUID(), "a brand")
+                , ModelData(UUID.randomUUID(), " a model", UUID.randomUUID())
+                , Date(0)
+            )
+
+            vm.report.value = report.copy(changed = true)
+            vm.editMode.value = true
+            vm.nameChanged("hello")
+            whenever(repo.loadReport(id)).thenReturn(Response.success(report))
+
+            vm.confirmDiscardChanges()
+
+            assertFalse(vm.editMode.value!!)
+            assertEquals(report, vm.report.value)
         }
     }
 }

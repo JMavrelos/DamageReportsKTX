@@ -1,6 +1,6 @@
 package gr.blackswamp.damagereports.ui.reports.fragments
 
-import android.os.Bundle
+import android.text.Editable
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
@@ -12,14 +12,16 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import gr.blackswamp.core.ui.CoreFragment
+import gr.blackswamp.core.widget.TextChangeListener
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.ui.base.BaseFragment
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.vms.reports.ReportViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportViewViewModel
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
-class ReportViewFragment : CoreFragment<IReportViewViewModel>() {
+@Suppress("UNUSED_PARAMETER")
+class ReportViewFragment : BaseFragment<IReportViewViewModel>() {
     companion object {
         const val TAG = "ReportViewFragment"
         fun newInstance(): Fragment = ReportViewFragment()
@@ -27,7 +29,8 @@ class ReportViewFragment : CoreFragment<IReportViewViewModel>() {
 
     override val vm: IReportViewViewModel by sharedViewModel<ReportViewModel>()
     override val layoutId: Int = R.layout.fragment_report_view
-
+    private val nameListener = TextChangeListener(after = this::nameChanged)
+    private val descriptionListener = TextChangeListener(after = this::descriptionChanged)
 
     //region bindings
     private lateinit var toolbar: Toolbar
@@ -43,6 +46,7 @@ class ReportViewFragment : CoreFragment<IReportViewViewModel>() {
     private lateinit var edit: MenuItem
     //endregion
 
+    //region lifecycle methods
     override fun setUpBindings(view: View) {
         toolbar = view.findViewById(R.id.toolbar)
         save = toolbar.menu.findItem(R.id.save)
@@ -57,24 +61,56 @@ class ReportViewFragment : CoreFragment<IReportViewViewModel>() {
         action = view.findViewById(R.id.action)
     }
 
-    override fun initView(state: Bundle?) {
-
-    }
-
     override fun setUpListeners() {
-        model.setOnClickListener { vm.pickModel() }
-        brand.setOnClickListener { vm.pickBrand() }
-        save.setOnMenuItemClickListener { vm.saveReport(); true }
-        edit.setOnMenuItemClickListener { vm.editReport(); true }
-        toolbar.setNavigationOnClickListener { vm.exitReport() }
+        model.setOnClickListener(this::pickModel)
+        brand.setOnClickListener(this::pickBrand)
+        save.setOnMenuItemClickListener(this::saveReport)
+        edit.setOnMenuItemClickListener(this::editReport)
+        toolbar.setNavigationOnClickListener(this::exit)
+        name.addTextChangedListener(nameListener)
+        description.addTextChangedListener(descriptionListener)
     }
 
     override fun setUpObservers(vm: IReportViewViewModel) {
         vm.report.observe(this, Observer { showReport(it) })
         vm.editMode.observe(this, Observer { setEditable(it == true) })
-
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        name.removeTextChangedListener(nameListener)
+        description.removeTextChangedListener(descriptionListener)
+    }
+    //endregion
+
+    //region listeners
+    private fun pickModel(v: View) = vm.pickModel()
+
+    private fun pickBrand(v: View) = vm.pickBrand()
+
+    private fun descriptionChanged(editable: Editable?) {
+        vm.descriptionChanged(editable?.toString() ?: "")
+    }
+
+    private fun nameChanged(editable: Editable?) {
+        vm.nameChanged(editable?.toString() ?: "")
+    }
+
+    private fun saveReport(item: MenuItem): Boolean {
+        vm.saveReport()
+        return true
+    }
+
+    private fun editReport(item: MenuItem): Boolean {
+        vm.editReport()
+        return true
+    }
+
+    private fun exit(v: View) = vm.exitReport()
+
+    //endregion
+
+    //region private methods
     private fun setEditable(editable: Boolean) {
         save.isVisible = editable
         edit.isVisible = !editable
@@ -95,10 +131,20 @@ class ReportViewFragment : CoreFragment<IReportViewViewModel>() {
 
     private fun showReport(report: Report?) {
         if (report == null) return
-        id.text = report.id.toString()
-        name.setText(report.name)
-        description.setText(report.description)
-        model.text = report.modelName ?: getString(R.string.select_model)
-        brand.text = report.brandName ?: getString(R.string.select_brand)
+        try {
+            nameListener.pause()
+            descriptionListener.pause()
+            id.text = report.id.toString()
+            name.setText(report.name)
+            description.setText(report.description)
+            model.text = report.modelName ?: getString(R.string.select_model)
+            brand.text = report.brandName ?: getString(R.string.select_brand)
+        } finally {
+            nameListener.resume()
+            descriptionListener.resume()
+        }
     }
+    //endregion
+
+
 }

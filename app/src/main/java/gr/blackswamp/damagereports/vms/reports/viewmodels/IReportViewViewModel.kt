@@ -11,4 +11,6 @@ interface IReportViewViewModel {
     fun saveReport()
     fun editReport()
     fun exitReport()
+    fun nameChanged(name: String)
+    fun descriptionChanged(description: String)
 }
