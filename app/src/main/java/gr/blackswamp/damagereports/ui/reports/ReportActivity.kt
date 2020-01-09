@@ -2,6 +2,7 @@ package gr.blackswamp.damagereports.ui.reports
 
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
 import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -82,14 +83,20 @@ class ReportActivity : BaseActivity<IReportActivityViewModel>(), DialogFinishedL
         }
     }
 
+    override fun onBackPressed() {
+        vm.backPressed()
+    }
+
     override fun executeCommand(command: ScreenCommand): Boolean {
         return when (command) {
             is ReportCommand.ShowReport -> {
-                supportFragmentManager
-                    .beginTransaction()
-                    .replace(R.id.content, ReportViewFragment.newInstance(), ReportViewFragment.TAG)
-                    .addToBackStack(SHOW_REPORT)
-                    .commit()
+                if (supportFragmentManager.findFragmentByTag(ReportViewFragment.TAG) != null) {
+                    supportFragmentManager
+                        .beginTransaction()
+                        .replace(R.id.content, ReportViewFragment.newInstance(), ReportViewFragment.TAG)
+                        .addToBackStack(SHOW_REPORT)
+                        .commit()
+                }
                 true
             }
             is ReportCommand.ConfirmDiscard -> {

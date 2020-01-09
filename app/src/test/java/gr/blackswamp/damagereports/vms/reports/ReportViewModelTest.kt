@@ -401,7 +401,7 @@ class ReportViewModelTest : KoinTest {
 
     @ExperimentalContracts
     @Test
-    fun `when the user confirms discard on an editted report it is reloaded`() {
+    fun `when the user confirms discard on an edited report it is reloaded`() {
         runBlockingTest {
             val id = UUID.randomUUID()
             val report = ReportData(
@@ -423,5 +423,32 @@ class ReportViewModelTest : KoinTest {
             assertFalse(vm.editMode.value!!)
             assertEquals(report, vm.report.value)
         }
+    }
+
+    @Test
+    fun `when back is pressed in list it is sent to the system to be evaluated`() {
+        vm.report.value = null
+        vm.backPressed()
+
+        assertTrue(vm.command.value is ScreenCommand.Back)
+    }
+    
+    @Test
+    fun `when back is pressed on an edited report then the discard dialog shows` () {
+        val id = UUID.randomUUID()
+        val report = ReportData(
+            id, "a name"
+            , "a description"
+            , BrandData(UUID.randomUUID(), "a brand")
+            , ModelData(UUID.randomUUID(), " a model", UUID.randomUUID())
+            , Date(0)
+            , true
+        )
+        vm.report.value = report
+        vm.editMode.value = true
+
+        vm.backPressed()
+
+        assertTrue(vm.command.value is ReportCommand.ConfirmDiscard)
     }
 }

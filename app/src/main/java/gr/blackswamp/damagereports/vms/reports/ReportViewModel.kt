@@ -71,6 +71,15 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
             }
         }
     }
+
+    override fun backPressed() {
+        if (report.value != null) {
+            exitReport()
+        } else {
+            command.postValue(ScreenCommand.Back)
+        }
+    }
+
     //endregion
 
     //region IReportListViewModel implementation
@@ -220,7 +229,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
                 editMode.postValue(false)
             }
         } else {
-            command.postValue(ScreenCommand.Back)
+            exitView()
         }
     }
 
@@ -228,10 +237,16 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     override fun confirmDiscardChanges() {
         val reportId = this.report.value?.id
         if (reportId.isNullOrBlank()) {
-            command.postValue(ScreenCommand.Back)
+            exitView()
         } else {
             showReport(reportId, false)
         }
+    }
+
+    private fun exitView() {
+        command.postValue(ScreenCommand.Back)
+        editMode.postValue(null)
+        report.postValue(null)
     }
     //endregion
 }
