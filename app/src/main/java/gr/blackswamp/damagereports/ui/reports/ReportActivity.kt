@@ -2,7 +2,7 @@ package gr.blackswamp.damagereports.ui.reports
 
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -68,6 +68,19 @@ class ReportActivity : BaseActivity<IReportActivityViewModel>(), DialogFinishedL
                 }
             }
         })
+        vm.report.observe(this, Observer {
+            if (it != null) {
+                if (supportFragmentManager.backStackEntryCount == 0) {
+                    supportFragmentManager
+                        .beginTransaction()
+                        .replace(R.id.content, ReportViewFragment.newInstance(), ReportViewFragment.TAG)
+                        .addToBackStack(SHOW_REPORT)
+                        .commit()
+                }
+            } else {
+                supportFragmentManager.popBackStackImmediate(SHOW_REPORT, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            }
+        })
     }
 
     override fun dialogFinished(id: Int, which: Int, dialog: View, payload: Bundle?): Boolean {
@@ -89,16 +102,6 @@ class ReportActivity : BaseActivity<IReportActivityViewModel>(), DialogFinishedL
 
     override fun executeCommand(command: ScreenCommand): Boolean {
         return when (command) {
-            is ReportCommand.ShowReport -> {
-                if (supportFragmentManager.findFragmentByTag(ReportViewFragment.TAG) != null) {
-                    supportFragmentManager
-                        .beginTransaction()
-                        .replace(R.id.content, ReportViewFragment.newInstance(), ReportViewFragment.TAG)
-                        .addToBackStack(SHOW_REPORT)
-                        .commit()
-                }
-                true
-            }
             is ReportCommand.ConfirmDiscard -> {
                 DialogBuilders
                     .messageDialogBuilder(DISCARD_CONFIRM_ID, getString(R.string.confirm_discard_changes))

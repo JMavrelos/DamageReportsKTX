@@ -134,9 +134,9 @@ class Dialog : DialogFragment(), IDialog {
         val dialog = builder.create()
         dialog.setCanceledOnTouchOutside(cancelable)
         dialog.setOnShowListener {
-            if (positive.isNotBlank()) dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { act(BUTTON_POSITIVE) }
-            if (negative.isNotBlank()) dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener { act(BUTTON_NEGATIVE) }
-            if (neutral.isNotBlank()) dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener { act(BUTTON_NEUTRAL) }
+            if (positive != null) dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { act(BUTTON_POSITIVE) }
+            if (negative != null) dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener { act(BUTTON_NEGATIVE) }
+            if (neutral != null) dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener { act(BUTTON_NEUTRAL) }
         }
         if (title.isBlank())
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -161,7 +161,7 @@ class Dialog : DialogFragment(), IDialog {
     }
 
     private class DialogBuilder(val id: Int, @LayoutRes val resId: Int) : IDialogBuilder {
-        private var padding: Int = 0
+        private var padding: Int = 8
         private var title: String = ""
         private var positive: String? = null
         private var negative: String? = null

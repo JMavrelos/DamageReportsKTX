@@ -237,10 +237,8 @@ class ReportViewModelTest : KoinTest {
             val report = ReportData(id, "a name", "a description", BrandData(UUID.randomUUID(), "a brand"), ModelData(UUID.randomUUID(), " a model", UUID.randomUUID()), Date(0))
             whenever(repo.loadReport(id)).thenReturn(Response.success(report))
             vm.selectReport(id)
-
             assertEquals(false, vm.editMode.value)
             assertEquals(report, vm.report.value)
-            assertTrue(vm.command.value is ReportCommand.ShowReport)
             assertFalse(vm.loading.value!!)
         }
     }
@@ -255,7 +253,6 @@ class ReportViewModelTest : KoinTest {
 
             assertEquals(true, vm.editMode.value)
             assertEquals(report, vm.report.value)
-            assertTrue(vm.command.value is ReportCommand.ShowReport)
         }
     }
 
@@ -302,6 +299,7 @@ class ReportViewModelTest : KoinTest {
             assertNull(report.modelName)
             assertEquals("", report.description)
             assertEquals("", report.name)
+            assertFalse((report as ReportData).changed)
         }
     }
 
@@ -329,6 +327,27 @@ class ReportViewModelTest : KoinTest {
 
 
     @Test
+    fun `user presses exit after opening a new report with no changes made`() {
+        vm.newReport()
+
+        vm.exitReport()
+
+        assertNull(vm.report.value)
+        assertNull(vm.editMode.value)
+    }
+
+    @Test
+    fun `user presses exit after opening a new report with changes made`() {
+        vm.newReport()
+        vm.nameChanged("wlke;lq")
+
+        vm.exitReport()
+
+        assertTrue(vm.command.value is ReportCommand.ConfirmDiscard)
+        assertNotNull(vm.report.value)
+    }
+
+    @Test
     fun `the user presses exit on a non edited screen`() {
         val report =
             ReportData(
@@ -344,7 +363,7 @@ class ReportViewModelTest : KoinTest {
 
         vm.exitReport()
 
-        assertTrue(vm.command.value is ScreenCommand.Back)
+        assertNull(vm.report.value)
     }
 
     @Test
@@ -396,7 +415,7 @@ class ReportViewModelTest : KoinTest {
 
         vm.confirmDiscardChanges()
 
-        assertTrue(vm.command.value is ScreenCommand.Back)
+        assertNull(vm.report.value)
     }
 
     @ExperimentalContracts
@@ -432,9 +451,9 @@ class ReportViewModelTest : KoinTest {
 
         assertTrue(vm.command.value is ScreenCommand.Back)
     }
-    
+
     @Test
-    fun `when back is pressed on an edited report then the discard dialog shows` () {
+    fun `when back is pressed on an edited report then the discard dialog shows`() {
         val id = UUID.randomUUID()
         val report = ReportData(
             id, "a name"

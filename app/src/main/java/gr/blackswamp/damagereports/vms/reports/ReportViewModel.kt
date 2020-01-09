@@ -2,10 +2,7 @@ package gr.blackswamp.damagereports.vms.reports
 
 import android.app.Application
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import gr.blackswamp.core.lifecycle.SingleLiveEvent
@@ -56,6 +53,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     //region IReportActivityViewModel implementation
     override val loading = MutableLiveData<Boolean>()
     override val error = SingleLiveEvent<String>()
+    // this is used for showing (if needed) the correct fragment and updating the view fragment's data
     override val report = MutableLiveData<Report>()
 
     override fun toggleTheme() {
@@ -154,9 +152,8 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
             loading.postValue(true)
             try {
                 val data = repo.loadReport(id).throwOrGet()
-                report.postValue(data)
                 editMode.postValue(inEditMode)
-                command.postValue(ReportCommand.ShowReport)
+                report.postValue(data)
             } catch (t: Throwable) {
                 error.postValue(t.message ?: t::class.java.name)
             } finally {
@@ -167,10 +164,9 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
 
     override fun newReport() {
         viewModelScope.launch {
-            val newReport = ReportData(EmptyUUID, "", "", null, null, Date(System.currentTimeMillis()), true)
-            report.postValue(newReport)
+            val newReport = ReportData(EmptyUUID, "", "", null, null, Date(System.currentTimeMillis()), false)
             editMode.postValue(true)
-            command.postValue(ReportCommand.ShowReport)
+            report.postValue(newReport)
         }
     }
 
@@ -193,6 +189,23 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     //region IReportViewViewModel implementation
     @VisibleForTesting
     override val editMode = MutableLiveData<Boolean>()
+
+//    override val viewNavIcon = MediatorLiveData<Int>().apply {
+//        addSource(editMode) {
+//            value = when {
+//                it != true -> R.drawable.ic_nav_back
+//                (report.value as? ReportData)?.changed == true -> R.drawable.ic_undo
+//                else -> R.drawable.ic_nav_back
+//            }
+//        }
+//        addSource(report) {
+//            (it as? ReportData)?.let {
+//                if (it.changed) {
+//
+//                }
+//            }
+//        }
+//    }
 
     override fun pickModel() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -222,12 +235,11 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     }
 
     override fun exitReport() {
-        if (this.editMode.value == true) {
-            if ((report.value as? ReportData)?.changed == true) {
-                command.postValue(ReportCommand.ConfirmDiscard)
-            } else {
-                editMode.postValue(false)
-            }
+        val report = report.value as ReportData
+        if (editMode.value == true && report.changed) {
+            command.postValue(ReportCommand.ConfirmDiscard)
+        } else if (editMode.value == true && report.id != EmptyUUID) {
+            editMode.postValue(false)
         } else {
             exitView()
         }
@@ -244,7 +256,6 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     }
 
     private fun exitView() {
-        command.postValue(ScreenCommand.Back)
         editMode.postValue(null)
         report.postValue(null)
     }

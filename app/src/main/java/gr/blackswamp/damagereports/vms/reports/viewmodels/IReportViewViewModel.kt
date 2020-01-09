@@ -1,6 +1,7 @@
 package gr.blackswamp.damagereports.vms.reports.viewmodels
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import gr.blackswamp.damagereports.ui.model.Report
 
 interface IReportViewViewModel {
@@ -13,4 +14,5 @@ interface IReportViewViewModel {
     fun exitReport()
     fun nameChanged(name: String)
     fun descriptionChanged(description: String)
+//    val viewNavIcon: MutableLiveData<Int>
 }
