@@ -11,7 +11,7 @@ data class ReportData(
     val brand: BrandData?,
     val model: ModelData?,
     override val created: Date,
-    val changed: Boolean = false
+    override val changed: Boolean = false
 ) : Report {
     override val brandName: String? = brand?.name
     override val modelName: String? = model?.name

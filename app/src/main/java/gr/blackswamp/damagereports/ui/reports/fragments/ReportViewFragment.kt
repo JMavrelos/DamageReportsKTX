@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.widget.TextChangeListener
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.ui.base.BaseFragment
@@ -72,8 +73,14 @@ class ReportViewFragment : BaseFragment<IReportViewViewModel>() {
     }
 
     override fun setUpObservers(vm: IReportViewViewModel) {
-        vm.report.observe(this, Observer { showReport(it) })
-        vm.editMode.observe(this, Observer { setEditable(it == true) })
+        vm.report.observe(this, Observer {
+            showReport(it)
+            updateNavigationIcon(it, vm.editMode.value)
+        })
+        vm.editMode.observe(this, Observer {
+            setEditable(it == true)
+            updateNavigationIcon(vm.report.value, it)
+        })
     }
 
     override fun onDestroy() {
@@ -120,10 +127,8 @@ class ReportViewFragment : BaseFragment<IReportViewViewModel>() {
         name.isEnabled = editable
         if (editable) {
             action.show()
-            toolbar.setNavigationIcon(R.drawable.ic_undo)
         } else {
             action.hide()
-            toolbar.setNavigationIcon(R.drawable.ic_nav_back)
             name.clearFocus()
             description.clearFocus()
         }
@@ -144,7 +149,16 @@ class ReportViewFragment : BaseFragment<IReportViewViewModel>() {
             descriptionListener.resume()
         }
     }
+
+    private fun updateNavigationIcon(report: Report?, editMode: Boolean?) {
+        val changed = report?.changed == true
+        val new = report?.id == EmptyUUID
+        val edit = editMode == true
+        if (new || (edit && !changed)) {
+            toolbar.setNavigationIcon(R.drawable.ic_nav_back)
+        } else {
+            toolbar.setNavigationIcon(R.drawable.ic_undo)
+        }
+    }
     //endregion
-
-
 }

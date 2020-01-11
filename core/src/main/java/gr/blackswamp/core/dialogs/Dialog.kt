@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
+import gr.blackswamp.core.R
 
 class Dialog : DialogFragment(), IDialog {
     companion object {
@@ -98,7 +99,7 @@ class Dialog : DialogFragment(), IDialog {
             .Builder(activity!!)
             .setView(dialogView)
             .setCancelable(cancelable)
-            .setOnCancelListener{act(BUTTON_CANCELED) }
+            .setOnCancelListener { act(BUTTON_CANCELED) }
 
         // set up title
         if (title.isNotBlank()) builder.setTitle(title)
@@ -140,6 +141,7 @@ class Dialog : DialogFragment(), IDialog {
         }
         if (title.isBlank())
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog)
         return dialog
     }
 
@@ -147,7 +149,7 @@ class Dialog : DialogFragment(), IDialog {
         var dismiss = true
         try {
             val listener = activity as? DialogFinishedListener ?: return
-            dismiss = listener.onDialogFinished(dialogId, which,dialogView, payload)
+            dismiss = listener.onDialogFinished(dialogId, which, dialogView, payload)
         } finally {
             if (dismiss)
                 this.dismiss()

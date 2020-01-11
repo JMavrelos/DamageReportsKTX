@@ -1,4 +1,4 @@
-package gr.blackswamp.damagereports.data.db.converter
+package gr.blackswamp.damagereports.data.db.converters
 
 import androidx.room.TypeConverter
 import java.text.SimpleDateFormat

@@ -1,18 +1,15 @@
 package gr.blackswamp.damagereports.data.db
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import gr.blackswamp.damagereports.data.db.converter.DateConverter
-import gr.blackswamp.damagereports.data.db.converter.UUIDConverter
+import gr.blackswamp.damagereports.data.db.converters.DateConverter
+import gr.blackswamp.damagereports.data.db.converters.UUIDConverter
 import gr.blackswamp.damagereports.data.db.dao.BrandDao
 import gr.blackswamp.damagereports.data.db.dao.DamageDao
 import gr.blackswamp.damagereports.data.db.dao.ModelDao
 import gr.blackswamp.damagereports.data.db.dao.ReportDao
 import gr.blackswamp.damagereports.data.db.entities.*
-import java.util.*
 
 
 @Database(
