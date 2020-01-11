@@ -14,6 +14,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.widget.TextChangeListener
+import gr.blackswamp.core.widget.updateText
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.ui.base.BaseFragment
 import gr.blackswamp.damagereports.ui.model.Report
@@ -140,8 +141,8 @@ class ReportViewFragment : BaseFragment<IReportViewViewModel>() {
             nameListener.pause()
             descriptionListener.pause()
             id.text = report.id.toString()
-            name.setText(report.name)
-            description.setText(report.description)
+            name.updateText(report.name)
+            description.updateText(report.description)
             model.text = report.modelName ?: getString(R.string.select_model)
             brand.text = report.brandName ?: getString(R.string.select_brand)
         } finally {
