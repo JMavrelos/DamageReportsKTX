@@ -19,17 +19,17 @@ import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.ui.base.BaseFragment
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.vms.reports.ReportViewModel
-import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportViewViewModel
+import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportViewViewModel
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 @Suppress("UNUSED_PARAMETER")
-class ReportViewFragment : BaseFragment<IReportViewViewModel>() {
+class ReportViewFragment : BaseFragment<ReportViewViewModel>() {
     companion object {
         const val TAG = "ReportViewFragment"
         fun newInstance(): Fragment = ReportViewFragment()
     }
 
-    override val vm: IReportViewViewModel by sharedViewModel<ReportViewModel>()
+    override val vm: ReportViewViewModel by sharedViewModel<ReportViewModel>()
     override val layoutId: Int = R.layout.fragment_report_view
     private val nameListener = TextChangeListener(after = this::nameChanged)
     private val descriptionListener = TextChangeListener(after = this::descriptionChanged)
@@ -73,7 +73,7 @@ class ReportViewFragment : BaseFragment<IReportViewViewModel>() {
         description.addTextChangedListener(descriptionListener)
     }
 
-    override fun setUpObservers(vm: IReportViewViewModel) {
+    override fun setUpObservers(vm: ReportViewViewModel) {
         vm.report.observe(this, Observer {
             showReport(it)
             updateNavigationIcon(it, vm.editMode.value)

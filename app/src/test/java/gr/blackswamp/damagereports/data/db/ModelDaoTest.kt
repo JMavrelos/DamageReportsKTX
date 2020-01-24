@@ -29,7 +29,7 @@ import java.util.*
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestApp::class)
 class ModelDaoTest {
-    private lateinit var db: AppDatabase
+    private lateinit var db: AppDatabaseImpl
     private lateinit var dao: ModelDao
 
     @get:Rule
@@ -39,7 +39,7 @@ class ModelDaoTest {
     fun setUp() {
         db = Room.inMemoryDatabaseBuilder(
             InstrumentationRegistry.getInstrumentation().targetContext,
-            AppDatabase::class.java
+            AppDatabaseImpl::class.java
         ).allowMainThreadQueries()
             .build()
 

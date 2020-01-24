@@ -16,7 +16,7 @@ import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.TestApp
 import gr.blackswamp.damagereports.UnitTestData
-import gr.blackswamp.damagereports.data.repos.IReportRepository
+import gr.blackswamp.damagereports.data.repos.ReportRepository
 import gr.blackswamp.damagereports.data.repos.toData
 import gr.blackswamp.damagereports.ui.base.ScreenCommand
 import gr.blackswamp.damagereports.ui.reports.ReportCommand
@@ -65,7 +65,7 @@ class ReportViewModelTest : KoinTest {
         }
     }
 
-    private val repo: IReportRepository = mock(IReportRepository::class.java)
+    private val repo: ReportRepository = mock(ReportRepository::class.java)
     private lateinit var modules: Module
     private lateinit var vm: ReportViewModel
 

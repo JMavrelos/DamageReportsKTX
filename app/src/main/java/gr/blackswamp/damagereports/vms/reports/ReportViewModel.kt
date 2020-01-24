@@ -13,7 +13,7 @@ import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.util.isNullOrBlank
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.data.repos.IReportRepository
+import gr.blackswamp.damagereports.data.repos.ReportRepository
 import gr.blackswamp.damagereports.ui.base.ScreenCommand
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.ui.model.ReportHeader
@@ -21,15 +21,15 @@ import gr.blackswamp.damagereports.ui.reports.ReportCommand
 import gr.blackswamp.damagereports.util.StaticDataSource
 import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.base.BaseViewModel
-import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportActivityViewModel
-import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportListViewModel
-import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportViewViewModel
+import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportActivityViewModel
+import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportListViewModel
+import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportViewViewModel
 import kotlinx.coroutines.launch
 import org.koin.core.inject
 import java.util.*
 import kotlin.contracts.ExperimentalContracts
 
-class ReportViewModel(application: Application, runInit: Boolean = true) : BaseViewModel(application), IReportActivityViewModel, IReportListViewModel, IReportViewViewModel {
+class ReportViewModel(application: Application, runInit: Boolean = true) : BaseViewModel(application), ReportActivityViewModel, ReportListViewModel, ReportViewViewModel {
     companion object {
         const val TAG = "ReportViewModel"
         @VisibleForTesting
@@ -37,7 +37,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     }
 
     private val log: ILog by inject()
-    private val repo: IReportRepository by inject()
+    private val repo: ReportRepository by inject()
     @VisibleForTesting
     internal val filter = MutableLiveData<String>()
     override val darkTheme: LiveData<Boolean> = repo.darkThemeLive

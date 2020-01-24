@@ -1,101 +1,44 @@
 package gr.blackswamp.damagereports.data.repos
 
-import android.app.Application
-import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
-import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.data.Response
-import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.data.db.IDatabase
-import gr.blackswamp.damagereports.data.db.entities.ReportEntity
-import gr.blackswamp.damagereports.data.prefs.IPreferences
 import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.ReportHeaderData
-import kotlinx.coroutines.withContext
-import org.koin.core.KoinComponent
-import org.koin.core.inject
 import java.util.*
-import kotlin.random.Random
 
-class ReportRepository : IReportRepository, KoinComponent {
-    private val db: IDatabase by inject()
-    private val prefs: IPreferences by inject()
-    private val dispatchers: IDispatchers by inject()
-    private val application: Application by inject()
+interface ReportRepository {
+    val darkTheme: Boolean
+    val darkThemeLive: LiveData<Boolean>
 
-    override val darkTheme: Boolean
-        get() = prefs.darkTheme
-    override val darkThemeLive: LiveData<Boolean> = prefs.darkThemeLive
+    suspend fun newReport(name: String, description: String, brandId: UUID, modelId: UUID): Throwable?
+    /**
+     * Changes the current theme
+     * @return true if it switched to dark theme or false for light theme
+     */
+    suspend fun switchTheme()
 
-    override suspend fun newReport(
-        name: String,
-        description: String,
-        brandId: UUID,
-        modelId: UUID
-    ): Throwable? {
-        return try {
-            val date =
-                Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, Random.nextInt(8) - 4) }
-            val entity =
-                ReportEntity(UUID.randomUUID(), name, description, brandId, modelId, date.time)
-            db.reportDao.saveReport(entity)
-            null
-        } catch (t: Throwable) {
-            t
-        }
-    }
+    /**
+     * gets a list of report headers according to a filter
+     * @return a data source with the report header entities
+     */
+    fun getReportHeaders(filter: String): Response<DataSource.Factory<Int, ReportHeaderData>>
 
-    override suspend fun switchTheme() {
-        withContext(dispatchers.IO) {
-            prefs.darkTheme = !prefs.darkTheme
-        }
-    }
+    /**
+     * flags a report with a specific id as deleted
+     * @return null if there was no error otherwise a message
+     */
+    suspend fun deleteReport(id: UUID): Response<Unit>
 
-    override fun getReportHeaders(filter: String): Response<DataSource.Factory<Int, ReportHeaderData>> {
-        return try {
-            Response.success(db.reportDao.loadReportHeaders(filter)
-                .map { entity -> entity.toData() })
-        } catch (t: Throwable) {
-            Response.failure(t)
-        }
-    }
+    /**
+     * unflags a report with a specific id as deleted
+     * @return null if there was no error otherwise a message
+     */
+    suspend fun unDeleteReport(id: UUID): Response<Unit>
 
-    override suspend fun loadReport(id: UUID): Response<ReportData> {
-        return try {
-            val report = db.reportDao.loadReportById(id) ?: return Response.failure(getString(R.string.error_report_not_found, id))
-            val brand = db.brandDao.loadBrandById(report.brand) ?: return Response.failure(getString(R.string.error_brand_not_found, report.brand))
-            val model = db.modelDao.loadModelById(report.model) ?: return Response.failure(getString(R.string.error_model_not_found, report.model))
-            if (model.brand != brand.id) return Response.failure(getString(R.string.error_invalid_model_brand))
-            Response.success(report.toData(brand, model))
-        } catch (t: Throwable) {
-            Response.failure(getString(R.string.error_loading_report, id), t)
-        }
-    }
-
-    override suspend fun deleteReport(id: UUID): Response<Unit> {
-        return try {
-            val affected = db.reportDao.flagReportDeleted(id)
-            if (affected == 0)
-                return Response.failure(getString(R.string.error_report_not_found, id))
-            Response.success()
-        } catch (t: Throwable) {
-            return Response.failure(getString(R.string.error_deleting, (t.message ?: t::class.java.name)), t)
-        }
-    }
-
-    override suspend fun unDeleteReport(id: UUID): Response<Unit> {
-        return try {
-            val affected = db.reportDao.unFlagReportDeleted(id)
-            if (affected == 0)
-                return Response.failure(getString(R.string.error_no_deleted_report, id))
-            Response.success()
-        } catch (t: Throwable) {
-            return Response.failure(getString(R.string.error_un_deleting, (t.message ?: t::class.java.name)), t)
-        }
-    }
-
-    protected fun getString(@StringRes resId: Int): String = application.getString(resId)
-    protected fun getString(@StringRes resId: Int, vararg formatArgs: Any?): String = application.getString(resId, *formatArgs)
+    /**
+     * loads all data needed to display a report
+     * @return the report or the error thrown when loading it
+     */
+    suspend fun loadReport(id: UUID): Response<ReportData>
 }
-

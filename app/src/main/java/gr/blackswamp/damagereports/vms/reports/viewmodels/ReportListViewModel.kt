@@ -6,7 +6,7 @@ import gr.blackswamp.damagereports.ui.model.ReportHeader
 import gr.blackswamp.damagereports.vms.base.IBaseViewModel
 import java.util.*
 
-interface IReportListViewModel : IBaseViewModel {
+interface ReportListViewModel : IBaseViewModel {
     val refreshing: LiveData<Boolean>
     var reportHeaderList: LiveData<PagedList<ReportHeader>>
 

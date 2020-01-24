@@ -9,11 +9,11 @@ import gr.blackswamp.core.TestDispatchers
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.UnitTestData
-import gr.blackswamp.damagereports.data.db.IDatabase
+import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.dao.BrandDao
 import gr.blackswamp.damagereports.data.db.dao.ModelDao
 import gr.blackswamp.damagereports.data.db.dao.ReportDao
-import gr.blackswamp.damagereports.data.prefs.IPreferences
+import gr.blackswamp.damagereports.data.prefs.Preferences
 import gr.blackswamp.damagereports.vms.BrandData
 import gr.blackswamp.damagereports.vms.ModelData
 import gr.blackswamp.damagereports.vms.ReportData
@@ -54,9 +54,9 @@ class ReportRepositoryTest : KoinTest {
         }
     }
 
-    private val db = mock<IDatabase>()
-    private val prefs = mock<IPreferences>()
-    private lateinit var repo: IReportRepository
+    private val db = mock<AppDatabase>()
+    private val prefs = mock<Preferences>()
+    private lateinit var repo: ReportRepository
     private val dao = mock<ReportDao>()
     private val mDao = mock<ModelDao>()
     private val bDao = mock<BrandDao>()
@@ -81,7 +81,7 @@ class ReportRepositoryTest : KoinTest {
         whenever(db.brandDao).thenReturn(bDao)
         whenever(db.modelDao).thenReturn(mDao)
         loadKoinModules(module)
-        repo = ReportRepository()
+        repo = ReportRepositoryImpl()
     }
 
     @After

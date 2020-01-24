@@ -16,10 +16,10 @@ import gr.blackswamp.damagereports.ui.base.ScreenCommand
 import gr.blackswamp.damagereports.ui.reports.fragments.ReportListFragment
 import gr.blackswamp.damagereports.ui.reports.fragments.ReportViewFragment
 import gr.blackswamp.damagereports.vms.reports.ReportViewModel
-import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportActivityViewModel
+import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportActivityViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class ReportActivity : BaseActivity<IReportActivityViewModel>(), DialogFinishedListener {
+class ReportActivity : BaseActivity<ReportActivityViewModel>(), DialogFinishedListener {
     companion object {
         private const val TAG = "ReportActivity"
         private const val SHOW_REPORT = "show_report"
@@ -27,7 +27,7 @@ class ReportActivity : BaseActivity<IReportActivityViewModel>(), DialogFinishedL
     }
 
     override val layoutId: Int = R.layout.activity_report
-    override val vm: IReportActivityViewModel by viewModel<ReportViewModel>()
+    override val vm: ReportActivityViewModel by viewModel<ReportViewModel>()
     private lateinit var progress: View
     private var undo: Snackbar? = null
 
@@ -47,7 +47,7 @@ class ReportActivity : BaseActivity<IReportActivityViewModel>(), DialogFinishedL
         }
     }
 
-    override fun setUpObservers(vm: IReportActivityViewModel) {
+    override fun setUpObservers(vm: ReportActivityViewModel) {
         super.setUpObservers(vm)
         vm.error.observe(this, Observer { it?.let { showSnackBar(progress, it, Snackbar.LENGTH_LONG) } })
         vm.loading.observe(this, Observer { progress.visible = (it == true) })
@@ -108,6 +108,13 @@ class ReportActivity : BaseActivity<IReportActivityViewModel>(), DialogFinishedL
                     .setCancelable(true)
                     .setButtons(positive = true, negative = true, neutral = true)
                     .show(this)
+                true
+            }
+            is ReportCommand.ShowModelSelection -> {
+
+                true
+            }
+            is ReportCommand.ShowBrandSelection -> {
                 true
             }
             else -> false

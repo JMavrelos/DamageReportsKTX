@@ -19,18 +19,18 @@ import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.ui.reports.adapters.ReportListAction
 import gr.blackswamp.damagereports.ui.reports.adapters.ReportListAdapter
 import gr.blackswamp.damagereports.vms.reports.ReportViewModel
-import gr.blackswamp.damagereports.vms.reports.viewmodels.IReportListViewModel
+import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportListViewModel
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 import java.util.*
 
-class ReportListFragment : CoreFragment<IReportListViewModel>(), ReportListAction {
+class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction {
     companion object {
         const val TAG = "ReportListFragment"
         fun newInstance(): Fragment = ReportListFragment()
     }
 
 
-    override val vm: IReportListViewModel by sharedViewModel<ReportViewModel>()
+    override val vm: ReportListViewModel by sharedViewModel<ReportViewModel>()
     override val layoutId: Int = R.layout.fragment_report_list
 
     private lateinit var refresh: SwipeRefreshLayout
@@ -63,7 +63,7 @@ class ReportListFragment : CoreFragment<IReportListViewModel>(), ReportListActio
         toolbar.setNavigationOnClickListener { Toast.makeText(activity!!, "BACK", Toast.LENGTH_LONG).show() }
     }
 
-    override fun setUpObservers(vm: IReportListViewModel) {
+    override fun setUpObservers(vm: ReportListViewModel) {
         vm.reportHeaderList.observe(this, Observer { adapter.submitList(it) })
         vm.refreshing.observe(this, Observer {
             if (it == false)

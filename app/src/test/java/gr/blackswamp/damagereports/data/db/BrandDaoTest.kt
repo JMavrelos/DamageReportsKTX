@@ -27,7 +27,7 @@ import java.util.*
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestApp::class)
 class BrandDaoTest {
-    private lateinit var db: AppDatabase
+    private lateinit var db: AppDatabaseImpl
     private lateinit var dao: BrandDao
 
     @get:Rule
@@ -35,7 +35,7 @@ class BrandDaoTest {
 
     @Before
     fun setUp() {
-        db = Room.inMemoryDatabaseBuilder(InstrumentationRegistry.getInstrumentation().targetContext, AppDatabase::class.java)
+        db = Room.inMemoryDatabaseBuilder(InstrumentationRegistry.getInstrumentation().targetContext, AppDatabaseImpl::class.java)
             .allowMainThreadQueries()
             .build()
 
