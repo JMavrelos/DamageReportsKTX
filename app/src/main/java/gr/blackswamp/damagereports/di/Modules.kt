@@ -5,12 +5,13 @@ import gr.blackswamp.core.coroutines.AppDispatchers
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.logging.AppLog
 import gr.blackswamp.core.logging.ILog
-import gr.blackswamp.damagereports.data.db.AppDatabaseImpl
 import gr.blackswamp.damagereports.data.db.AppDatabase
+import gr.blackswamp.damagereports.data.db.AppDatabaseImpl
 import gr.blackswamp.damagereports.data.prefs.Preferences
 import gr.blackswamp.damagereports.data.prefs.PreferencesImpl
-import gr.blackswamp.damagereports.data.repos.ReportRepository
-import gr.blackswamp.damagereports.data.repos.ReportRepositoryImpl
+import gr.blackswamp.damagereports.data.repos.*
+import gr.blackswamp.damagereports.vms.brands.BrandViewModel
+import gr.blackswamp.damagereports.vms.models.ModelViewModel
 import gr.blackswamp.damagereports.vms.reports.ReportViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
@@ -28,5 +29,13 @@ val applicationModule = module {
 
     single<ReportRepository> { ReportRepositoryImpl() }
 
-    viewModel { ReportViewModel(androidApplication(),true) }
+    single<BrandRepository> { BrandRepositoryImpl() }
+
+    single<ModelRepository> { ModelRepositoryImpl() }
+
+    viewModel { ReportViewModel(androidApplication(), true) }
+
+    viewModel { BrandViewModel(androidApplication(), true) }
+
+    viewModel { ModelViewModel(androidApplication(), true) }
 }

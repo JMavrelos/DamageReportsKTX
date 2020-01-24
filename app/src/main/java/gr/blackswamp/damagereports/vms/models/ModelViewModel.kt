@@ -1,21 +1,22 @@
-package gr.blackswamp.damagereports.vms.brands
+package gr.blackswamp.damagereports.vms.models
 
 import android.app.Application
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import gr.blackswamp.core.logging.ILog
-import gr.blackswamp.damagereports.data.repos.BrandRepository
+import gr.blackswamp.damagereports.data.repos.ModelRepository
 import gr.blackswamp.damagereports.vms.base.BaseViewModel
 import org.koin.core.inject
 
-class BrandViewModel(application: Application, runInit:Boolean) : BaseViewModel(application), BrandActivityViewModel {
+class ModelViewModel(application: Application, runInit: Boolean) : BaseViewModel(application), ModelActivityViewModel {
     companion object {
-        const val TAG = "BrandViewModel"
+        const val TAG = "ModelViewModel"
         @VisibleForTesting
         internal const val LIST_PAGE_SIZE = 30
     }
+
     private val log: ILog by inject()
-    private val repo: BrandRepository by inject()
+    private val repo: ModelRepository by inject()
     override val darkTheme: LiveData<Boolean> = repo.darkThemeLive
 
     init {
@@ -26,6 +27,5 @@ class BrandViewModel(application: Application, runInit:Boolean) : BaseViewModel(
 
     @VisibleForTesting
     internal fun initialize() {
-
     }
 }
