@@ -2,7 +2,10 @@ package gr.blackswamp.damagereports.vms.reports
 
 import android.app.Application
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import gr.blackswamp.core.lifecycle.SingleLiveEvent
@@ -190,29 +193,18 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     @VisibleForTesting
     override val editMode = MutableLiveData<Boolean>()
 
-//    override val viewNavIcon = MediatorLiveData<Int>().apply {
-//        addSource(editMode) {
-//            value = when {
-//                it != true -> R.drawable.ic_nav_back
-//                (report.value as? ReportData)?.changed == true -> R.drawable.ic_undo
-//                else -> R.drawable.ic_nav_back
-//            }
-//        }
-//        addSource(report) {
-//            (it as? ReportData)?.let {
-//                if (it.changed) {
-//
-//                }
-//            }
-//        }
-//    }
-
-    override fun pickModel() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun pickBrand() {
+        if (report.value as? ReportData == null) return
+        command.postValue(ReportCommand.ShowBrandSelection)
     }
 
-    override fun pickBrand() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun pickModel() {
+        val current = report.value as? ReportData ?: return
+        if (current.brand == null) {
+            error.setValue(getString(R.string.error_no_brand_selected))
+            return
+        }
+        command.postValue(ReportCommand.ShowModelSelection(current.brand.id))
     }
 
     override fun nameChanged(name: String) {

@@ -470,4 +470,58 @@ class ReportViewModelTest : KoinTest {
 
         assertTrue(vm.command.value is ReportCommand.ConfirmDiscard)
     }
+
+    @Test
+    fun `when the user tries to pick a model before trying to pick a brand then a message is shown`() {
+        val id = UUID.randomUUID()
+        vm.report.value = ReportData(id, "name", "descr", null, null, Date(0), true)
+        whenever(app.getString(R.string.error_no_brand_selected)).thenReturn(ERROR)
+
+        vm.editMode.value = true
+        vm.pickModel()
+
+        assertEquals(ERROR, vm.error.value)
+    }
+
+    @Test
+    fun `when the user tries to pick a model with no current selection nothing happens`() {
+        vm.report.value = null
+
+        vm.pickModel()
+
+        assertNull(vm.command.value)
+    }
+
+    @Test
+    fun `when the user tries to pick a brand with no current selection nothing happens`() {
+        vm.report.value = null
+
+        vm.pickBrand()
+
+        assertNull(vm.command.value)
+    }
+
+    @Test
+    fun `when the user tries to pick a brand with a selection a signal is sent to show the brand screen`() {
+        val id = UUID.randomUUID()
+        vm.report.value = ReportData(id, "name", "descr", null, null, Date(0), true)
+
+        vm.pickBrand()
+
+        assertEquals(ReportCommand.ShowBrandSelection, vm.command.value)
+    }
+
+    @Test
+    fun `when the user tries to pick a model with a valid selection a signal is sent to show the brand screen`() {
+        val id = UUID.randomUUID()
+        val brandId = UUID.randomUUID()
+        vm.report.value = ReportData(id, "name", "descr", BrandData(brandId,"brand name"), null, Date(0), true)
+
+        vm.pickModel()
+
+
+        assertTrue(vm.command.value is ReportCommand.ShowModelSelection)
+
+        assertEquals(brandId, (vm.command.value as ReportCommand.ShowModelSelection).brandId)
+    }
 }

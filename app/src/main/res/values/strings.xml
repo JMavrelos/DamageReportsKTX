@@ -29,4 +29,5 @@
     <string name="error_invalid_model_brand">Η σύνδεση μοντέλου/μάρκας είναι λάθος</string>
     <string name="edit">Τροποποίηση</string>
     <string name="confirm_discard_changes">Αν συνεχίσετε θα χαθούν όλες οι αλλαγές που έχετε κάνει\nΘέλετε σίγουρα να συνεχίσετε;</string>
+    <string name="error_no_brand_selected">Πρέπει να επιλέξετε μάρκα πριν επιλέξετε μοντέλο</string>
 </resources>
