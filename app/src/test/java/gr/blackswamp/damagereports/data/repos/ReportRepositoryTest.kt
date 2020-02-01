@@ -1,6 +1,5 @@
 package gr.blackswamp.damagereports.data.repos
 
-import android.app.Application
 import android.database.sqlite.SQLiteException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.*
@@ -8,6 +7,8 @@ import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatchers
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.TestApp
+import gr.blackswamp.damagereports.TestApp.Companion.app
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.dao.BrandDao
@@ -21,11 +22,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.*
 import org.junit.Assert.*
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.loadKoinModules
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.mockito.ArgumentMatchers.anyString
@@ -35,23 +31,15 @@ import java.util.*
 @ExperimentalCoroutinesApi
 class ReportRepositoryTest : KoinTest {
     companion object {
-        private val app = mock<Application>()
         const val FILTER = "12j3kj1lk23mm.,asd"
         const val ERROR = "there was a problem"
         @BeforeClass
         @JvmStatic
-        fun initialize() {
-            startKoin {
-                modules(emptyList())
-                androidContext(app)
-            }
-        }
+        fun initialize() = TestApp.initialize()
 
         @AfterClass
         @JvmStatic
-        fun dispose() {
-            stopKoin()
-        }
+        fun dispose() = TestApp.dispose()
     }
 
     private val db = mock<AppDatabase>()
@@ -80,13 +68,14 @@ class ReportRepositoryTest : KoinTest {
         whenever(db.reportDao).thenReturn(dao)
         whenever(db.brandDao).thenReturn(bDao)
         whenever(db.modelDao).thenReturn(mDao)
-        loadKoinModules(module)
+        TestApp.startKoin(module)
         repo = ReportRepositoryImpl()
+
     }
 
     @After
     fun tearDown() {
-        unloadKoinModules(module)
+        TestApp.stopKoin(module)
     }
 
     @Test

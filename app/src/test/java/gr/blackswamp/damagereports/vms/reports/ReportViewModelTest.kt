@@ -16,6 +16,7 @@ import gr.blackswamp.core.testing.TestLog
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.TestApp
+import gr.blackswamp.damagereports.TestApp.Companion.app
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.repos.ReportRepository
 import gr.blackswamp.damagereports.data.repos.toData
@@ -29,11 +30,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.*
 import org.junit.Assert.*
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.loadKoinModules
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.core.context.unloadKoinModules
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import org.koin.test.KoinTest
@@ -45,28 +41,29 @@ import kotlin.contracts.ExperimentalContracts
 @ExperimentalCoroutinesApi
 class ReportViewModelTest : KoinTest {
     companion object {
-        private val app = mock(TestApp::class.java)
         private const val FILTER = "a filter"
         private const val ERROR = " there was an error"
 
         @BeforeClass
         @JvmStatic
         fun initialize() {
-            startKoin {
-                androidContext(app)
-                modules(emptyList())
-            }
+            TestApp.initialize()
         }
 
         @AfterClass
         @JvmStatic
         fun dispose() {
-            stopKoin()
+            TestApp.dispose()
         }
     }
 
     private val repo: ReportRepository = mock(ReportRepository::class.java)
-    private lateinit var modules: Module
+    private val modules: Module = module {
+        single<IDispatchers> { TestDispatchers }
+        single<ILog> { TestLog }
+        single { repo }
+        single { app }
+    }
     private lateinit var vm: ReportViewModel
 
     @get:Rule
@@ -76,20 +73,14 @@ class ReportViewModelTest : KoinTest {
 
     @Before
     fun setUp() {
-        modules = module {
-            single<IDispatchers> { TestDispatchers }
-            single<ILog> { TestLog }
-            single { repo }
-            single { app }
-        }
-        loadKoinModules(modules)
+        TestApp.startKoin(modules)
         vm = ReportViewModel(app, false)
         reset(repo, app)
     }
 
     @After
     fun tearDown() {
-        unloadKoinModules(modules)
+        TestApp.stopKoin(modules)
     }
 
     @Test
