@@ -23,17 +23,32 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    sourceSets {
+        test {
+            java.srcDirs += "src/sharedTest/java"
+        }
+    }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            all {
+                systemProperty 'robolectric.offline', 'true'
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
     }
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8.toString()
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(path: ':core')
     implementation project(path: ':db')
-    testImplementation  project(path: ':testing')
+    testImplementation project(path: ':testing')
 
     implementation deps.koin.core //koin
     implementation deps.koin.core_ext
@@ -57,7 +72,10 @@ dependencies {
     kapt deps.room.compiler //room
 
     // tests
-    debugImplementation deps.fragment_testing
+    debugImplementation deps.atsl.core
+    debugImplementation deps.atsl.fragment
+    testImplementation deps.atsl.core
+    testImplementation deps.atsl.extensions
     testImplementation deps.espresso.core
     testImplementation deps.junit // Junit
     testImplementation deps.robolectric // Robolectric
@@ -67,15 +85,4 @@ dependencies {
     testImplementation deps.room.testing
     testImplementation deps.koin.test //koin
     testImplementation deps.arch_core.testing
-
-
-    androidTestImplementation deps.espresso.core
-    androidTestImplementation deps.junit // Junit
-    androidTestImplementation deps.robolectric // Robolectric
-    androidTestImplementation deps.mockito.kotlin // Mockito
-    androidTestImplementation deps.arch_core.testing
-    androidTestImplementation deps.coroutines.test // coroutines
-    androidTestImplementation deps.room.testing
-    androidTestImplementation deps.koin.test //koin
-    androidTestImplementation deps.arch_core.testing
 }

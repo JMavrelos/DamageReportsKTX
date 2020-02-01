@@ -1,7 +1,10 @@
 package gr.blackswamp.damagereports.vms.reports
 
+import android.app.Application
 import android.database.sqlite.SQLiteException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
@@ -16,7 +19,6 @@ import gr.blackswamp.core.testing.TestLog
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.TestApp
-import gr.blackswamp.damagereports.TestApp.Companion.app
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.repos.ReportRepository
 import gr.blackswamp.damagereports.data.repos.toData
@@ -28,41 +30,36 @@ import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.reports.ReportViewModel.Companion.LIST_PAGE_SIZE
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.*
+import org.junit.After
 import org.junit.Assert.*
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.reset
+import org.robolectric.annotation.Config
 import java.util.*
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalCoroutinesApi
+@RunWith(AndroidJUnit4::class)
+@Config(application = TestApp::class)
 class ReportViewModelTest : KoinTest {
     companion object {
         private const val FILTER = "a filter"
         private const val ERROR = " there was an error"
-
-        @BeforeClass
-        @JvmStatic
-        fun initialize() {
-            TestApp.initialize()
-        }
-
-        @AfterClass
-        @JvmStatic
-        fun dispose() {
-            TestApp.dispose()
-        }
     }
 
+    private val app: Application = ApplicationProvider.getApplicationContext()
     private val repo: ReportRepository = mock(ReportRepository::class.java)
     private val modules: Module = module {
         single<IDispatchers> { TestDispatchers }
         single<ILog> { TestLog }
         single { repo }
-        single { app }
     }
     private lateinit var vm: ReportViewModel
 
@@ -75,7 +72,7 @@ class ReportViewModelTest : KoinTest {
     fun setUp() {
         TestApp.startKoin(modules)
         vm = ReportViewModel(app, false)
-        reset(repo, app)
+        reset(repo)
     }
 
     @After
@@ -183,12 +180,11 @@ class ReportViewModelTest : KoinTest {
     @Test
     fun `when we try to undelete with no last deleted id an error shows`() {
         runBlockingTest {
-            whenever(app.getString(R.string.error_un_deleting_no_saved_value)).thenReturn(ERROR)
-
+            val expected = app.getString(R.string.error_un_deleting_no_saved_value)
             vm.undoLastDelete()
 
             verifyZeroInteractions(repo)
-            assertEquals(ERROR, vm.error.value)
+            assertEquals(expected, vm.error.value)
             assertFalse(vm.showUndo.value ?: false)
             assertFalse(vm.loading.value!!)
         }
@@ -464,14 +460,14 @@ class ReportViewModelTest : KoinTest {
 
     @Test
     fun `when the user tries to pick a model before trying to pick a brand then a message is shown`() {
+        val expected = app.getString(R.string.error_no_brand_selected)
         val id = UUID.randomUUID()
         vm.report.value = ReportData(id, "name", "descr", null, null, Date(0), true)
-        whenever(app.getString(R.string.error_no_brand_selected)).thenReturn(ERROR)
 
         vm.editMode.value = true
         vm.pickModel()
 
-        assertEquals(ERROR, vm.error.value)
+        assertEquals(expected, vm.error.value)
     }
 
     @Test
@@ -515,4 +511,5 @@ class ReportViewModelTest : KoinTest {
 
         assertEquals(brandId, (vm.command.value as ReportCommand.ShowModelSelection).brandId)
     }
+
 }

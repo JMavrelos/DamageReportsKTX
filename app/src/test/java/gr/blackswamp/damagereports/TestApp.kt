@@ -1,6 +1,7 @@
 package gr.blackswamp.damagereports
 
 import android.app.Application
+import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.loadKoinModules
@@ -8,37 +9,32 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.context.unloadKoinModules
 import org.koin.core.module.Module
-import org.mockito.Mockito
 
 @ExperimentalCoroutinesApi
 class TestApp : Application() {
     companion object {
-        val app = Mockito.mock(TestApp::class.java)
-        @JvmStatic
-        fun initialize() {
+        fun startKoin(module: Module) {
             startKoin {
-                androidContext(app)
+                androidContext(ApplicationProvider.getApplicationContext())
                 modules(emptyList())
             }
-        }
-
-        @JvmStatic
-        fun dispose() {
-            stopKoin()
-        }
-
-        fun startKoin(module: Module) {
             loadKoinModules(module)
         }
 
         fun stopKoin(module: Module) {
             unloadKoinModules(module)
+            stopKoin()
         }
 
         fun withModules(module: Module, block: () -> Unit) {
+            startKoin {
+                androidContext(ApplicationProvider.getApplicationContext())
+                modules(emptyList())
+            }
             loadKoinModules(module)
             block()
             unloadKoinModules(module)
+            stopKoin()
         }
     }
 }

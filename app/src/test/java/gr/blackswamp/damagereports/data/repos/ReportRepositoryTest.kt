@@ -2,13 +2,14 @@ package gr.blackswamp.damagereports.data.repos
 
 import android.database.sqlite.SQLiteException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nhaarman.mockitokotlin2.*
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatchers
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.TestApp
-import gr.blackswamp.damagereports.TestApp.Companion.app
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.dao.BrandDao
@@ -20,28 +21,28 @@ import gr.blackswamp.damagereports.vms.ModelData
 import gr.blackswamp.damagereports.vms.ReportData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.*
+import org.junit.After
 import org.junit.Assert.*
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
 import org.koin.dsl.module
 import org.koin.test.KoinTest
-import org.mockito.ArgumentMatchers.anyString
+import org.robolectric.annotation.Config
 import java.util.*
 
 
 @ExperimentalCoroutinesApi
+@RunWith(AndroidJUnit4::class)
+@Config(application = TestApp::class)
 class ReportRepositoryTest : KoinTest {
     companion object {
         const val FILTER = "12j3kj1lk23mm.,asd"
         const val ERROR = "there was a problem"
-        @BeforeClass
-        @JvmStatic
-        fun initialize() = TestApp.initialize()
-
-        @AfterClass
-        @JvmStatic
-        fun dispose() = TestApp.dispose()
     }
 
+    private val application = ApplicationProvider.getApplicationContext<TestApp>()
     private val db = mock<AppDatabase>()
     private val prefs = mock<Preferences>()
     private lateinit var repo: ReportRepository
@@ -64,7 +65,7 @@ class ReportRepositoryTest : KoinTest {
 
     @Before
     fun setUp() {
-        reset(db, prefs, app)
+        reset(db, prefs)
         whenever(db.reportDao).thenReturn(dao)
         whenever(db.brandDao).thenReturn(bDao)
         whenever(db.modelDao).thenReturn(mDao)
@@ -123,13 +124,13 @@ class ReportRepositoryTest : KoinTest {
         runBlockingTest {
             val id = UUID.randomUUID()
             val error = SQLiteException("$ERROR with sqlite")
+            val expected = application.getString(R.string.error_deleting, error.message!!)
             whenever(dao.flagReportDeleted(id)).thenThrow(error)
-            whenever(app.getString(eq(R.string.error_deleting), anyString())).thenReturn(ERROR)
 
             val response = repo.deleteReport(id)
 
             verify(dao).flagReportDeleted(id)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(expected, response.errorMessage)
         }
     }
 
@@ -137,13 +138,14 @@ class ReportRepositoryTest : KoinTest {
     fun `delete report with no affected values shows error`() {
         runBlockingTest {
             val id = UUID.randomUUID()
+            val expected = application.getString(R.string.error_report_not_found, id)
             whenever(dao.flagReportDeleted(id)).thenReturn(0)
-            whenever(app.getString(R.string.error_report_not_found, id)).thenReturn(ERROR)
+
 
             val response = repo.deleteReport(id)
 
             verify(dao).flagReportDeleted(id)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(expected, response.errorMessage)
         }
     }
 
@@ -166,13 +168,13 @@ class ReportRepositoryTest : KoinTest {
         runBlockingTest {
             val id = UUID.randomUUID()
             val error = SQLiteException("$ERROR with sqlite")
+            val expected = application.getString(R.string.error_un_deleting, error.message)
             whenever(dao.unFlagReportDeleted(id)).thenThrow(error)
-            whenever(app.getString(eq(R.string.error_un_deleting), anyString())).thenReturn(ERROR)
 
             val response = repo.unDeleteReport(id)
 
             verify(dao).unFlagReportDeleted(id)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(expected, response.errorMessage)
         }
     }
 
@@ -180,13 +182,13 @@ class ReportRepositoryTest : KoinTest {
     fun `un-delete report with no affected values shows error`() {
         runBlockingTest {
             val id = UUID.randomUUID()
+            val expected = application.getString(R.string.error_no_deleted_report, id)
             whenever(dao.unFlagReportDeleted(id)).thenReturn(0)
-            whenever(app.getString(R.string.error_no_deleted_report, id)).thenReturn(ERROR)
 
             val response = repo.unDeleteReport(id)
 
             verify(dao).unFlagReportDeleted(id)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(expected, response.errorMessage)
         }
     }
 
@@ -194,16 +196,15 @@ class ReportRepositoryTest : KoinTest {
     fun `load report that does not exist`() {
         runBlockingTest {
             val report = UnitTestData.REPORTS.random()
+            val expected = application.getString(R.string.error_report_not_found, report.id)
             whenever(dao.loadReportById(report.id)).thenReturn(null)
-            whenever(app.getString(R.string.error_report_not_found, report.id)).thenReturn(ERROR)
-
 
             val response = repo.loadReport(report.id)
 
             verify(dao).loadReportById(report.id)
             verifyZeroInteractions(mDao, bDao)
             assertTrue(response.hasError)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(expected, response.errorMessage)
         }
     }
 
@@ -211,11 +212,9 @@ class ReportRepositoryTest : KoinTest {
     fun `load report whose brand does not exist`() {
         runBlockingTest {
             val report = UnitTestData.REPORTS.random()
-
+            val expected = application.getString(R.string.error_brand_not_found, report.brand)
             whenever(dao.loadReportById(report.id)).thenReturn(report)
             whenever(bDao.loadBrandById(report.brand)).thenReturn(null)
-            whenever(app.getString(R.string.error_brand_not_found, report.brand)).thenReturn(ERROR)
-
 
             val response = repo.loadReport(report.id)
 
@@ -223,7 +222,7 @@ class ReportRepositoryTest : KoinTest {
             verify(bDao).loadBrandById(report.brand)
             verifyZeroInteractions(mDao)
             assertTrue(response.hasError)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(expected, response.errorMessage)
         }
     }
 
@@ -232,12 +231,10 @@ class ReportRepositoryTest : KoinTest {
     fun `load report whose model does not exist`() {
         runBlockingTest {
             val report = UnitTestData.REPORTS.random()
-
+            val expected = application.getString(R.string.error_model_not_found, report.model)
             whenever(dao.loadReportById(report.id)).thenReturn(report)
             whenever(bDao.loadBrandById(report.brand)).thenReturn(UnitTestData.BRANDS.first { it.id == report.brand })
             whenever(mDao.loadModelById(report.model)).thenReturn(null)
-            whenever(app.getString(R.string.error_model_not_found, report.model)).thenReturn(ERROR)
-
 
             val response = repo.loadReport(report.id)
 
@@ -245,7 +242,7 @@ class ReportRepositoryTest : KoinTest {
             verify(mDao).loadModelById(report.model)
             verify(bDao).loadBrandById(report.brand)
             assertTrue(response.hasError)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(expected, response.errorMessage)
         }
     }
 
@@ -254,11 +251,10 @@ class ReportRepositoryTest : KoinTest {
     fun `load a report incorrect model-brand association`() {
         runBlockingTest {
             val report = UnitTestData.REPORTS.random()
-
+            val expected = application.getString(R.string.error_invalid_model_brand)
             whenever(dao.loadReportById(report.id)).thenReturn(report)
             whenever(bDao.loadBrandById(report.brand)).thenReturn(UnitTestData.BRANDS.first { it.id == report.brand })
             whenever(mDao.loadModelById(report.model)).thenReturn(UnitTestData.MODELS.filter { it.id != report.model }.random())
-            whenever(app.getString(R.string.error_invalid_model_brand)).thenReturn(ERROR)
 
             val response = repo.loadReport(report.id)
 
@@ -266,7 +262,7 @@ class ReportRepositoryTest : KoinTest {
             verify(dao).loadReportById(report.id)
             verify(mDao).loadModelById(report.model)
             verify(bDao).loadBrandById(report.brand)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(expected, response.errorMessage)
         }
     }
 

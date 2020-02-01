@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteConstraintException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.room.Room
 import androidx.room.paging.LimitOffsetDataSource
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import gr.blackswamp.core.count
 import gr.blackswamp.core.countWhere
@@ -19,12 +20,11 @@ import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.*
 
 @ExperimentalCoroutinesApi
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 @Config(application = TestApp::class)
 class BrandDaoTest {
     private lateinit var db: AppDatabaseImpl
@@ -163,7 +163,7 @@ class BrandDaoTest {
 
             val brand = dao.loadBrandById(expected.id)
 
-            assertEquals(expected,brand)
+            assertEquals(expected, brand)
         }
     }
 

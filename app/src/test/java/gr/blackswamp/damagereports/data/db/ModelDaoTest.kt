@@ -5,6 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.paging.LimitOffsetDataSource
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import gr.blackswamp.core.count
 import gr.blackswamp.core.countWhere
@@ -21,12 +22,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.*
 
 @ExperimentalCoroutinesApi
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 @Config(application = TestApp::class)
 class ModelDaoTest {
     private lateinit var db: AppDatabaseImpl
@@ -55,7 +55,7 @@ class ModelDaoTest {
     fun `insert new model`() {
         runBlockingTest {
             val brand = UnitTestData.BRANDS.random()
-            val model = UnitTestData.MODELS.filter{ it.brand == brand.id }.random()
+            val model = UnitTestData.MODELS.filter { it.brand == brand.id }.random()
             db.brandDao.saveBrand(brand)
             dao.saveModel(model)
 
@@ -159,7 +159,7 @@ class ModelDaoTest {
 
             val model = dao.loadModelById(expected.id)
 
-            assertEquals(expected,model)
+            assertEquals(expected, model)
         }
     }
 
