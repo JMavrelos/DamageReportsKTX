@@ -32,6 +32,8 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(path: ':core')
+    implementation project(path: ':db')
+    testImplementation  project(path: ':testing')
 
     implementation deps.koin.core //koin
     implementation deps.koin.core_ext

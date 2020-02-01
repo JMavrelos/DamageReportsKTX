@@ -8,6 +8,7 @@ import androidx.lifecycle.Transformations
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
+import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.lifecycle.SingleLiveEvent
 import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.core.util.EmptyUUID
@@ -18,7 +19,6 @@ import gr.blackswamp.damagereports.ui.base.ScreenCommand
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.ui.model.ReportHeader
 import gr.blackswamp.damagereports.ui.reports.ReportCommand
-import gr.blackswamp.damagereports.util.StaticDataSource
 import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.base.BaseViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportActivityViewModel

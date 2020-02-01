@@ -1,17 +1,16 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion build_versions.target_sdk
     buildToolsVersion build_versions.build_tools
+
     defaultConfig {
         minSdkVersion build_versions.min_sdk
         targetSdkVersion build_versions.target_sdk
         versionCode 1
         versionName "1.0"
-        vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -25,12 +24,12 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(path: ':core')
 
-    implementation deps.support.app_compat
-    implementation deps.support.design
-    implementation deps.constraint_layout
-    implementation deps.support.core_ktx
-    implementation deps.lifecycle.kotlin
+    implementation deps.arch_core.testing
 
-    implementation deps.koin.core //koin
+    implementation deps.kotlin.stdlib //kotlin
+
+    implementation deps.junit // Junit
+    implementation deps.coroutines.test // coroutines
 }

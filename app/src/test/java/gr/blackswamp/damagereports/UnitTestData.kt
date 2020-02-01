@@ -34,7 +34,10 @@ object UnitTestData {
 
     val REPORT_HEADERS = (0 until 100)
         .map {
-            ReportHeaderEntity(UUID.randomUUID(), "${randomString(10)} header $it", "${randomString(10)} description $it ", randomDate())
+            ReportHeaderEntity(
+                UUID.randomUUID(), "${randomString(10)} header $it", "${randomString(10)} description $it ",
+                randomDate()
+            )
         }
 
     val DAMAGES: List<DamageEntity> =

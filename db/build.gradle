@@ -1,18 +1,18 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
-
 android {
-    compileSdkVersion build_versions.target_sdk
-    buildToolsVersion build_versions.build_tools
+    compileSdkVersion 28
+
+
     defaultConfig {
-        minSdkVersion build_versions.min_sdk
-        targetSdkVersion build_versions.target_sdk
+        minSdkVersion 21
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        vectorDrawables.useSupportLibrary = true
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
     }
 
     buildTypes {
@@ -21,16 +21,20 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    testImplementation project(path: ':testing')
 
-    implementation deps.support.app_compat
-    implementation deps.support.design
-    implementation deps.constraint_layout
-    implementation deps.support.core_ktx
-    implementation deps.lifecycle.kotlin
+    implementation deps.kotlin.stdlib //kotlin
 
-    implementation deps.koin.core //koin
+    implementation deps.room.kotlin //room
+    implementation deps.paging.kotlin //paging library
+
+    testImplementation deps.junit // Junit
+    testImplementation deps.mockito.kotlin // Mockito
+    testImplementation deps.arch_core.testing
+    testImplementation deps.room.testing
 }

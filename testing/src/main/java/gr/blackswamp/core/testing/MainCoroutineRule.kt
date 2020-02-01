@@ -1,4 +1,4 @@
-package gr.blackswamp.core
+package gr.blackswamp.core.testing
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

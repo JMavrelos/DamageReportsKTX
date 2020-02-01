@@ -4,9 +4,9 @@ import android.app.Application
 import android.database.sqlite.SQLiteException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.*
-import gr.blackswamp.core.MainCoroutineScopeRule
-import gr.blackswamp.core.TestDispatchers
 import gr.blackswamp.core.coroutines.IDispatchers
+import gr.blackswamp.core.testing.MainCoroutineScopeRule
+import gr.blackswamp.core.testing.TestDispatchers
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.db.AppDatabase

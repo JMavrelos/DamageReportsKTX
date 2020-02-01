@@ -5,13 +5,14 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
-import gr.blackswamp.core.MainCoroutineScopeRule
-import gr.blackswamp.core.TestDispatchers
-import gr.blackswamp.core.TestLog
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.data.Response
+import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.core.test
+import gr.blackswamp.core.testing.MainCoroutineScopeRule
+import gr.blackswamp.core.testing.TestDispatchers
+import gr.blackswamp.core.testing.TestLog
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.TestApp
@@ -20,7 +21,6 @@ import gr.blackswamp.damagereports.data.repos.ReportRepository
 import gr.blackswamp.damagereports.data.repos.toData
 import gr.blackswamp.damagereports.ui.base.ScreenCommand
 import gr.blackswamp.damagereports.ui.reports.ReportCommand
-import gr.blackswamp.damagereports.util.StaticDataSource
 import gr.blackswamp.damagereports.vms.BrandData
 import gr.blackswamp.damagereports.vms.ModelData
 import gr.blackswamp.damagereports.vms.ReportData
@@ -127,7 +127,7 @@ class ReportViewModelTest : KoinTest {
         vm.reportHeaderList.test()
         val expected = UnitTestData.REPORT_HEADERS.map { it.toData() }
 
-        whenever(repo.getReportHeaders(FILTER)).thenReturn(Response.success(StaticDataSource.factory(expected)))
+        whenever(repo.getReportHeaders(FILTER)).thenReturn(Response.success(StaticDataSource.factory(expected, false)))
 
         vm.newReportFilter(FILTER, true)
 
@@ -515,7 +515,7 @@ class ReportViewModelTest : KoinTest {
     fun `when the user tries to pick a model with a valid selection a signal is sent to show the brand screen`() {
         val id = UUID.randomUUID()
         val brandId = UUID.randomUUID()
-        vm.report.value = ReportData(id, "name", "descr", BrandData(brandId,"brand name"), null, Date(0), true)
+        vm.report.value = ReportData(id, "name", "descr", BrandData(brandId, "brand name"), null, Date(0), true)
 
         vm.pickModel()
 

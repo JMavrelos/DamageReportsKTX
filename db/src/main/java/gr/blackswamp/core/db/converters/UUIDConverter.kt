@@ -7,7 +7,7 @@ class UUIDConverter {
     companion object {
         @TypeConverter
         @JvmStatic
-        fun toUUID(text: String?) = text?.let { UUID.fromString(it)}
+        fun toUUID(text: String?) = text?.let { UUID.fromString(it) }
 
         @TypeConverter
         @JvmStatic

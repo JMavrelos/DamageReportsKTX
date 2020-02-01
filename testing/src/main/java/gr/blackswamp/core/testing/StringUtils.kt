@@ -10,3 +10,7 @@ fun randomString(length: Int): String {
         .map(charPool::get)
         .joinToString("")
 }
+
+fun randomStringList(number: Int, length: Int): List<String> {
+    return (1..number).map { randomString(length) }
+}
