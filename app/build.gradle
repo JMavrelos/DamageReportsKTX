@@ -51,13 +51,14 @@ dependencies {
     implementation deps.swipe_refresh //design
     implementation deps.lifecycle.extensions //lifecycle
     implementation deps.lifecycle.runtime //lifecycle
-    implementation deps.lifecycle.extensions //lifecycle
     implementation deps.lifecycle.kotlin
     implementation deps.paging.kotlin //paging library
     kapt deps.lifecycle.compiler
     kapt deps.room.compiler //room
 
     // tests
+    debugImplementation deps.fragment_testing
+    testImplementation deps.espresso.core
     testImplementation deps.junit // Junit
     testImplementation deps.robolectric // Robolectric
     testImplementation deps.mockito.kotlin // Mockito
@@ -66,4 +67,15 @@ dependencies {
     testImplementation deps.room.testing
     testImplementation deps.koin.test //koin
     testImplementation deps.arch_core.testing
+
+
+    androidTestImplementation deps.espresso.core
+    androidTestImplementation deps.junit // Junit
+    androidTestImplementation deps.robolectric // Robolectric
+    androidTestImplementation deps.mockito.kotlin // Mockito
+    androidTestImplementation deps.arch_core.testing
+    androidTestImplementation deps.coroutines.test // coroutines
+    androidTestImplementation deps.room.testing
+    androidTestImplementation deps.koin.test //koin
+    androidTestImplementation deps.arch_core.testing
 }

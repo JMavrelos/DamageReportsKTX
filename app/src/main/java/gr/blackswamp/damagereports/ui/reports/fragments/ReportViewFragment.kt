@@ -8,7 +8,6 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -74,14 +73,8 @@ class ReportViewFragment : BaseFragment<ReportViewViewModel>() {
     }
 
     override fun setUpObservers(vm: ReportViewViewModel) {
-        vm.report.observe(this, Observer {
-            showReport(it)
-            updateNavigationIcon(it, vm.editMode.value)
-        })
-        vm.editMode.observe(this, Observer {
-            setEditable(it == true)
-            updateNavigationIcon(vm.report.value, it)
-        })
+        vm.report.observe(this::updateReport)
+        vm.editMode.observe(this::updateEditable)
     }
 
     override fun onDestroy() {
@@ -91,6 +84,19 @@ class ReportViewFragment : BaseFragment<ReportViewViewModel>() {
     }
     //endregion
 
+    //region observers
+    private fun updateReport(report: Report?) {
+        showReport(report)
+        updateNavigationIcon(report, vm.editMode.value)
+
+    }
+
+    private fun updateEditable(editable: Boolean?) {
+        setEditable(editable == true)
+        updateNavigationIcon(vm.report.value, editable)
+    }
+
+    //endregion
     //region listeners
     private fun pickModel(v: View) = vm.pickModel()
 

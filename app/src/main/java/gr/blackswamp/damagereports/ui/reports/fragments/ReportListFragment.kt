@@ -15,6 +15,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import gr.blackswamp.core.ui.CoreFragment
 import gr.blackswamp.core.widget.CItemTouchHelperCallback
 import gr.blackswamp.core.widget.SearchListener
+import gr.blackswamp.core.widget.onClick
+import gr.blackswamp.core.widget.onNavigationClick
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.ui.reports.adapters.ReportListAction
 import gr.blackswamp.damagereports.ui.reports.adapters.ReportListAdapter
@@ -56,29 +58,46 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
 
     override fun setUpListeners() {
         adapter.setListener(this)
-        add.setOnClickListener { vm.newReport() }
+        add.onClick(this::newReport)
         refresh.setOnRefreshListener { vm.reloadReports() }
-        (toolbar.menu?.findItem(R.id.search_reports)?.actionView as? SearchView)?.setOnQueryTextListener(SearchListener(vm::newReportFilter))
-        toolbar.menu?.findItem(R.id.switch_theme)?.setOnMenuItemClickListener { vm.toggleTheme();true }
-        toolbar.setNavigationOnClickListener { Toast.makeText(activity!!, "BACK", Toast.LENGTH_LONG).show() }
+        (toolbar.menu?.findItem(R.id.search_reports)?.actionView as? SearchView)?.setOnQueryTextListener(SearchListener(this::newFilter))
+        toolbar.menu?.findItem(R.id.switch_theme)?.onClick(this::toggleTheme)
+        toolbar.onNavigationClick(this::backClicked)
     }
 
     override fun setUpObservers(vm: ReportListViewModel) {
-        vm.reportHeaderList.observe(this, Observer { adapter.submitList(it) })
+        vm.reportHeaderList.observe(adapter::submitList)
         vm.refreshing.observe(this, Observer {
             if (it == false)
                 refresh.isRefreshing = false
         })
-        vm.darkTheme.observe(this, Observer {
-            if (it == true) {
-                theme.setTitle(R.string.switch_to_light)
-                theme.setIcon(R.drawable.ic_brightness_7_on_control)
-            } else {
-                theme.setTitle(R.string.switch_to_dark)
-                theme.setIcon(R.drawable.ic_brightness_4_on_control)
-            }
-        })
+        vm.darkTheme.observe(this::updateTheme)
     }
+
+    //region observers
+    private fun updateTheme(dark: Boolean?) {
+        if (dark == true) {
+            theme.setTitle(R.string.switch_to_light)
+            theme.setIcon(R.drawable.ic_brightness_7_on_control)
+        } else {
+            theme.setTitle(R.string.switch_to_dark)
+            theme.setIcon(R.drawable.ic_brightness_4_on_control)
+        }
+    }
+    //endregion
+
+    //region listeners
+    private fun newReport() = vm.newReport()
+
+    private fun newFilter(filter: String, submitted: Boolean): Boolean = vm.newReportFilter(filter, submitted)
+
+    private fun toggleTheme() = vm.toggleTheme()
+
+    private fun backClicked() {
+        Toast.makeText(activity!!, "BACK", Toast.LENGTH_LONG).show()
+    }
+
+    //endregion
 
     override fun delete(id: UUID) = vm.deleteReport(id)
 

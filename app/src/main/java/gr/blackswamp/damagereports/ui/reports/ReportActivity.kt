@@ -28,7 +28,7 @@ class ReportActivity : BaseActivity<ReportActivityViewModel>(), DialogFinishedLi
 
     override val layoutId: Int = R.layout.activity_report
     override val vm: ReportActivityViewModel by viewModel<ReportViewModel>()
-    private lateinit var progress: View
+    internal lateinit var progress: View
     private var undo: Snackbar? = null
 
     override fun setUpBindings() {

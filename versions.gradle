@@ -37,6 +37,7 @@ versions.work = "1.0.0"
 versions.gson = "2.8.5"
 versions.robolectric = "4.3"
 versions.services = "4.3.2"
+versions.fragment_testing = "1.2.0"
 
 def deps = [:]
 deps.dexmaker = "com.linkedin.dexmaker:dexmaker-mockito:$versions.dexmaker"
@@ -50,6 +51,7 @@ deps.rx_android = "io.reactivex.rxjava2:rxandroid:$versions.rx_android"
 deps.hamcrest = "org.hamcrest:hamcrest-all:$versions.hamcrest"
 deps.android_gradle_plugin = "com.android.tools.build:gradle:$versions.android_gradle_plugin"
 deps.robolectric = "org.robolectric:robolectric:$versions.robolectric"
+deps.fragment_testing = "androidx.fragment:fragment-testing:$versions.fragment_testing"
 ext.deps = deps
 
 def google = [:]
