@@ -2,45 +2,10 @@
 
     <style name="BottomSheetText" parent="@style/TextAppearance.MaterialComponents.Body1">
         <item name="android:drawablePadding">@dimen/padding</item>
-        <item name="android:textColor">?colorOnSurface</item>
+        <item name="android:textColor">@color/cl_on_surface_activatable</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:padding">@dimen/padding</item>
     </style>
-    <!--    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>-->
-
-    <!--    <style name="AppToolbar" parent="ThemeOverlay.AppCompat.ActionBar">-->
-    <!--        <item name="iconTint">?colorOnPrimary</item>-->
-    <!--        <item name="titleTextColor">?colorOnPrimary</item>-->
-    <!--        <item name="colorControlNormal">?colorOnPrimary</item>-->
-    <!--        <item name="android:itemTextAppearance">?colorOnPrimary</item>-->
-    <!--        <item name="android:textColorPrimary">?colorOnPrimary</item>-->
-    <!--        <item name="android:textColorSecondary">?colorOnPrimary</item>-->
-    <!--    </style>-->
-
-    <!--    <style name="AppToolbar.Dark" parent="ThemeOverlay.MaterialComponents.ActionBar.Surface">-->
-    <!--        <item name="iconTint">?colorOnSurface</item>-->
-    <!--        <item name="titleTextColor">?colorOnSurface</item>-->
-    <!--        <item name="colorControlNormal">?colorOnSurface</item>-->
-    <!--        <item name="android:itemTextAppearance">?colorOnSurface</item>-->
-    <!--        <item name="android:textColorPrimary">?colorOnSurface</item>-->
-    <!--        <item name="android:textColorSecondary">?colorOnSurface</item>-->
-    <!--    </style>-->
-
-    <!--    <style name="AppToolbarTitle">-->
-    <!--        <item name="android:textColor">?colorOnPrimary</item>-->
-    <!--        <item name="android:background">@android:color/transparent</item>-->
-    <!--    </style>-->
-
-    <!--    <style name="AppCardView">-->
-    <!--        <item name="android:layout_width">match_parent</item>-->
-    <!--        <item name="android:layout_height">wrap_content</item>-->
-    <!--        <item name="android:layout_marginBottom">@dimen/card_radius</item>-->
-    <!--        <item name="android:clickable">true</item>-->
-    <!--        <item name="android:focusable">true</item>-->
-    <!--        <item name="android:foreground">?attr/selectableItemBackground</item>-->
-    <!--        <item name="cardCornerRadius">@dimen/card_radius</item>-->
-    <!--        <item name="cardElevation">@dimen/card_elevation</item>-->
-    <!--    </style>-->
 
 </resources>

@@ -117,6 +117,10 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
     private fun updateBottomSheet(setting: ThemeSetting?) {
         if (setting != null) {
             sheetBehavior.state = STATE_EXPANDED
+            darkTheme.isActivated = setting == ThemeSetting.Dark
+            lightTheme.isActivated = setting == ThemeSetting.Light
+            systemTheme.isActivated = setting == ThemeSetting.System
+            autoTheme.isActivated = setting == ThemeSetting.Auto
         } else {
             sheetBehavior.state = STATE_COLLAPSED
         }
