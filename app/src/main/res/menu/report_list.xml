@@ -7,8 +7,9 @@
         android:title="@string/search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="always|collapseActionView" />
-    <item android:id="@+id/switch_theme"
-        android:icon="@drawable/ic_brightness_4_on_control"
-        android:title="@string/switch_to_dark"
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_settings_on_control"
+        android:title="@string/settings"
         app:showAsAction="ifRoom" />
 </menu>

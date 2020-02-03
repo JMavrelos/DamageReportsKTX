@@ -2,14 +2,12 @@ package gr.blackswamp.damagereports.data.repos
 
 import android.app.Application
 import androidx.annotation.StringRes
-import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.entities.ReportEntity
-import gr.blackswamp.damagereports.data.prefs.Preferences
 import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.ReportHeaderData
 import kotlinx.coroutines.withContext
@@ -18,15 +16,10 @@ import org.koin.core.inject
 import java.util.*
 import kotlin.random.Random
 
-class ReportRepositoryImpl : ReportRepository, KoinComponent {
+class ReportRepositoryImpl : BaseRepositoryImpl(), ReportRepository, KoinComponent {
     private val db: AppDatabase by inject()
-    private val prefs: Preferences by inject()
     private val dispatchers: IDispatchers by inject()
     private val application: Application by inject()
-
-    override val darkTheme: Boolean
-        get() = prefs.darkTheme
-    override val darkThemeLive: LiveData<Boolean> = prefs.darkThemeLive
 
     override suspend fun newReport(
         name: String,
@@ -48,7 +41,7 @@ class ReportRepositoryImpl : ReportRepository, KoinComponent {
 
     override suspend fun switchTheme() {
         withContext(dispatchers.IO) {
-            prefs.darkTheme = !prefs.darkTheme
+
         }
     }
 

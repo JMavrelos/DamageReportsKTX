@@ -38,7 +38,7 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
     private lateinit var list: RecyclerView
     private lateinit var adapter: ReportListAdapter
     private lateinit var toolbar: MaterialToolbar
-    private lateinit var theme: MenuItem
+    private lateinit var settings: MenuItem
 
     override fun setUpBindings(view: View) {
         refresh = view.findViewById(R.id.refresh)
@@ -46,7 +46,7 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
         list = view.findViewById(R.id.list)
         adapter = ReportListAdapter()
         toolbar = view.findViewById(R.id.toolbar)
-        theme = toolbar.menu.findItem(R.id.switch_theme)
+        settings = toolbar.menu.findItem(R.id.settings)
     }
 
     override fun initView(state: Bundle?) {
@@ -59,7 +59,7 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
         add.setOnClickListener { vm.newReport() }
         refresh.setOnRefreshListener { vm.reloadReports() }
         (toolbar.menu?.findItem(R.id.search_reports)?.actionView as? SearchView)?.setOnQueryTextListener(SearchListener(vm::newReportFilter))
-        toolbar.menu?.findItem(R.id.switch_theme)?.setOnMenuItemClickListener { vm.toggleTheme();true }
+        toolbar.menu?.findItem(R.id.settings)?.setOnMenuItemClickListener { vm.showSettings();true }
         toolbar.setNavigationOnClickListener { Toast.makeText(activity!!, "BACK", Toast.LENGTH_LONG).show() }
     }
 
@@ -68,15 +68,6 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
         vm.refreshing.observe(this, Observer {
             if (it == false)
                 refresh.isRefreshing = false
-        })
-        vm.darkTheme.observe(this, Observer {
-            if (it == true) {
-                theme.setTitle(R.string.switch_to_light)
-                theme.setIcon(R.drawable.ic_brightness_7_on_control)
-            } else {
-                theme.setTitle(R.string.switch_to_dark)
-                theme.setIcon(R.drawable.ic_brightness_4_on_control)
-            }
         })
     }
 

@@ -65,15 +65,6 @@ class ReportRepositoryTest : AndroidKoinTest() {
     }
 
     @Test
-    fun `changing theme alters value`() {
-        runBlockingTest {
-            whenever(prefs.darkTheme).thenReturn(false)
-            repo.switchTheme()
-            verify(prefs).darkTheme = true
-        }
-    }
-
-    @Test
     fun `calling get report headers creates new livedata from db`() {
         runBlockingTest {
             whenever(dao.loadReportHeaders(FILTER)).thenReturn(mock())

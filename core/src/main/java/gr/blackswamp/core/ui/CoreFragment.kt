@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 
 @Suppress("SameParameterValue")
 abstract class CoreFragment<T : Any> : Fragment() {
@@ -20,8 +22,12 @@ abstract class CoreFragment<T : Any> : Fragment() {
         setUpBindings(view)
         initView(savedInstanceState)
         setUpListeners()
-        setUpObservers(vm)
         return view
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        setUpObservers(vm)
     }
 
     protected open fun setUpBindings(view: View) {}
@@ -32,4 +38,12 @@ abstract class CoreFragment<T : Any> : Fragment() {
 
     protected open fun setUpObservers(vm: T) {}
 
+    /**
+     * short hand method to add observers faster and avoid problems with lifecycle owner
+     */
+    protected fun <D> LiveData<D>.observe(observer: ((D?) -> Unit)) {
+        this.observe(viewLifecycleOwner, Observer {
+            observer.invoke(it)
+        })
+    }
 }

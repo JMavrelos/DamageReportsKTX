@@ -13,8 +13,7 @@
     <string name="cancel">Ακύρωση</string>
     <string name="dismiss">OK</string>
     <string name="error_selecting_part">Υπήρξε πρόβλημα κατά την επιλογή ανταλλακτικού, δοκιμάστε ξανά</string>
-    <string name="switch_to_dark">Αλλαγή σε σκοτεινό Θέμα</string>
-    <string name="switch_to_light">Αλλαγή σε φωτεινό Θέμα</string>
+    <string name="settings">Ρυθμίσεις</string>
     <string name="error_un_deleting_no_saved_value">Υπήρξε πρόβλημα κατά την αναίρεση ERpR(1)</string>
     <string name="error_un_deleting">Υπήρξε πρόβλημα κατά την αναίρεση (%1$s)</string>
     <string name="error_report_not_found">Η αναφορά δεν βρέθηκε (%1$s)</string>

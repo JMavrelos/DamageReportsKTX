@@ -16,5 +16,5 @@ interface ReportListViewModel : IBaseViewModel {
     fun deleteReport(id: UUID)
     fun selectReport(id: UUID)
     fun editReport(id: UUID)
-    fun toggleTheme()
+    fun showSettings()
 }

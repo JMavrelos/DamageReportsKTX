@@ -1,10 +1,11 @@
 package gr.blackswamp.damagereports.ui.reports
 
-import gr.blackswamp.damagereports.ui.base.ScreenCommand
 import java.util.*
 
-sealed class ReportCommand : ScreenCommand() {
-    object ConfirmDiscard : ScreenCommand()
-    object ShowBrandSelection : ScreenCommand()
-    class ShowModelSelection(val brandId: UUID) : ScreenCommand()
+sealed class ReportCommand {
+    object ShowUndoDelete : ReportCommand()
+    object ConfirmDiscard : ReportCommand()
+    object ShowBrandSelection : ReportCommand()
+    object ShowSettings : ReportCommand()
+    class ShowModelSelection(val brandId: UUID) : ReportCommand()
 }

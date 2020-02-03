@@ -8,6 +8,8 @@ import android.widget.Toast
 import androidx.annotation.LayoutRes
 import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import gr.blackswamp.core.dialogs.DialogBuilders
 import gr.blackswamp.core.dialogs.DialogFinishedListener
@@ -80,4 +82,12 @@ abstract class CoreActivity<T : Any> : AppCompatActivity(), DialogFinishedListen
         }
     }
 
+    /**
+     * short hand method to add observers faster
+     */
+    protected fun <D> LiveData<D>.observe(observer: ((D?) -> Unit)) {
+        this.observe(this@CoreActivity, Observer {
+            observer.invoke(it)
+        })
+    }
 }

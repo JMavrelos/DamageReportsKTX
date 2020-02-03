@@ -1,8 +1,6 @@
 package gr.blackswamp.damagereports.data.repos
 
-import androidx.lifecycle.LiveData
+interface ModelRepository : BaseRepository {
 
-interface ModelRepository {
-    val darkThemeLive: LiveData<Boolean>
 
 }

@@ -2,9 +2,8 @@ package gr.blackswamp.damagereports.vms.base
 
 import androidx.lifecycle.LiveData
 import gr.blackswamp.core.vms.ICoreViewModel
-import gr.blackswamp.damagereports.ui.base.ScreenCommand
+import gr.blackswamp.damagereports.data.prefs.ThemeMode
 
 interface IBaseViewModel : ICoreViewModel {
-    val darkTheme: LiveData<Boolean>
-    val command: LiveData<ScreenCommand>
+    val themeMode: LiveData<ThemeMode>
 }

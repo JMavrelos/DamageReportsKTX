@@ -3,6 +3,6 @@ package gr.blackswamp.damagereports.data.prefs
 import androidx.lifecycle.LiveData
 
 interface Preferences {
-    var darkTheme: Boolean
-    val darkThemeLive: LiveData<Boolean>
+    var themeMode: ThemeMode
+    val themeModeLive: LiveData<ThemeMode>
 }

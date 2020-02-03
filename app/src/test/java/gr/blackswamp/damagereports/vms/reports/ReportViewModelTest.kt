@@ -19,7 +19,6 @@ import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.repos.ReportRepository
 import gr.blackswamp.damagereports.data.repos.toData
-import gr.blackswamp.damagereports.ui.base.ScreenCommand
 import gr.blackswamp.damagereports.ui.reports.ReportCommand
 import gr.blackswamp.damagereports.vms.BrandData
 import gr.blackswamp.damagereports.vms.ModelData
@@ -238,7 +237,7 @@ class ReportViewModelTest : AndroidKoinTest() {
 
             assertNull(vm.editMode.value)
             assertNull(vm.report.value)
-            assertNull(vm.command.value)
+            assertNull(vm.activityCommand.value)
             assertEquals(ERROR, vm.error.value)
         }
     }
@@ -252,7 +251,7 @@ class ReportViewModelTest : AndroidKoinTest() {
 
             assertNull(vm.editMode.value)
             assertNull(vm.report.value)
-            assertNull(vm.command.value)
+            assertNull(vm.activityCommand.value)
             assertEquals(ERROR, vm.error.value)
         }
     }
@@ -316,7 +315,7 @@ class ReportViewModelTest : AndroidKoinTest() {
 
         vm.exitReport()
 
-        assertTrue(vm.command.value is ReportCommand.ConfirmDiscard)
+        assertTrue(vm.activityCommand.value is ReportCommand.ConfirmDiscard)
         assertNotNull(vm.report.value)
     }
 
@@ -376,7 +375,7 @@ class ReportViewModelTest : AndroidKoinTest() {
 
         vm.exitReport()
 
-        assertTrue(vm.command.value is ReportCommand.ConfirmDiscard)
+        assertTrue(vm.activityCommand.value is ReportCommand.ConfirmDiscard)
     }
 
 
@@ -422,7 +421,7 @@ class ReportViewModelTest : AndroidKoinTest() {
         vm.report.value = null
         vm.backPressed()
 
-        assertTrue(vm.command.value is ScreenCommand.Back)
+        assertNotNull(vm.back.value)
     }
 
     @Test
@@ -441,7 +440,7 @@ class ReportViewModelTest : AndroidKoinTest() {
 
         vm.backPressed()
 
-        assertTrue(vm.command.value is ReportCommand.ConfirmDiscard)
+        assertTrue(vm.activityCommand.value is ReportCommand.ConfirmDiscard)
     }
 
     @Test
@@ -462,7 +461,7 @@ class ReportViewModelTest : AndroidKoinTest() {
 
         vm.pickModel()
 
-        assertNull(vm.command.value)
+        assertNull(vm.activityCommand.value)
     }
 
     @Test
@@ -471,7 +470,7 @@ class ReportViewModelTest : AndroidKoinTest() {
 
         vm.pickBrand()
 
-        assertNull(vm.command.value)
+        assertNull(vm.activityCommand.value)
     }
 
     @Test
@@ -481,7 +480,7 @@ class ReportViewModelTest : AndroidKoinTest() {
 
         vm.pickBrand()
 
-        assertEquals(ReportCommand.ShowBrandSelection, vm.command.value)
+        assertEquals(ReportCommand.ShowBrandSelection, vm.activityCommand.value)
     }
 
     @Test
@@ -493,8 +492,8 @@ class ReportViewModelTest : AndroidKoinTest() {
         vm.pickModel()
 
 
-        assertTrue(vm.command.value is ReportCommand.ShowModelSelection)
+        assertTrue(vm.activityCommand.value is ReportCommand.ShowModelSelection)
 
-        assertEquals(brandId, (vm.command.value as ReportCommand.ShowModelSelection).brandId)
+        assertEquals(brandId, (vm.activityCommand.value as ReportCommand.ShowModelSelection).brandId)
     }
 }

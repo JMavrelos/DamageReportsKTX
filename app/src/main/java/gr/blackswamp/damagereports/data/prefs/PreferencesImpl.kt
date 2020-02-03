@@ -12,25 +12,26 @@ class PreferencesImpl(app: Application) : Preferences, SharedPreferences.OnShare
         private const val NAME = "DamageReportsPrefs"
     }
 
-    private val KEY_DARK_THEME = app.getString(R.string.KEY_DARK_THEME)
+    private val KEY_THEME = app.getString(R.string.KEY_THEME)
+
     private val prefs = app.getSharedPreferences(NAME, MODE_PRIVATE)
-    override var darkTheme: Boolean
-        get() = prefs.getBoolean(KEY_DARK_THEME, false)
+    override var themeMode: ThemeMode
+        get() = ThemeMode.read(prefs.getInt(KEY_THEME, 0))
         set(value) {
-            prefs.edit().putBoolean(KEY_DARK_THEME, value).apply()
+            prefs.edit().putInt(KEY_THEME, value.value).apply()
         }
 
-    override val darkThemeLive = MutableLiveData<Boolean>()
+    override val themeModeLive = MutableLiveData<ThemeMode>()
 
     init {
         prefs.registerOnSharedPreferenceChangeListener(this)
-        darkThemeLive.postValue(darkTheme)
+        themeModeLive.postValue(themeMode)
     }
 
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
-            KEY_DARK_THEME -> darkThemeLive.postValue(darkTheme)
+            KEY_THEME -> themeModeLive.postValue(themeMode)
         }
     }
 }
