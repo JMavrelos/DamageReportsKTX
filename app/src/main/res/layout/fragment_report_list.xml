@@ -20,7 +20,6 @@
             app:title="@string/damage_reports" />
     </com.google.android.material.appbar.AppBarLayout>
 
-
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/refresh"
         android:layout_width="match_parent"
@@ -42,10 +41,56 @@
         android:id="@+id/add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="@dimen/fab_margin"
         android:tint="?colorOnSecondary"
+        app:layout_anchor="@+id/theme_selection"
+        app:layout_anchorGravity="top|end"
         app:srcCompat="@drawable/ic_add" />
+
+    <LinearLayout
+        android:id="@+id/theme_selection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_sheet"
+        android:orientation="vertical"
+        android:padding="@dimen/padding"
+        android:paddingBottom="24dp"
+        app:behavior_hideable="true"
+        app:behavior_peekHeight="0dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <TextView
+            android:id="@+id/system"
+            style="@style/BottomSheetText"
+            android:drawableStart="@drawable/ic_brightness"
+            android:text="@string/system_theme" />
+
+        <TextView
+            android:id="@+id/dark"
+            style="@style/BottomSheetText"
+            android:drawableStart="@drawable/ic_brightness_dark"
+            android:text="@string/dark_theme" />
+
+        <TextView
+            android:id="@+id/light"
+            style="@style/BottomSheetText"
+            android:drawableStart="@drawable/ic_brightness_light"
+            android:text="@string/light_theme" />
+
+        <TextView
+            android:id="@+id/auto"
+            style="@style/BottomSheetText"
+            android:drawableStart="@drawable/ic_brightness_auto"
+            android:text="@string/auto_theme" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/cancel_theme"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel" />
+
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

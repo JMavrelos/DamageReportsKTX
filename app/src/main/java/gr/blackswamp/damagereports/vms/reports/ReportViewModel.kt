@@ -20,7 +20,8 @@ import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.repos.ReportRepository
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.ui.model.ReportHeader
-import gr.blackswamp.damagereports.ui.reports.ReportCommand
+import gr.blackswamp.damagereports.ui.reports.commands.ReportActivityCommand
+import gr.blackswamp.damagereports.ui.reports.commands.ReportListCommand
 import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.base.BaseViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportActivityViewModel
@@ -59,11 +60,11 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     //region IReportActivityViewModel implementation
     override val loading = MutableLiveData<Boolean>()
     override val error = SingleLiveEvent<String>()
-    override val activityCommand = SingleLiveEvent<ReportCommand>()
+    override val activityCommand = SingleLiveEvent<ReportActivityCommand>()
     override val report = MutableLiveData<Report>() // this is used for showing (if needed) the correct fragment and updating the view fragment's data
 
     override fun showThemeSettings() {
-        activityCommand.postValue(ReportCommand.ShowThemeSelection(repo.themeSetting))
+        listCommand.postValue(ReportListCommand.ShowThemeSelection(repo.themeSetting))
     }
 
     override fun backPressed() {
@@ -73,11 +74,6 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
             back.call()
         }
     }
-
-    override fun changeTheme(themeSetting: ThemeSetting) {
-        repo.setTheme(themeSetting)
-    }
-
     //endregion
 
     //region IReportListViewModel implementation
@@ -89,6 +85,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
 
     override var reportHeaderList: LiveData<PagedList<ReportHeader>> =
         Transformations.switchMap(filter, this::dbHeaderToUi)
+    override val listCommand = SingleLiveEvent<ReportListCommand>()
 
     override val refreshing = MutableLiveData<Boolean>()
 
@@ -182,6 +179,11 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
         refreshing.postValue(false)
     }
 
+    override fun changeTheme(theme: ThemeSetting) {
+        repo.setTheme(theme)
+        listCommand.postValue(ReportListCommand.ShowThemeSelection(null))
+    }
+
     //endregion
 
     //region IReportViewViewModel implementation
@@ -190,7 +192,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
 
     override fun pickBrand() {
         if (report.value as? ReportData == null) return
-        activityCommand.postValue(ReportCommand.ShowBrandSelection)
+        activityCommand.postValue(ReportActivityCommand.ShowBrandSelection)
 
     }
 
@@ -200,7 +202,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
             error.setValue(getString(R.string.error_no_brand_selected))
             return
         }
-        activityCommand.postValue(ReportCommand.ShowModelSelection(current.brand.id))
+        activityCommand.postValue(ReportActivityCommand.ShowModelSelection(current.brand.id))
     }
 
     override fun nameChanged(name: String) {
@@ -225,7 +227,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     override fun exitReport() {
         val report = report.value as ReportData
         if (editMode.value == true && report.changed) {
-            activityCommand.postValue(ReportCommand.ConfirmDiscard)
+            activityCommand.postValue(ReportActivityCommand.ConfirmDiscard)
         } else if (editMode.value == true && report.id != EmptyUUID) {
             editMode.postValue(false)
         } else {

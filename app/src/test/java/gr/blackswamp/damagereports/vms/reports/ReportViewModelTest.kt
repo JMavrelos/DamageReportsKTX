@@ -19,7 +19,7 @@ import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.repos.ReportRepository
 import gr.blackswamp.damagereports.data.toData
-import gr.blackswamp.damagereports.ui.reports.ReportCommand
+import gr.blackswamp.damagereports.ui.reports.commands.ReportActivityCommand
 import gr.blackswamp.damagereports.vms.BrandData
 import gr.blackswamp.damagereports.vms.ModelData
 import gr.blackswamp.damagereports.vms.ReportData
@@ -315,7 +315,7 @@ class ReportViewModelTest : AndroidKoinTest() {
 
         vm.exitReport()
 
-        assertTrue(vm.activityCommand.value is ReportCommand.ConfirmDiscard)
+        assertTrue(vm.activityCommand.value is ReportActivityCommand.ConfirmDiscard)
         assertNotNull(vm.report.value)
     }
 
@@ -375,7 +375,7 @@ class ReportViewModelTest : AndroidKoinTest() {
 
         vm.exitReport()
 
-        assertTrue(vm.activityCommand.value is ReportCommand.ConfirmDiscard)
+        assertTrue(vm.activityCommand.value is ReportActivityCommand.ConfirmDiscard)
     }
 
 
@@ -440,7 +440,7 @@ class ReportViewModelTest : AndroidKoinTest() {
 
         vm.backPressed()
 
-        assertTrue(vm.activityCommand.value is ReportCommand.ConfirmDiscard)
+        assertTrue(vm.activityCommand.value is ReportActivityCommand.ConfirmDiscard)
     }
 
     @Test
@@ -480,7 +480,7 @@ class ReportViewModelTest : AndroidKoinTest() {
 
         vm.pickBrand()
 
-        assertEquals(ReportCommand.ShowBrandSelection, vm.activityCommand.value)
+        assertEquals(ReportActivityCommand.ShowBrandSelection, vm.activityCommand.value)
     }
 
     @Test
@@ -492,8 +492,8 @@ class ReportViewModelTest : AndroidKoinTest() {
         vm.pickModel()
 
 
-        assertTrue(vm.activityCommand.value is ReportCommand.ShowModelSelection)
+        assertTrue(vm.activityCommand.value is ReportActivityCommand.ShowModelSelection)
 
-        assertEquals(brandId, (vm.activityCommand.value as ReportCommand.ShowModelSelection).brandId)
+        assertEquals(brandId, (vm.activityCommand.value as ReportActivityCommand.ShowModelSelection).brandId)
     }
 }
