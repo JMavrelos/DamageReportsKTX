@@ -8,6 +8,10 @@ import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 
 class App : Application() {
+    companion object {
+        const val PREFS_NAME = "DamageReportsPrefs"
+    }
+
     override fun onCreate() {
         super.onCreate()
         startKoin {

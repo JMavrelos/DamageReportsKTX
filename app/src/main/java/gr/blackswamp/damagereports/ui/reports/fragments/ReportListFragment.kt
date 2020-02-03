@@ -40,7 +40,7 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
     private lateinit var list: RecyclerView
     private lateinit var adapter: ReportListAdapter
     private lateinit var toolbar: MaterialToolbar
-    private lateinit var theme: MenuItem
+    private lateinit var settings: MenuItem
 
     override fun setUpBindings(view: View) {
         refresh = view.findViewById(R.id.refresh)
@@ -48,7 +48,7 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
         list = view.findViewById(R.id.list)
         adapter = ReportListAdapter()
         toolbar = view.findViewById(R.id.toolbar)
-        theme = toolbar.menu.findItem(R.id.switch_theme)
+        settings = toolbar.menu.findItem(R.id.settings)
     }
 
     override fun initView(state: Bundle?) {
@@ -61,7 +61,7 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
         add.onClick(this::newReport)
         refresh.setOnRefreshListener { vm.reloadReports() }
         (toolbar.menu?.findItem(R.id.search_reports)?.actionView as? SearchView)?.setOnQueryTextListener(SearchListener(this::newFilter))
-        toolbar.menu?.findItem(R.id.switch_theme)?.onClick(this::toggleTheme)
+        toolbar.menu?.findItem(R.id.settings)?.setOnMenuItemClickListener { vm.showThemeSettings();true }
         toolbar.onNavigationClick(this::backClicked)
     }
 
@@ -71,18 +71,6 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
             if (it == false)
                 refresh.isRefreshing = false
         })
-        vm.darkTheme.observe(this::updateTheme)
-    }
-
-    //region observers
-    private fun updateTheme(dark: Boolean?) {
-        if (dark == true) {
-            theme.setTitle(R.string.switch_to_light)
-            theme.setIcon(R.drawable.ic_brightness_7_on_control)
-        } else {
-            theme.setTitle(R.string.switch_to_dark)
-            theme.setIcon(R.drawable.ic_brightness_4_on_control)
-        }
     }
     //endregion
 
@@ -90,8 +78,6 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
     private fun newReport() = vm.newReport()
 
     private fun newFilter(filter: String, submitted: Boolean): Boolean = vm.newReportFilter(filter, submitted)
-
-    private fun toggleTheme() = vm.toggleTheme()
 
     private fun backClicked() {
         Toast.makeText(activity!!, "BACK", Toast.LENGTH_LONG).show()

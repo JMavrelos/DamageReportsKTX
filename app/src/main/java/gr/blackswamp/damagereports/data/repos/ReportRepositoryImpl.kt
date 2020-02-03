@@ -1,15 +1,13 @@
 package gr.blackswamp.damagereports.data.repos
 
-import android.app.Application
-import androidx.annotation.StringRes
-import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.entities.ReportEntity
-import gr.blackswamp.damagereports.data.prefs.Preferences
+import gr.blackswamp.damagereports.data.prefs.ThemeSetting
+import gr.blackswamp.damagereports.data.toData
 import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.ReportHeaderData
 import kotlinx.coroutines.withContext
@@ -18,15 +16,9 @@ import org.koin.core.inject
 import java.util.*
 import kotlin.random.Random
 
-class ReportRepositoryImpl : ReportRepository, KoinComponent {
+class ReportRepositoryImpl : BaseRepositoryImpl(), ReportRepository, KoinComponent {
     private val db: AppDatabase by inject()
-    private val prefs: Preferences by inject()
     private val dispatchers: IDispatchers by inject()
-    private val application: Application by inject()
-
-    override val darkTheme: Boolean
-        get() = prefs.darkTheme
-    override val darkThemeLive: LiveData<Boolean> = prefs.darkThemeLive
 
     override suspend fun newReport(
         name: String,
@@ -48,7 +40,7 @@ class ReportRepositoryImpl : ReportRepository, KoinComponent {
 
     override suspend fun switchTheme() {
         withContext(dispatchers.IO) {
-            prefs.darkTheme = !prefs.darkTheme
+
         }
     }
 
@@ -62,20 +54,22 @@ class ReportRepositoryImpl : ReportRepository, KoinComponent {
     }
 
     override suspend fun loadReport(id: UUID): Response<ReportData> {
-        return try {
-            val report = db.reportDao.loadReportById(id) ?: return Response.failure(getString(R.string.error_report_not_found, id))
-            val brand = db.brandDao.loadBrandById(report.brand) ?: return Response.failure(getString(R.string.error_brand_not_found, report.brand))
-            val model = db.modelDao.loadModelById(report.model) ?: return Response.failure(getString(R.string.error_model_not_found, report.model))
-            if (model.brand != brand.id) return Response.failure(getString(R.string.error_invalid_model_brand))
-            Response.success(report.toData(brand, model))
-        } catch (t: Throwable) {
-            Response.failure(getString(R.string.error_loading_report, id), t)
+        return withContext(dispatchers.IO) {
+            try {
+                val report = db.reportDao.loadReportById(id) ?: return@withContext Response.failure<ReportData>(getString(R.string.error_report_not_found, id))
+                val brand = db.brandDao.loadBrandById(report.brand) ?: return@withContext Response.failure<ReportData>(getString(R.string.error_brand_not_found, report.brand))
+                val model = db.modelDao.loadModelById(report.model) ?: return@withContext Response.failure<ReportData>(getString(R.string.error_model_not_found, report.model))
+                if (model.brand != brand.id) return@withContext Response.failure<ReportData>(getString(R.string.error_invalid_model_brand))
+                Response.success(report.toData(brand, model))
+            } catch (t: Throwable) {
+                Response.failure<ReportData>(getString(R.string.error_loading_report, id), t)
+            }
         }
     }
 
     override suspend fun deleteReport(id: UUID): Response<Unit> {
         return try {
-            val affected = db.reportDao.flagReportDeleted(id)
+            val affected = withContext(dispatchers.IO) { db.reportDao.flagReportDeleted(id) }
             if (affected == 0)
                 return Response.failure(getString(R.string.error_report_not_found, id))
             Response.success()
@@ -86,7 +80,7 @@ class ReportRepositoryImpl : ReportRepository, KoinComponent {
 
     override suspend fun unDeleteReport(id: UUID): Response<Unit> {
         return try {
-            val affected = db.reportDao.unFlagReportDeleted(id)
+            val affected = withContext(dispatchers.IO) { db.reportDao.unFlagReportDeleted(id) }
             if (affected == 0)
                 return Response.failure(getString(R.string.error_no_deleted_report, id))
             Response.success()
@@ -95,7 +89,8 @@ class ReportRepositoryImpl : ReportRepository, KoinComponent {
         }
     }
 
-    protected fun getString(@StringRes resId: Int): String = application.getString(resId)
-    protected fun getString(@StringRes resId: Int, vararg formatArgs: Any?): String = application.getString(resId, *formatArgs)
+    override fun setTheme(themeSetting: ThemeSetting) {
+        prefs.themeSetting = themeSetting
+    }
 }
 

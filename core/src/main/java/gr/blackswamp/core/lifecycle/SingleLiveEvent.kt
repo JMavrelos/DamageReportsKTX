@@ -46,3 +46,7 @@ class SingleLiveEvent<T>(private val log: ILog = AppLog) : MutableLiveData<T>() 
         return super.getValue()
     }
 }
+
+fun SingleLiveEvent<Unit>.call() {
+    this.setValue(Unit)
+}

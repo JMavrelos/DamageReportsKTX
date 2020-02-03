@@ -1,15 +1,13 @@
 package gr.blackswamp.damagereports.data.repos
 
-import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import gr.blackswamp.core.data.Response
+import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.ReportHeaderData
 import java.util.*
 
-interface ReportRepository {
-    val darkTheme: Boolean
-    val darkThemeLive: LiveData<Boolean>
+interface ReportRepository : BaseRepository {
 
     suspend fun newReport(name: String, description: String, brandId: UUID, modelId: UUID): Throwable?
     /**
@@ -41,4 +39,9 @@ interface ReportRepository {
      * @return the report or the error thrown when loading it
      */
     suspend fun loadReport(id: UUID): Response<ReportData>
+
+    /**
+     * changes the current application's theme
+     */
+    fun setTheme(themeSetting: ThemeSetting)
 }

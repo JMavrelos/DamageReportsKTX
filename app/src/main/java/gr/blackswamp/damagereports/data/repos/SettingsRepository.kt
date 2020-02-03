@@ -1,3 +1,4 @@
 package gr.blackswamp.damagereports.data.repos
 
-interface BrandRepository : BaseRepository
+interface SettingsRepository : BaseRepository
+

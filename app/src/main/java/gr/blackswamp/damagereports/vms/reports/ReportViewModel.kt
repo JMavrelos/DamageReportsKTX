@@ -8,14 +8,16 @@ import androidx.lifecycle.Transformations
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
+import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.lifecycle.SingleLiveEvent
+import gr.blackswamp.core.lifecycle.call
 import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.util.isNullOrBlank
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.repos.ReportRepository
-import gr.blackswamp.damagereports.ui.base.ScreenCommand
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.ui.model.ReportHeader
 import gr.blackswamp.damagereports.ui.reports.ReportCommand
@@ -38,9 +40,10 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
 
     private val log: ILog by inject()
     private val repo: ReportRepository by inject()
+    private val dispatchers: IDispatchers by inject()
     @VisibleForTesting
     internal val filter = MutableLiveData<String>()
-    override val darkTheme: LiveData<Boolean> = repo.darkThemeLive
+    override val themeSetting: LiveData<ThemeSetting> = repo.themeSettingLive
 
     init {
         if (runInit) {
@@ -56,29 +59,23 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     //region IReportActivityViewModel implementation
     override val loading = MutableLiveData<Boolean>()
     override val error = SingleLiveEvent<String>()
-    // this is used for showing (if needed) the correct fragment and updating the view fragment's data
-    override val report = MutableLiveData<Report>()
+    override val activityCommand = SingleLiveEvent<ReportCommand>()
+    override val report = MutableLiveData<Report>() // this is used for showing (if needed) the correct fragment and updating the view fragment's data
 
-    override fun toggleTheme() {
-        viewModelScope.launch {
-            try {
-                loading.postValue(true)
-                repo.switchTheme()
-                loading.postValue(false)
-            } catch (t: Throwable) {
-                error.setValue(t.message ?: "Error switching theme")
-            } finally {
-                loading.postValue(false)
-            }
-        }
+    override fun showThemeSettings() {
+        activityCommand.postValue(ReportCommand.ShowThemeSelection(repo.themeSetting))
     }
 
     override fun backPressed() {
         if (report.value != null) {
             exitReport()
         } else {
-            command.postValue(ScreenCommand.Back)
+            back.call()
         }
+    }
+
+    override fun changeTheme(themeSetting: ThemeSetting) {
+        repo.setTheme(themeSetting)
     }
 
     //endregion
@@ -110,7 +107,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     }
 
     override fun deleteReport(id: UUID) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.UI) {
             try {
                 loading.postValue(true)
                 repo.deleteReport(id).throwOrGet()
@@ -129,7 +126,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     }
 
     override fun undoLastDelete() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.UI) {
             val last = lastDeleted.value
             try {
                 if (last == null) {
@@ -151,7 +148,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     override fun editReport(id: UUID) = showReport(id, true)
 
     private fun showReport(id: UUID, inEditMode: Boolean) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.UI) {
             loading.postValue(true)
             try {
                 val data = repo.loadReport(id).throwOrGet()
@@ -166,17 +163,15 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     }
 
     override fun newReport() {
-        viewModelScope.launch {
-            val newReport = ReportData(EmptyUUID, "", "", null, null, Date(System.currentTimeMillis()), false)
-            editMode.postValue(true)
-            report.postValue(newReport)
-        }
+        val newReport = ReportData(EmptyUUID, "", "", null, null, Date(System.currentTimeMillis()), false)
+        editMode.value = true
+        report.value = newReport
     }
 
     override fun newReportFilter(filter: String, submitted: Boolean): Boolean {
         this.filter.postValue(filter)
         if (submitted)
-            command.postValue(ScreenCommand.HideKeyboard)
+            hideKeyboard.call()
         return true
     }
 
@@ -195,7 +190,8 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
 
     override fun pickBrand() {
         if (report.value as? ReportData == null) return
-        command.postValue(ReportCommand.ShowBrandSelection)
+        activityCommand.postValue(ReportCommand.ShowBrandSelection)
+
     }
 
     override fun pickModel() {
@@ -204,7 +200,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
             error.setValue(getString(R.string.error_no_brand_selected))
             return
         }
-        command.postValue(ReportCommand.ShowModelSelection(current.brand.id))
+        activityCommand.postValue(ReportCommand.ShowModelSelection(current.brand.id))
     }
 
     override fun nameChanged(name: String) {
@@ -219,7 +215,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
 
     override fun saveReport() {
         this.editMode.postValue(false)
-        command.postValue(ScreenCommand.HideKeyboard)
+        hideKeyboard.call()
     }
 
     override fun editReport() {
@@ -229,7 +225,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     override fun exitReport() {
         val report = report.value as ReportData
         if (editMode.value == true && report.changed) {
-            command.postValue(ReportCommand.ConfirmDiscard)
+            activityCommand.postValue(ReportCommand.ConfirmDiscard)
         } else if (editMode.value == true && report.id != EmptyUUID) {
             editMode.postValue(false)
         } else {
