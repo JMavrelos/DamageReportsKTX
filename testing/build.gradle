@@ -32,4 +32,9 @@ dependencies {
 
     implementation deps.junit // Junit
     implementation deps.coroutines.test // coroutines
+
+    implementation deps.koin.test //koin
+    implementation deps.koin.android
+
+    implementation deps.mockito.kotlin // Mockito
 }

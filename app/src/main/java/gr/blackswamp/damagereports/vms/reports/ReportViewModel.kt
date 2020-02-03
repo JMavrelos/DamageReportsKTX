@@ -8,6 +8,7 @@ import androidx.lifecycle.Transformations
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
+import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.lifecycle.SingleLiveEvent
 import gr.blackswamp.core.logging.ILog
@@ -38,6 +39,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
 
     private val log: ILog by inject()
     private val repo: ReportRepository by inject()
+    private val dispatchers: IDispatchers by inject()
     @VisibleForTesting
     internal val filter = MutableLiveData<String>()
     override val darkTheme: LiveData<Boolean> = repo.darkThemeLive
@@ -60,11 +62,10 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     override val report = MutableLiveData<Report>()
 
     override fun toggleTheme() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.UI) {
             try {
                 loading.postValue(true)
                 repo.switchTheme()
-                loading.postValue(false)
             } catch (t: Throwable) {
                 error.setValue(t.message ?: "Error switching theme")
             } finally {
@@ -110,7 +111,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     }
 
     override fun deleteReport(id: UUID) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.UI) {
             try {
                 loading.postValue(true)
                 repo.deleteReport(id).throwOrGet()
@@ -129,7 +130,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     }
 
     override fun undoLastDelete() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.UI) {
             val last = lastDeleted.value
             try {
                 if (last == null) {
@@ -151,7 +152,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     override fun editReport(id: UUID) = showReport(id, true)
 
     private fun showReport(id: UUID, inEditMode: Boolean) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.UI) {
             loading.postValue(true)
             try {
                 val data = repo.loadReport(id).throwOrGet()
@@ -166,11 +167,9 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     }
 
     override fun newReport() {
-        viewModelScope.launch {
-            val newReport = ReportData(EmptyUUID, "", "", null, null, Date(System.currentTimeMillis()), false)
-            editMode.postValue(true)
-            report.postValue(newReport)
-        }
+        val newReport = ReportData(EmptyUUID, "", "", null, null, Date(System.currentTimeMillis()), false)
+        editMode.value = true
+        report.value = newReport
     }
 
     override fun newReportFilter(filter: String, submitted: Boolean): Boolean {

@@ -10,12 +10,12 @@ import gr.blackswamp.core.data.Response
 import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.core.test
+import gr.blackswamp.core.testing.AndroidKoinTest
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatchers
 import gr.blackswamp.core.testing.TestLog
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.TestApp
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.repos.ReportRepository
 import gr.blackswamp.damagereports.data.repos.toData
@@ -27,46 +27,31 @@ import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.reports.ReportViewModel.Companion.LIST_PAGE_SIZE
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.*
 import org.junit.Assert.*
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.loadKoinModules
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.core.context.unloadKoinModules
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import org.koin.core.module.Module
 import org.koin.dsl.module
-import org.koin.test.KoinTest
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.reset
 import java.util.*
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalCoroutinesApi
-class ReportViewModelTest : KoinTest {
+class ReportViewModelTest : AndroidKoinTest() {
     companion object {
-        private val app = mock(TestApp::class.java)
         private const val FILTER = "a filter"
         private const val ERROR = " there was an error"
-
-        @BeforeClass
-        @JvmStatic
-        fun initialize() {
-            startKoin {
-                androidContext(app)
-                modules(emptyList())
-            }
-        }
-
-        @AfterClass
-        @JvmStatic
-        fun dispose() {
-            stopKoin()
-        }
     }
 
     private val repo: ReportRepository = mock(ReportRepository::class.java)
-    private lateinit var modules: Module
+    override val modules: Module = module {
+        single<IDispatchers> { TestDispatchers }
+        single<ILog> { TestLog }
+        single { repo }
+    }
+
     private lateinit var vm: ReportViewModel
 
     @get:Rule
@@ -75,21 +60,10 @@ class ReportViewModelTest : KoinTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @Before
-    fun setUp() {
-        modules = module {
-            single<IDispatchers> { TestDispatchers }
-            single<ILog> { TestLog }
-            single { repo }
-            single { app }
-        }
-        loadKoinModules(modules)
+    override fun setUp() {
+        super.setUp()
         vm = ReportViewModel(app, false)
-        reset(repo, app)
-    }
-
-    @After
-    fun tearDown() {
-        unloadKoinModules(modules)
+        reset(repo)
     }
 
     @Test
@@ -192,12 +166,11 @@ class ReportViewModelTest : KoinTest {
     @Test
     fun `when we try to undelete with no last deleted id an error shows`() {
         runBlockingTest {
-            whenever(app.getString(R.string.error_un_deleting_no_saved_value)).thenReturn(ERROR)
-
             vm.undoLastDelete()
 
             verifyZeroInteractions(repo)
-            assertEquals(ERROR, vm.error.value)
+            assertEquals(APP_STRING, vm.error.value)
+            verify(app).getString(R.string.error_un_deleting_no_saved_value)
             assertFalse(vm.showUndo.value ?: false)
             assertFalse(vm.loading.value!!)
         }
@@ -475,12 +448,12 @@ class ReportViewModelTest : KoinTest {
     fun `when the user tries to pick a model before trying to pick a brand then a message is shown`() {
         val id = UUID.randomUUID()
         vm.report.value = ReportData(id, "name", "descr", null, null, Date(0), true)
-        whenever(app.getString(R.string.error_no_brand_selected)).thenReturn(ERROR)
 
         vm.editMode.value = true
         vm.pickModel()
 
-        assertEquals(ERROR, vm.error.value)
+        assertEquals(APP_STRING, vm.error.value)
+        verify(app).getString(R.string.error_no_brand_selected)
     }
 
     @Test

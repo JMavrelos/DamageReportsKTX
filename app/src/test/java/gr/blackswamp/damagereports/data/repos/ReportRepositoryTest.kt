@@ -1,10 +1,10 @@
 package gr.blackswamp.damagereports.data.repos
 
-import android.app.Application
 import android.database.sqlite.SQLiteException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.*
 import gr.blackswamp.core.coroutines.IDispatchers
+import gr.blackswamp.core.testing.AndroidKoinTest
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatchers
 import gr.blackswamp.damagereports.R
@@ -19,39 +19,20 @@ import gr.blackswamp.damagereports.vms.ModelData
 import gr.blackswamp.damagereports.vms.ReportData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.*
 import org.junit.Assert.*
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.loadKoinModules
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.core.context.unloadKoinModules
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import org.koin.dsl.module
-import org.koin.test.KoinTest
 import org.mockito.ArgumentMatchers.anyString
 import java.util.*
 
 
 @ExperimentalCoroutinesApi
-class ReportRepositoryTest : KoinTest {
+class ReportRepositoryTest : AndroidKoinTest() {
     companion object {
-        private val app = mock<Application>()
         const val FILTER = "12j3kj1lk23mm.,asd"
         const val ERROR = "there was a problem"
-        @BeforeClass
-        @JvmStatic
-        fun initialize() {
-            startKoin {
-                modules(emptyList())
-                androidContext(app)
-            }
-        }
-
-        @AfterClass
-        @JvmStatic
-        fun dispose() {
-            stopKoin()
-        }
     }
 
     private val db = mock<AppDatabase>()
@@ -61,12 +42,11 @@ class ReportRepositoryTest : KoinTest {
     private val mDao = mock<ModelDao>()
     private val bDao = mock<BrandDao>()
 
-    private val module = module {
+    override val modules = module {
         single { db }
         single { prefs }
         single<IDispatchers> { TestDispatchers }
     }
-
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -75,18 +55,13 @@ class ReportRepositoryTest : KoinTest {
     var mainCoroutineScopeRule = MainCoroutineScopeRule()
 
     @Before
-    fun setUp() {
-        reset(db, prefs, app)
+    override fun setUp() {
+        super.setUp()
+        reset(db, prefs)
         whenever(db.reportDao).thenReturn(dao)
         whenever(db.brandDao).thenReturn(bDao)
         whenever(db.modelDao).thenReturn(mDao)
-        loadKoinModules(module)
         repo = ReportRepositoryImpl()
-    }
-
-    @After
-    fun tearDown() {
-        unloadKoinModules(module)
     }
 
     @Test
@@ -135,12 +110,13 @@ class ReportRepositoryTest : KoinTest {
             val id = UUID.randomUUID()
             val error = SQLiteException("$ERROR with sqlite")
             whenever(dao.flagReportDeleted(id)).thenThrow(error)
-            whenever(app.getString(eq(R.string.error_deleting), anyString())).thenReturn(ERROR)
 
             val response = repo.deleteReport(id)
 
             verify(dao).flagReportDeleted(id)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(APP_STRING, response.errorMessage)
+            verify(app).getString(R.string.error_deleting, error.message ?: error::class.java.name)
+            verifyNoMoreInteractions(app)
         }
     }
 
@@ -149,12 +125,13 @@ class ReportRepositoryTest : KoinTest {
         runBlockingTest {
             val id = UUID.randomUUID()
             whenever(dao.flagReportDeleted(id)).thenReturn(0)
-            whenever(app.getString(R.string.error_report_not_found, id)).thenReturn(ERROR)
 
             val response = repo.deleteReport(id)
 
             verify(dao).flagReportDeleted(id)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(APP_STRING, response.errorMessage)
+            verify(app).getString(R.string.error_report_not_found, id)
+            verifyNoMoreInteractions(app)
         }
     }
 
