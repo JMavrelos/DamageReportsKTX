@@ -24,7 +24,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.koin.dsl.module
-import org.mockito.ArgumentMatchers.anyString
 import java.util.*
 
 
@@ -32,7 +31,6 @@ import java.util.*
 class ReportRepositoryTest : AndroidKoinTest() {
     companion object {
         const val FILTER = "12j3kj1lk23mm.,asd"
-        const val ERROR = "there was a problem"
     }
 
     private val db = mock<AppDatabase>()
@@ -75,7 +73,7 @@ class ReportRepositoryTest : AndroidKoinTest() {
 
     @Test
     fun `calling get report headers with an error propagates the error`() {
-        val error = SQLiteException(ERROR)
+        val error = SQLiteException("error with sqlite")
         whenever(dao.loadReportHeaders(FILTER)).thenThrow(error)
         val response = repo.getReportHeaders(FILTER)
         assertTrue(response.hasError)
@@ -99,7 +97,7 @@ class ReportRepositoryTest : AndroidKoinTest() {
     fun `delete report with error`() {
         runBlockingTest {
             val id = UUID.randomUUID()
-            val error = SQLiteException("$ERROR with sqlite")
+            val error = SQLiteException("error with sqlite")
             whenever(dao.flagReportDeleted(id)).thenThrow(error)
 
             val response = repo.deleteReport(id)
@@ -144,14 +142,15 @@ class ReportRepositoryTest : AndroidKoinTest() {
     fun `un-delete report with error`() {
         runBlockingTest {
             val id = UUID.randomUUID()
-            val error = SQLiteException("$ERROR with sqlite")
+            val error = SQLiteException("error with sqlite")
             whenever(dao.unFlagReportDeleted(id)).thenThrow(error)
-            whenever(app.getString(eq(R.string.error_un_deleting), anyString())).thenReturn(ERROR)
 
             val response = repo.unDeleteReport(id)
 
             verify(dao).unFlagReportDeleted(id)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(APP_STRING, response.errorMessage)
+            verify(app).getString(R.string.error_un_deleting, error.message ?: error::class.java.name)
+            verifyNoMoreInteractions(app)
         }
     }
 
@@ -160,12 +159,13 @@ class ReportRepositoryTest : AndroidKoinTest() {
         runBlockingTest {
             val id = UUID.randomUUID()
             whenever(dao.unFlagReportDeleted(id)).thenReturn(0)
-            whenever(app.getString(R.string.error_no_deleted_report, id)).thenReturn(ERROR)
 
             val response = repo.unDeleteReport(id)
 
             verify(dao).unFlagReportDeleted(id)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(APP_STRING, response.errorMessage)
+            verify(app).getString(R.string.error_no_deleted_report, id)
+            verifyNoMoreInteractions(app)
         }
     }
 
@@ -174,15 +174,14 @@ class ReportRepositoryTest : AndroidKoinTest() {
         runBlockingTest {
             val report = UnitTestData.REPORTS.random()
             whenever(dao.loadReportById(report.id)).thenReturn(null)
-            whenever(app.getString(R.string.error_report_not_found, report.id)).thenReturn(ERROR)
-
 
             val response = repo.loadReport(report.id)
 
             verify(dao).loadReportById(report.id)
             verifyZeroInteractions(mDao, bDao)
             assertTrue(response.hasError)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(APP_STRING, response.errorMessage)
+            verify(app).getString(R.string.error_report_not_found, report.id)
         }
     }
 
@@ -190,11 +189,8 @@ class ReportRepositoryTest : AndroidKoinTest() {
     fun `load report whose brand does not exist`() {
         runBlockingTest {
             val report = UnitTestData.REPORTS.random()
-
             whenever(dao.loadReportById(report.id)).thenReturn(report)
             whenever(bDao.loadBrandById(report.brand)).thenReturn(null)
-            whenever(app.getString(R.string.error_brand_not_found, report.brand)).thenReturn(ERROR)
-
 
             val response = repo.loadReport(report.id)
 
@@ -202,7 +198,8 @@ class ReportRepositoryTest : AndroidKoinTest() {
             verify(bDao).loadBrandById(report.brand)
             verifyZeroInteractions(mDao)
             assertTrue(response.hasError)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(APP_STRING, response.errorMessage)
+            verify(app).getString(R.string.error_brand_not_found, report.brand)
         }
     }
 
@@ -211,11 +208,9 @@ class ReportRepositoryTest : AndroidKoinTest() {
     fun `load report whose model does not exist`() {
         runBlockingTest {
             val report = UnitTestData.REPORTS.random()
-
             whenever(dao.loadReportById(report.id)).thenReturn(report)
             whenever(bDao.loadBrandById(report.brand)).thenReturn(UnitTestData.BRANDS.first { it.id == report.brand })
             whenever(mDao.loadModelById(report.model)).thenReturn(null)
-            whenever(app.getString(R.string.error_model_not_found, report.model)).thenReturn(ERROR)
 
 
             val response = repo.loadReport(report.id)
@@ -224,7 +219,8 @@ class ReportRepositoryTest : AndroidKoinTest() {
             verify(mDao).loadModelById(report.model)
             verify(bDao).loadBrandById(report.brand)
             assertTrue(response.hasError)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(APP_STRING, response.errorMessage)
+            verify(app).getString(R.string.error_model_not_found, report.model)
         }
     }
 
@@ -237,7 +233,6 @@ class ReportRepositoryTest : AndroidKoinTest() {
             whenever(dao.loadReportById(report.id)).thenReturn(report)
             whenever(bDao.loadBrandById(report.brand)).thenReturn(UnitTestData.BRANDS.first { it.id == report.brand })
             whenever(mDao.loadModelById(report.model)).thenReturn(UnitTestData.MODELS.filter { it.id != report.model }.random())
-            whenever(app.getString(R.string.error_invalid_model_brand)).thenReturn(ERROR)
 
             val response = repo.loadReport(report.id)
 
@@ -245,7 +240,8 @@ class ReportRepositoryTest : AndroidKoinTest() {
             verify(dao).loadReportById(report.id)
             verify(mDao).loadModelById(report.model)
             verify(bDao).loadBrandById(report.brand)
-            assertEquals(ERROR, response.errorMessage)
+            assertEquals(APP_STRING, response.errorMessage)
+            verify(app).getString(R.string.error_invalid_model_brand)
         }
     }
 
