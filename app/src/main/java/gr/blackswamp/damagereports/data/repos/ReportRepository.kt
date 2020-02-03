@@ -2,6 +2,7 @@ package gr.blackswamp.damagereports.data.repos
 
 import androidx.paging.DataSource
 import gr.blackswamp.core.data.Response
+import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.ReportHeaderData
 import java.util.*
@@ -38,4 +39,9 @@ interface ReportRepository : BaseRepository {
      * @return the report or the error thrown when loading it
      */
     suspend fun loadReport(id: UUID): Response<ReportData>
+
+    /**
+     * changes the current application's theme
+     */
+    fun setTheme(themeSetting: ThemeSetting)
 }

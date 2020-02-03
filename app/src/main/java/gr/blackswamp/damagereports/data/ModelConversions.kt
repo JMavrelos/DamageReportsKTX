@@ -1,4 +1,4 @@
-package gr.blackswamp.damagereports.data.repos
+package gr.blackswamp.damagereports.data
 
 import gr.blackswamp.damagereports.data.db.entities.BrandEntity
 import gr.blackswamp.damagereports.data.db.entities.ModelEntity

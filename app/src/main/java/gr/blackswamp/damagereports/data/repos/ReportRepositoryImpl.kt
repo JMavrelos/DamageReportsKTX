@@ -1,13 +1,13 @@
 package gr.blackswamp.damagereports.data.repos
 
-import android.app.Application
-import androidx.annotation.StringRes
 import androidx.paging.DataSource
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.entities.ReportEntity
+import gr.blackswamp.damagereports.data.prefs.ThemeSetting
+import gr.blackswamp.damagereports.data.toData
 import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.ReportHeaderData
 import kotlinx.coroutines.withContext
@@ -19,7 +19,6 @@ import kotlin.random.Random
 class ReportRepositoryImpl : BaseRepositoryImpl(), ReportRepository, KoinComponent {
     private val db: AppDatabase by inject()
     private val dispatchers: IDispatchers by inject()
-    private val application: Application by inject()
 
     override suspend fun newReport(
         name: String,
@@ -90,7 +89,8 @@ class ReportRepositoryImpl : BaseRepositoryImpl(), ReportRepository, KoinCompone
         }
     }
 
-    protected fun getString(@StringRes resId: Int): String = application.getString(resId)
-    protected fun getString(@StringRes resId: Int, vararg formatArgs: Any?): String = application.getString(resId, *formatArgs)
+    override fun setTheme(themeSetting: ThemeSetting) {
+        prefs.themeSetting = themeSetting
+    }
 }
 

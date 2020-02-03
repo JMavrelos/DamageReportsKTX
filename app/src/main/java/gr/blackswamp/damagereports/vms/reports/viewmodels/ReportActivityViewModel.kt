@@ -1,6 +1,7 @@
 package gr.blackswamp.damagereports.vms.reports.viewmodels
 
 import androidx.lifecycle.LiveData
+import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.ui.reports.ReportCommand
 import gr.blackswamp.damagereports.vms.base.IBaseViewModel
@@ -16,4 +17,5 @@ interface ReportActivityViewModel : IBaseViewModel {
     fun dismissedUndo()
     fun confirmDiscardChanges()
     fun backPressed()
+    fun changeTheme(themeSetting: ThemeSetting)
 }

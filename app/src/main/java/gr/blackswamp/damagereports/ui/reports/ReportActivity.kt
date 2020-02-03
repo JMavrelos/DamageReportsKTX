@@ -2,14 +2,17 @@ package gr.blackswamp.damagereports.ui.reports
 
 import android.os.Bundle
 import android.view.View
+import android.widget.RadioGroup
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import gr.blackswamp.core.dialogs.Dialog
 import gr.blackswamp.core.dialogs.Dialog.Companion.BUTTON_POSITIVE
 import gr.blackswamp.core.dialogs.DialogBuilders
 import gr.blackswamp.core.dialogs.DialogFinishedListener
 import gr.blackswamp.core.widget.visible
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.ui.base.BaseActivity
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.ui.reports.fragments.ReportListFragment
@@ -24,6 +27,7 @@ class ReportActivity : BaseActivity<ReportActivityViewModel>(), DialogFinishedLi
         private const val TAG = "ReportActivity"
         private const val SHOW_REPORT = "show_report"
         private const val DISCARD_CONFIRM_ID = 39012
+        private const val THEME_SELECTION_ID = 3022
     }
 
     override val layoutId: Int = R.layout.activity_report
@@ -66,6 +70,18 @@ class ReportActivity : BaseActivity<ReportActivityViewModel>(), DialogFinishedLi
                 }
                 true
             }
+            THEME_SELECTION_ID -> {
+                if (which == BUTTON_POSITIVE) {
+                    val themeMode = when ((dialog as RadioGroup).checkedRadioButtonId) {
+                        R.id.dark -> ThemeSetting.Dark
+                        R.id.light -> ThemeSetting.Light
+                        R.id.auto -> ThemeSetting.Auto
+                        else -> ThemeSetting.System
+                    }
+                    vm.changeTheme(themeMode)
+                }
+                true
+            }
             else -> true
         }
     }
@@ -83,7 +99,7 @@ class ReportActivity : BaseActivity<ReportActivityViewModel>(), DialogFinishedLi
             is ReportCommand.ShowBrandSelection -> gotoBrandSelect()
             is ReportCommand.ShowModelSelection -> gotoModelSelect(cmd.brandId)
             is ReportCommand.ConfirmDiscard -> showDiscardConfirmDialog()
-            is ReportCommand.ShowSettings -> gotoSettings()
+            is ReportCommand.ShowThemeSelection -> showThemeSelectionDialog(cmd.current)
         }
 
     }
@@ -137,12 +153,21 @@ class ReportActivity : BaseActivity<ReportActivityViewModel>(), DialogFinishedLi
 
     }
 
-    private fun showSettings() {
-
-    }
-
-    private fun gotoSettings() {
-
+    private fun showThemeSelectionDialog(current: ThemeSetting) {
+        Dialog.builder(THEME_SELECTION_ID, R.layout.dialog_theme)
+            .setCancelable(true)
+            .setTitle(getString(R.string.select_theme))
+            .setButtons(positive = true, negative = true, neutral = false)
+            .setInitViewCallback {
+                val id = when (current) {
+                    ThemeSetting.Dark -> R.id.dark
+                    ThemeSetting.System -> R.id.system
+                    ThemeSetting.Auto -> R.id.auto
+                    ThemeSetting.Light -> R.id.light
+                }
+                (it as RadioGroup).check(id)
+            }
+            .show(this)
     }
     //endregion
 

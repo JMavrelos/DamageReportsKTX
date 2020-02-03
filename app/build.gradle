@@ -33,7 +33,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(path: ':core')
     implementation project(path: ':db')
-    testImplementation  project(path: ':testing')
+    testImplementation project(path: ':testing')
 
     implementation deps.koin.core //koin
     implementation deps.koin.core_ext
@@ -47,6 +47,7 @@ dependencies {
     implementation deps.support.design //design
     implementation deps.support.annotations //design
     implementation deps.support.core_ktx //design
+    implementation deps.support.prefs //design
     implementation deps.constraint_layout //design
     implementation deps.swipe_refresh //design
     implementation deps.lifecycle.extensions //lifecycle

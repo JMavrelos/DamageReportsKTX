@@ -18,7 +18,7 @@ import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.repos.ReportRepository
-import gr.blackswamp.damagereports.data.repos.toData
+import gr.blackswamp.damagereports.data.toData
 import gr.blackswamp.damagereports.ui.reports.ReportCommand
 import gr.blackswamp.damagereports.vms.BrandData
 import gr.blackswamp.damagereports.vms.ModelData

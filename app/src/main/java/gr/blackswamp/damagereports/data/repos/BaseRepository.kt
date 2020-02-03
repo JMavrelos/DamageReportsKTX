@@ -1,9 +1,9 @@
 package gr.blackswamp.damagereports.data.repos
 
 import androidx.lifecycle.LiveData
-import gr.blackswamp.damagereports.data.prefs.ThemeMode
+import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 
 interface BaseRepository {
-    val themeMode: ThemeMode
-    val themeModeLive: LiveData<ThemeMode>
+    val themeSetting: ThemeSetting
+    val themeSettingLive: LiveData<ThemeSetting>
 }

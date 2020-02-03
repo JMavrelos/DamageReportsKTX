@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import gr.blackswamp.core.logging.ILog
-import gr.blackswamp.damagereports.data.prefs.ThemeMode
+import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.repos.ModelRepository
 import gr.blackswamp.damagereports.vms.base.BaseViewModel
 import org.koin.core.inject
@@ -17,7 +17,7 @@ class ModelViewModel(application: Application, runInit: Boolean) : BaseViewModel
     }
     private val log: ILog by inject()
     private val repo: ModelRepository by inject()
-    override val themeMode: LiveData<ThemeMode> = repo.themeModeLive
+    override val themeSetting: LiveData<ThemeSetting> = repo.themeSettingLive
 
     init {
         if (runInit) {

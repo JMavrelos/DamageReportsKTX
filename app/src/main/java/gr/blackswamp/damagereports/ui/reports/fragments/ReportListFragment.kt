@@ -59,7 +59,7 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
         add.setOnClickListener { vm.newReport() }
         refresh.setOnRefreshListener { vm.reloadReports() }
         (toolbar.menu?.findItem(R.id.search_reports)?.actionView as? SearchView)?.setOnQueryTextListener(SearchListener(vm::newReportFilter))
-        toolbar.menu?.findItem(R.id.settings)?.setOnMenuItemClickListener { vm.showSettings();true }
+        toolbar.menu?.findItem(R.id.settings)?.setOnMenuItemClickListener { vm.showThemeSettings();true }
         toolbar.setNavigationOnClickListener { Toast.makeText(activity!!, "BACK", Toast.LENGTH_LONG).show() }
     }
 

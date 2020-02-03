@@ -33,6 +33,8 @@ val applicationModule = module {
 
     single<ModelRepository> { ModelRepositoryImpl() }
 
+    single<SettingsRepository> { SettingsRepositoryImpl() }
+
     viewModel { ReportViewModel(androidApplication(), true) }
 
     viewModel { BrandViewModel(androidApplication(), true) }

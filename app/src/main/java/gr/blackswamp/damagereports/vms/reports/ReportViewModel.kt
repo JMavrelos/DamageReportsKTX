@@ -16,7 +16,7 @@ import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.util.isNullOrBlank
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.data.prefs.ThemeMode
+import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.repos.ReportRepository
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.ui.model.ReportHeader
@@ -43,7 +43,7 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     private val dispatchers: IDispatchers by inject()
     @VisibleForTesting
     internal val filter = MutableLiveData<String>()
-    override val themeMode: LiveData<ThemeMode> = repo.themeModeLive
+    override val themeSetting: LiveData<ThemeSetting> = repo.themeSettingLive
 
     init {
         if (runInit) {
@@ -62,8 +62,8 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
     override val activityCommand = SingleLiveEvent<ReportCommand>()
     override val report = MutableLiveData<Report>() // this is used for showing (if needed) the correct fragment and updating the view fragment's data
 
-    override fun showSettings() {
-        activityCommand.postValue(ReportCommand.ShowSettings)
+    override fun showThemeSettings() {
+        activityCommand.postValue(ReportCommand.ShowThemeSelection(repo.themeSetting))
     }
 
     override fun backPressed() {
@@ -72,6 +72,10 @@ class ReportViewModel(application: Application, runInit: Boolean = true) : BaseV
         } else {
             back.call()
         }
+    }
+
+    override fun changeTheme(themeSetting: ThemeSetting) {
+        repo.setTheme(themeSetting)
     }
 
     //endregion
