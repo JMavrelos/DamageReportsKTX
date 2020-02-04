@@ -17,9 +17,11 @@ import gr.blackswamp.core.testing.TestLog
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.UnitTestData
+import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.repos.ReportRepository
 import gr.blackswamp.damagereports.data.toData
 import gr.blackswamp.damagereports.ui.reports.commands.ReportActivityCommand
+import gr.blackswamp.damagereports.ui.reports.commands.ReportListCommand
 import gr.blackswamp.damagereports.vms.BrandData
 import gr.blackswamp.damagereports.vms.ModelData
 import gr.blackswamp.damagereports.vms.ReportData
@@ -495,5 +497,39 @@ class ReportViewModelTest : AndroidKoinTest() {
         assertTrue(vm.activityCommand.value is ReportActivityCommand.ShowModelSelection)
 
         assertEquals(brandId, (vm.activityCommand.value as ReportActivityCommand.ShowModelSelection).brandId)
+    }
+
+    @Test
+    fun `when the theme changes then the change is applied and a message to close the selector is set`() {
+        vm.changeTheme(ThemeSetting.Auto)
+
+        verify(repo).setTheme(ThemeSetting.Auto)
+        assertTrue(vm.listCommand.value is ReportListCommand.ShowThemeSelection)
+        assertNull((vm.listCommand.value as ReportListCommand.ShowThemeSelection).current)
+
+        reset(repo)
+
+        vm.changeTheme(ThemeSetting.System)
+
+        verify(repo).setTheme(ThemeSetting.System)
+        assertTrue(vm.listCommand.value is ReportListCommand.ShowThemeSelection)
+        assertNull((vm.listCommand.value as ReportListCommand.ShowThemeSelection).current)
+
+        reset(repo)
+
+        vm.changeTheme(ThemeSetting.Light)
+
+        verify(repo).setTheme(ThemeSetting.Light)
+        assertTrue(vm.listCommand.value is ReportListCommand.ShowThemeSelection)
+        assertNull((vm.listCommand.value as ReportListCommand.ShowThemeSelection).current)
+
+        reset(repo)
+
+        vm.changeTheme(ThemeSetting.Dark)
+
+        verify(repo).setTheme(ThemeSetting.Dark)
+        assertTrue(vm.listCommand.value is ReportListCommand.ShowThemeSelection)
+        assertNull((vm.listCommand.value as ReportListCommand.ShowThemeSelection).current)
+
     }
 }

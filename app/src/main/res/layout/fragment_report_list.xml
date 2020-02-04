@@ -84,13 +84,6 @@
             android:drawableStart="@drawable/ic_brightness_auto"
             android:text="@string/auto_theme" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/cancel_theme"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/cancel" />
-
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

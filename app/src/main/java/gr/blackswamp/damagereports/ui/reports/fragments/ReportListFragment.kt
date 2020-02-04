@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.marginEnd
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -40,7 +41,7 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
     override val layoutId: Int = R.layout.fragment_report_list
 
     private lateinit var refresh: SwipeRefreshLayout
-    private lateinit var add: FloatingActionButton
+    private lateinit var action: FloatingActionButton
     private lateinit var list: RecyclerView
     private lateinit var adapter: ReportListAdapter
     private lateinit var toolbar: MaterialToolbar
@@ -50,11 +51,10 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
     private lateinit var lightTheme: View
     private lateinit var systemTheme: View
     private lateinit var autoTheme: View
-    private lateinit var closeTheme: View
 
     override fun setUpBindings(view: View) {
         refresh = view.findViewById(R.id.refresh)
-        add = view.findViewById(R.id.add)
+        action = view.findViewById(R.id.add)
         list = view.findViewById(R.id.list)
         adapter = ReportListAdapter()
         toolbar = view.findViewById(R.id.toolbar)
@@ -65,7 +65,6 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
         lightTheme = view.findViewById(R.id.light)
         systemTheme = view.findViewById(R.id.system)
         autoTheme = view.findViewById(R.id.auto)
-        closeTheme = view.findViewById(R.id.cancel_theme)
     }
 
     override fun initView(state: Bundle?) {
@@ -75,7 +74,7 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
 
     override fun setUpListeners() {
         adapter.setListener(this)
-        add.onClick(this::newReport)
+        action.onClick(this::actionClick)
         refresh.setOnRefreshListener { vm.reloadReports() }
         (toolbar.menu?.findItem(R.id.search_reports)?.actionView as? SearchView)?.setOnQueryTextListener(SearchListener(this::newFilter))
         toolbar.menu?.findItem(R.id.settings)?.onClick(vm::showThemeSettings)
@@ -84,7 +83,7 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
         lightTheme.onClick { vm.changeTheme(ThemeSetting.Light) }
         systemTheme.onClick { vm.changeTheme(ThemeSetting.System) }
         autoTheme.onClick { vm.changeTheme(ThemeSetting.Auto) }
-        closeTheme.onClick { updateBottomSheet(null) }
+        sheetBehavior.addBottomSheetCallback(bottomSheetCallback)
     }
 
     override fun setUpObservers(vm: ReportListViewModel) {
@@ -98,7 +97,27 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
     //endregion
 
     //region listeners
-    private fun newReport() = vm.newReport()
+
+    private val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
+        override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            if (isAdded) {
+                action.rotation = (-slideOffset * 135f)
+                val offset = ((this@ReportListFragment.view?.measuredWidth ?: 0) - action.width - (action.paddingEnd * 2) - (action.marginEnd * 2)) / 2
+                action.translationX = (slideOffset * (-offset))
+            }
+        }
+
+        override fun onStateChanged(bottomSheet: View, newState: Int) {}
+
+    }
+
+    private fun actionClick() {
+        if (sheetBehavior.state == STATE_COLLAPSED) {
+            vm.newReport()
+        } else {
+            updateBottomSheet(null)
+        }
+    }
 
     private fun newFilter(filter: String, submitted: Boolean): Boolean = vm.newReportFilter(filter, submitted)
 
