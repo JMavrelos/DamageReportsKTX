@@ -36,4 +36,7 @@
     <string name="light_theme">Φωτεινό</string>
     <string name="auto_theme">Αυτόματο</string>
     <string name="select_theme">Επιλέξτε το θέμα της εαφρμογής</string>
+    <string name="sort">Ταξινόμιση</string>
+    <string name="by_use">Κατά Χρήση</string>
+    <string name="alphabetically">Αλφαβητικά</string>
 </resources>

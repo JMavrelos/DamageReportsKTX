@@ -25,7 +25,7 @@ import gr.blackswamp.damagereports.ui.reports.commands.ReportListCommand
 import gr.blackswamp.damagereports.vms.BrandData
 import gr.blackswamp.damagereports.vms.ModelData
 import gr.blackswamp.damagereports.vms.ReportData
-import gr.blackswamp.damagereports.vms.reports.ReportViewModel.Companion.LIST_PAGE_SIZE
+import gr.blackswamp.damagereports.vms.reports.ReportViewModelImpl.Companion.LIST_PAGE_SIZE
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.*
@@ -53,7 +53,7 @@ class ReportViewModelTest : AndroidKoinTest() {
         single { repo }
     }
 
-    private lateinit var vm: ReportViewModel
+    private lateinit var vm: ReportViewModelImpl
 
     @get:Rule
     val coroutineScope = MainCoroutineScopeRule()
@@ -63,7 +63,7 @@ class ReportViewModelTest : AndroidKoinTest() {
     @Before
     override fun setUp() {
         super.setUp()
-        vm = ReportViewModel(app, false)
+        vm = ReportViewModelImpl(app, false)
         reset(repo)
     }
 

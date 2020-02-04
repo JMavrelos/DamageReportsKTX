@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.widget.CItemTouchAdapter
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.ui.base.ListAction
 import gr.blackswamp.damagereports.ui.model.ReportHeader
 
 @Suppress("unused")
@@ -32,9 +33,9 @@ class ReportListAdapter : PagedListAdapter<ReportHeader, ReportListAdapter.Repor
         private const val HEADER = 1
     }
 
-    private var listener: ReportListAction? = null
+    private var listener: ListAction? = null
 
-    fun setListener(listener: ReportListAction) {
+    fun setListener(listener: ListAction) {
         this.listener = listener
     }
 

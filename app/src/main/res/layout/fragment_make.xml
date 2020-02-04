@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -15,10 +16,12 @@
             style="?toolbarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:menu="@menu/report_list"
-            app:subtitle="@string/select_create_report"
-            app:title="@string/damage_reports" />
+            app:menu="@menu/make_list"
+            app:navigationIcon="@drawable/ic_nav_back"
+            app:subtitle="@string/select_brand"
+            app:title="@string/brand" />
     </com.google.android.material.appbar.AppBarLayout>
+
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/refresh"
@@ -38,52 +41,55 @@
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:tint="?colorOnSecondary"
+        app:fabSize="mini"
+        app:layout_anchor="@+id/create"
+        app:layout_anchorGravity="top|end"
+        app:srcCompat="@drawable/ic_clear" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/action"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="@dimen/fab_margin"
         android:tint="?colorOnSecondary"
-        app:layout_anchor="@+id/theme_selection"
-        app:layout_anchorGravity="top|end"
+        app:layout_anchor="@+id/create"
+        app:layout_anchorGravity="bottom|end"
         app:srcCompat="@drawable/ic_add" />
 
-    <LinearLayout
-        android:id="@+id/theme_selection"
+    <FrameLayout
+        android:id="@+id/create"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_sheet"
         android:orientation="vertical"
-        android:padding="@dimen/padding"
-        android:paddingBottom="24dp"
+        android:paddingStart="@dimen/padding"
+        android:paddingTop="@dimen/fab_margin"
+        android:paddingEnd="@dimen/padding"
         app:behavior_hideable="true"
         app:behavior_peekHeight="0dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-        <TextView
-            android:id="@+id/system"
-            style="@style/BottomSheetText"
-            android:drawableStart="@drawable/ic_brightness"
-            android:text="@string/system_theme" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/name_til"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/brand"
+            android:paddingBottom="@dimen/fab_margin">
 
-        <TextView
-            android:id="@+id/dark"
-            style="@style/BottomSheetText"
-            android:drawableStart="@drawable/ic_brightness_dark"
-            android:text="@string/dark_theme" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:id="@+id/light"
-            style="@style/BottomSheetText"
-            android:drawableStart="@drawable/ic_brightness_light"
-            android:text="@string/light_theme" />
-
-        <TextView
-            android:id="@+id/auto"
-            style="@style/BottomSheetText"
-            android:drawableStart="@drawable/ic_brightness_auto"
-            android:text="@string/auto_theme" />
-
-    </LinearLayout>
+    </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

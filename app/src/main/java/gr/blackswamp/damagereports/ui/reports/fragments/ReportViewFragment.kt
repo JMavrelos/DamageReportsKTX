@@ -17,18 +17,18 @@ import gr.blackswamp.core.widget.updateText
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.ui.base.BaseFragment
 import gr.blackswamp.damagereports.ui.model.Report
-import gr.blackswamp.damagereports.vms.reports.ReportViewModel
-import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportViewViewModel
+import gr.blackswamp.damagereports.vms.reports.ReportViewModelImpl
+import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportViewParent
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 @Suppress("UNUSED_PARAMETER")
-class ReportViewFragment : BaseFragment<ReportViewViewModel>() {
+class ReportViewFragment : BaseFragment<ReportViewParent>() {
     companion object {
         const val TAG = "ReportViewFragment"
         fun newInstance(): Fragment = ReportViewFragment()
     }
 
-    override val vm: ReportViewViewModel by sharedViewModel<ReportViewModel>()
+    override val vm: ReportViewParent by sharedViewModel<ReportViewModelImpl>()
     override val layoutId: Int = R.layout.fragment_report_view
     private val nameListener = TextChangeListener(after = this::nameChanged)
     private val descriptionListener = TextChangeListener(after = this::descriptionChanged)
@@ -72,7 +72,7 @@ class ReportViewFragment : BaseFragment<ReportViewViewModel>() {
         description.addTextChangedListener(descriptionListener)
     }
 
-    override fun setUpObservers(vm: ReportViewViewModel) {
+    override fun setUpObservers(vm: ReportViewParent) {
         vm.report.observe(this::updateReport)
         vm.editMode.observe(this::updateEditable)
     }

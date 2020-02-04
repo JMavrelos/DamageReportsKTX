@@ -11,16 +11,17 @@ import gr.blackswamp.core.dialogs.DialogFinishedListener
 import gr.blackswamp.core.widget.visible
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.ui.base.BaseActivity
+import gr.blackswamp.damagereports.ui.make.MakeActivity
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.ui.reports.commands.ReportActivityCommand
 import gr.blackswamp.damagereports.ui.reports.fragments.ReportListFragment
 import gr.blackswamp.damagereports.ui.reports.fragments.ReportViewFragment
-import gr.blackswamp.damagereports.vms.reports.ReportViewModel
-import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportActivityViewModel
+import gr.blackswamp.damagereports.vms.reports.ReportViewModelImpl
+import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.util.*
 
-class ReportActivity : BaseActivity<ReportActivityViewModel>(), DialogFinishedListener {
+class ReportActivity : BaseActivity<ReportViewModel>(), DialogFinishedListener {
     companion object {
         private const val TAG = "ReportActivity"
         private const val SHOW_REPORT = "show_report"
@@ -28,7 +29,7 @@ class ReportActivity : BaseActivity<ReportActivityViewModel>(), DialogFinishedLi
     }
 
     override val layoutId: Int = R.layout.activity_report
-    override val vm: ReportActivityViewModel by viewModel<ReportViewModel>()
+    override val vm: ReportViewModel by viewModel<ReportViewModelImpl>()
     private lateinit var progress: View
 
 
@@ -51,7 +52,7 @@ class ReportActivity : BaseActivity<ReportActivityViewModel>(), DialogFinishedLi
         }
     }
 
-    override fun setUpObservers(vm: ReportActivityViewModel) {
+    override fun setUpObservers(vm: ReportViewModel) {
         super.setUpObservers(vm)
         vm.error.observe { it?.let { showSnackBar(progress, it, Snackbar.LENGTH_LONG) } }
         vm.loading.observe { progress.visible = (it == true) }
@@ -132,11 +133,11 @@ class ReportActivity : BaseActivity<ReportActivityViewModel>(), DialogFinishedLi
     }
 
     private fun gotoBrandSelect() {
-
+        startActivity(MakeActivity.getIntent(this, null))
     }
 
     private fun gotoModelSelect(brandId: UUID) {
-
+        startActivity(MakeActivity.getIntent(this, brandId))
     }
     //endregion
 

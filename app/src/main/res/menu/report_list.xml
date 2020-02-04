@@ -8,7 +8,7 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="always|collapseActionView" />
     <item
-        android:id="@+id/settings"
+        android:id="@+id/theme"
         android:icon="@drawable/ic_settings_brightness"
         android:title="@string/theme_settings"
         app:showAsAction="ifRoom" />

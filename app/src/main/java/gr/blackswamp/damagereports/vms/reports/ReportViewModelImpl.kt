@@ -24,15 +24,15 @@ import gr.blackswamp.damagereports.ui.reports.commands.ReportActivityCommand
 import gr.blackswamp.damagereports.ui.reports.commands.ReportListCommand
 import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.base.BaseViewModel
-import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportActivityViewModel
-import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportListViewModel
-import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportViewViewModel
+import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportListParent
+import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportViewModel
+import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportViewParent
 import kotlinx.coroutines.launch
 import org.koin.core.inject
 import java.util.*
 import kotlin.contracts.ExperimentalContracts
 
-class ReportViewModel(application: Application, runInit: Boolean = true) : BaseViewModel(application), ReportActivityViewModel, ReportListViewModel, ReportViewViewModel {
+class ReportViewModelImpl(application: Application, runInit: Boolean = true) : BaseViewModel(application), ReportViewModel, ReportListParent, ReportViewParent {
     companion object {
         const val TAG = "ReportViewModel"
         @VisibleForTesting

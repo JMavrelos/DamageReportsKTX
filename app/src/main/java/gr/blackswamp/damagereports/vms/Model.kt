@@ -1,5 +1,7 @@
 package gr.blackswamp.damagereports.vms
 
+import gr.blackswamp.damagereports.ui.model.Brand
+import gr.blackswamp.damagereports.ui.model.Model
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.ui.model.ReportHeader
 import java.util.*
@@ -19,8 +21,9 @@ data class ReportData(
 
 data class ReportHeaderData(override val id: UUID, override val name: String, override val description: String, override val date: Date) : ReportHeader
 
-data class BrandData(val id: UUID, val name: String)
+data class BrandData(override val id: UUID, override val name: String) : Brand
 
-data class ModelData(val id: UUID, val name: String, val brand: UUID)
+data class ModelData(override val id: UUID, override val name: String, override val brand: UUID) : Model
 
 data class PartData(val id: UUID, val name: String, val brand: UUID?, val model: UUID?, val price: Double)
+

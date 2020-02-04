@@ -1,8 +1,8 @@
-package gr.blackswamp.damagereports.ui.reports.adapters
+package gr.blackswamp.damagereports.ui.base
 
 import java.util.*
 
-interface ReportListAction {
+interface ListAction {
     fun delete(id: UUID)
     fun select(id: UUID)
     fun edit(id: UUID)

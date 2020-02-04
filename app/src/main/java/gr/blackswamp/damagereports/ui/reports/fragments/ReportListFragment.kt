@@ -23,42 +23,44 @@ import gr.blackswamp.core.widget.onClick
 import gr.blackswamp.core.widget.onNavigationClick
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
-import gr.blackswamp.damagereports.ui.reports.adapters.ReportListAction
+import gr.blackswamp.damagereports.ui.base.ListAction
 import gr.blackswamp.damagereports.ui.reports.adapters.ReportListAdapter
 import gr.blackswamp.damagereports.ui.reports.commands.ReportListCommand
-import gr.blackswamp.damagereports.vms.reports.ReportViewModel
-import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportListViewModel
+import gr.blackswamp.damagereports.vms.reports.ReportViewModelImpl
+import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportListParent
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 import java.util.*
 
-class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction {
+class ReportListFragment : CoreFragment<ReportListParent>(), ListAction {
     companion object {
         const val TAG = "ReportListFragment"
         fun newInstance(): Fragment = ReportListFragment()
     }
 
-    override val vm: ReportListViewModel by sharedViewModel<ReportViewModel>()
+    override val vm: ReportListParent by sharedViewModel<ReportViewModelImpl>()
     override val layoutId: Int = R.layout.fragment_report_list
 
+    //region view bindings
     private lateinit var refresh: SwipeRefreshLayout
     private lateinit var action: FloatingActionButton
     private lateinit var list: RecyclerView
-    private lateinit var adapter: ReportListAdapter
+    private val adapter = ReportListAdapter()
     private lateinit var toolbar: MaterialToolbar
-    private lateinit var settings: MenuItem
+    private lateinit var theme: MenuItem
     private lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
     private lateinit var darkTheme: View
     private lateinit var lightTheme: View
     private lateinit var systemTheme: View
     private lateinit var autoTheme: View
+    //endregion
 
+    //region set up
     override fun setUpBindings(view: View) {
         refresh = view.findViewById(R.id.refresh)
-        action = view.findViewById(R.id.add)
+        action = view.findViewById(R.id.action)
         list = view.findViewById(R.id.list)
-        adapter = ReportListAdapter()
         toolbar = view.findViewById(R.id.toolbar)
-        settings = toolbar.menu.findItem(R.id.settings)
+        theme = toolbar.menu.findItem(R.id.theme)
         val themeSelection = view.findViewById<LinearLayout>(R.id.theme_selection)
         sheetBehavior = BottomSheetBehavior.from(themeSelection)
         darkTheme = view.findViewById(R.id.dark)
@@ -77,7 +79,7 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
         action.onClick(this::actionClick)
         refresh.setOnRefreshListener { vm.reloadReports() }
         (toolbar.menu?.findItem(R.id.search_reports)?.actionView as? SearchView)?.setOnQueryTextListener(SearchListener(this::newFilter))
-        toolbar.menu?.findItem(R.id.settings)?.onClick(vm::showThemeSettings)
+        toolbar.menu?.findItem(R.id.theme)?.onClick(vm::showThemeSettings)
         toolbar.onNavigationClick(this::backClicked)
         darkTheme.onClick { vm.changeTheme(ThemeSetting.Dark) }
         lightTheme.onClick { vm.changeTheme(ThemeSetting.Light) }
@@ -86,7 +88,7 @@ class ReportListFragment : CoreFragment<ReportListViewModel>(), ReportListAction
         sheetBehavior.addBottomSheetCallback(bottomSheetCallback)
     }
 
-    override fun setUpObservers(vm: ReportListViewModel) {
+    override fun setUpObservers(vm: ReportListParent) {
         vm.reportHeaderList.observe(adapter::submitList)
         vm.refreshing.observe {
             if (it == false)

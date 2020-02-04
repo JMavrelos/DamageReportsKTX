@@ -5,10 +5,9 @@ import androidx.paging.PagedList
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.ui.model.ReportHeader
 import gr.blackswamp.damagereports.ui.reports.commands.ReportListCommand
-import gr.blackswamp.damagereports.vms.base.IBaseViewModel
 import java.util.*
 
-interface ReportListViewModel : IBaseViewModel {
+interface ReportListParent {
     val refreshing: LiveData<Boolean>
     var reportHeaderList: LiveData<PagedList<ReportHeader>>
     val listCommand: LiveData<ReportListCommand>

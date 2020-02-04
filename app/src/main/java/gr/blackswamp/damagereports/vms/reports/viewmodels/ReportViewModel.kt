@@ -5,7 +5,7 @@ import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.ui.reports.commands.ReportActivityCommand
 import gr.blackswamp.damagereports.vms.base.IBaseViewModel
 
-interface ReportActivityViewModel : IBaseViewModel {
+interface ReportViewModel : IBaseViewModel {
     val report: LiveData<Report>
     val showUndo: LiveData<Boolean>
     val loading: LiveData<Boolean>

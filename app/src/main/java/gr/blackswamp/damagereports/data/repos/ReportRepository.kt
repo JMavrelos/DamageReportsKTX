@@ -17,7 +17,7 @@ interface ReportRepository : BaseRepository {
     suspend fun switchTheme()
 
     /**
-     * gets a list of report headers according to a filter
+     * gets a make_list of report headers according to a filter
      * @return a data source with the report header entities
      */
     fun getReportHeaders(filter: String): Response<DataSource.Factory<Int, ReportHeaderData>>
