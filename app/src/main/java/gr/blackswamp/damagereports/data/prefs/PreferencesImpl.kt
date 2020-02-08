@@ -23,7 +23,7 @@ class PreferencesImpl(app: Application) : Preferences, SharedPreferences.OnShare
     private val prefs = app.getSharedPreferences(App.PREFS_NAME, MODE_PRIVATE)
 
     override var themeSetting: ThemeSetting
-        get() = prefs.getString(KEY_THEME, system_value).toThemeMode()
+        get() = prefs.getString(KEY_THEME, system_value).toThemeSetting()
         set(value) = prefs.edit().putString(KEY_THEME, value.toValue()).apply()
 
     override val themeSettingLive = MutableLiveData<ThemeSetting>()
@@ -43,7 +43,7 @@ class PreferencesImpl(app: Application) : Preferences, SharedPreferences.OnShare
         }
     }
 
-    private fun String?.toThemeMode(): ThemeSetting {
+    private fun String?.toThemeSetting(): ThemeSetting {
         return when (this) {
             dark_value -> ThemeSetting.Dark
             light_value -> ThemeSetting.Light

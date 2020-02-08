@@ -7,6 +7,7 @@ import gr.blackswamp.core.util.getUUIDExtra
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.ui.base.BaseActivity
 import gr.blackswamp.damagereports.ui.make.fragments.BrandFragment
+import gr.blackswamp.damagereports.ui.make.fragments.ModelFragment
 import gr.blackswamp.damagereports.vms.make.MakeViewModelImpl
 import gr.blackswamp.damagereports.vms.make.viewmodels.MakeViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -40,10 +41,17 @@ class MakeActivity : BaseActivity<MakeViewModel>() {
 
     override fun initView(state: Bundle?) {
         if (state == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.content, BrandFragment.newInstance(), BrandFragment.TAG)
-                .commit()
+            if (intent.getUUIDExtra(BRAND) != null) {
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.content, ModelFragment.newInstance(), ModelFragment.TAG)
+                    .commit()
+            } else {
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.content, BrandFragment.newInstance(), BrandFragment.TAG)
+                    .commit()
+            }
         }
     }
 

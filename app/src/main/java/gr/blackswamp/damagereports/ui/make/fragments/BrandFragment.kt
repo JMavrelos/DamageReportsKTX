@@ -1,13 +1,12 @@
 package gr.blackswamp.damagereports.ui.make.fragments
 
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
-import android.widget.Toast
 import androidx.appcompat.widget.SearchView
-import androidx.core.view.marginEnd
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -23,7 +22,7 @@ import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.ui.base.ListAction
 import gr.blackswamp.damagereports.ui.make.adapters.BrandAdapter
 import gr.blackswamp.damagereports.ui.model.Brand
-import gr.blackswamp.damagereports.vms.BrandData
+import gr.blackswamp.damagereports.ui.moveBy
 import gr.blackswamp.damagereports.vms.make.MakeViewModelImpl
 import gr.blackswamp.damagereports.vms.make.viewmodels.BrandParent
 import org.koin.android.viewmodel.ext.android.sharedViewModel
@@ -50,6 +49,7 @@ class BrandFragment : CoreFragment<BrandParent>(), ListAction {
     private lateinit var sheetBehavior: BottomSheetBehavior<FrameLayout>
     private lateinit var byUse: MenuItem
     private lateinit var byName: MenuItem
+    private var screenWidth: Int = 0
     //endregion
 
     //region set up
@@ -64,6 +64,10 @@ class BrandFragment : CoreFragment<BrandParent>(), ListAction {
         byUse = toolbar.menu.findItem(R.id.sort_use)
         val brandInput = view.findViewById<FrameLayout>(R.id.create)
         sheetBehavior = BottomSheetBehavior.from(brandInput)
+        val metrics = DisplayMetrics()
+        activity?.windowManager?.defaultDisplay?.getMetrics(metrics)
+        screenWidth = metrics.widthPixels
+
     }
 
     override fun initView(state: Bundle?) {
@@ -84,8 +88,9 @@ class BrandFragment : CoreFragment<BrandParent>(), ListAction {
     }
 
     override fun setUpObservers(vm: BrandParent) {
-
+        vm.brand.observe(this::showBrand)
     }
+
     //endregion
 
     //region listeners
@@ -102,7 +107,7 @@ class BrandFragment : CoreFragment<BrandParent>(), ListAction {
     }
 
     private fun toggleByUse() {
-        showBrand(BrandData(UUID.randomUUID(), "test"))
+        vm.editBrand(UUID.randomUUID())
     }
 
     private fun toggleByName() {
@@ -111,10 +116,9 @@ class BrandFragment : CoreFragment<BrandParent>(), ListAction {
 
     private fun actionClick() {
         if (sheetBehavior.state == STATE_EXPANDED) {
-            Toast.makeText(activity!!, "Save", Toast.LENGTH_LONG).show()
-            showBrand(null)
+            vm.saveBrand(name.text.toString())
         } else {
-            showBrand(BrandData(UUID.randomUUID(), ""))
+            vm.newBrand()
         }
     }
 
@@ -131,44 +135,51 @@ class BrandFragment : CoreFragment<BrandParent>(), ListAction {
     }
 
     private fun cancelEdit() {
-        showBrand(null)
+        vm.cancelBrand()
     }
 
     private val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            if (isAdded) {
-                //this where the cancel button should move to
-                val offset = ((this@BrandFragment.view?.measuredWidth ?: 0) - action.width - (action.paddingEnd * 2) - (action.marginEnd * 2)) / 2
-                cancel.rotation = (-slideOffset * 360f)
-                cancel.alpha = abs(slideOffset)
-                cancel.visible = slideOffset > 0f
-                cancel.translationX = (slideOffset * (-offset))
-
-                action.rotation = (slideOffset * 360f)
-                if (slideOffset == 1f) {
-                    action.setImageResource(R.drawable.ic_save)
-                } else if (slideOffset <= 0f) {
-                    action.setImageResource(R.drawable.ic_add)
-                }
+            if (isAdded && slideOffset > 0f && slideOffset < 1f) {
+                updateCancelButton(slideOffset)
+                updateActionButton(slideOffset)
             }
         }
 
-        override fun onStateChanged(bottomSheet: View, newState: Int) {}
+        override fun onStateChanged(bottomSheet: View, newState: Int) = Unit
 
     }
     //region listeners
 
     //region private functions
+    private fun updateCancelButton(slideOffset: Float) {
+        cancel.rotation = (-slideOffset * 360f)
+        cancel.alpha = abs(slideOffset)
+        cancel.visible = slideOffset > 0f
+        cancel.moveBy(slideOffset, screenWidth / 2)
+    }
+
+    private fun updateActionButton(slideOffset: Float) {
+        action.rotation = (slideOffset * 360f)
+        if (slideOffset == 1f) {
+            action.setImageResource(R.drawable.ic_save)
+        } else if (slideOffset <= 0f) {
+            action.setImageResource(R.drawable.ic_add)
+        }
+    }
+
     private fun showBrand(brand: Brand?) {
         if (brand == null) {
+            updateActionButton(0f)
+            updateCancelButton(0f)
             sheetBehavior.state = STATE_COLLAPSED
         } else {
+            updateActionButton(1f)
+            updateCancelButton(1f)
             name.setText(brand.name)
             name.selectAll()
             sheetBehavior.state = STATE_EXPANDED
         }
     }
-
     //endregion
-
 }

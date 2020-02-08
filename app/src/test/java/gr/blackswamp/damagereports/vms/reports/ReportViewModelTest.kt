@@ -3,6 +3,7 @@ package gr.blackswamp.damagereports.vms.reports
 import android.database.sqlite.SQLiteException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import gr.blackswamp.core.coroutines.IDispatchers
@@ -19,7 +20,6 @@ import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.repos.ReportRepository
 import gr.blackswamp.damagereports.data.toData
 import gr.blackswamp.damagereports.ui.reports.commands.ReportActivityCommand
-import gr.blackswamp.damagereports.ui.reports.commands.ReportListCommand
 import gr.blackswamp.damagereports.vms.BrandData
 import gr.blackswamp.damagereports.vms.ModelData
 import gr.blackswamp.damagereports.vms.ReportData
@@ -501,32 +501,41 @@ class ReportViewModelTest : AndroidKoinTest() {
         vm.changeTheme(ThemeSetting.Auto)
 
         verify(repo).setTheme(ThemeSetting.Auto)
-        assertTrue(vm.listCommand.value is ReportListCommand.ShowThemeSelection)
-        assertNull((vm.listCommand.value as ReportListCommand.ShowThemeSelection).current)
+        assertNull(vm.themeSelection.value)
 
         reset(repo)
 
         vm.changeTheme(ThemeSetting.System)
 
         verify(repo).setTheme(ThemeSetting.System)
-        assertTrue(vm.listCommand.value is ReportListCommand.ShowThemeSelection)
-        assertNull((vm.listCommand.value as ReportListCommand.ShowThemeSelection).current)
+        assertNull(vm.themeSelection.value)
 
         reset(repo)
 
         vm.changeTheme(ThemeSetting.Light)
 
         verify(repo).setTheme(ThemeSetting.Light)
-        assertTrue(vm.listCommand.value is ReportListCommand.ShowThemeSelection)
-        assertNull((vm.listCommand.value as ReportListCommand.ShowThemeSelection).current)
+        assertNull(vm.themeSelection.value)
 
         reset(repo)
 
         vm.changeTheme(ThemeSetting.Dark)
 
         verify(repo).setTheme(ThemeSetting.Dark)
-        assertTrue(vm.listCommand.value is ReportListCommand.ShowThemeSelection)
-        assertNull((vm.listCommand.value as ReportListCommand.ShowThemeSelection).current)
+        assertNull(vm.themeSelection.value)
+    }
 
+    @Test
+    fun `verify the interaction of opening and closing the theme`() {
+        whenever(repo.themeSetting).thenReturn(ThemeSetting.System)
+        vm.showThemeSettings()
+
+        verify(repo).themeSetting
+        assertEquals(ThemeSetting.System, vm.themeSelection.value)
+
+        vm.closeThemeSelection()
+
+        verifyNoMoreInteractions(repo)
+        assertNull(vm.themeSelection.value)
     }
 }

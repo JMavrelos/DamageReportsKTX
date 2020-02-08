@@ -1,12 +1,12 @@
 package gr.blackswamp.damagereports.ui.reports.fragments
 
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
-import androidx.core.view.marginEnd
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -24,11 +24,12 @@ import gr.blackswamp.core.widget.onNavigationClick
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.ui.base.ListAction
+import gr.blackswamp.damagereports.ui.moveBy
 import gr.blackswamp.damagereports.ui.reports.adapters.ReportListAdapter
-import gr.blackswamp.damagereports.ui.reports.commands.ReportListCommand
 import gr.blackswamp.damagereports.vms.reports.ReportViewModelImpl
 import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportListParent
 import org.koin.android.viewmodel.ext.android.sharedViewModel
+import timber.log.Timber
 import java.util.*
 
 class ReportListFragment : CoreFragment<ReportListParent>(), ListAction {
@@ -47,11 +48,13 @@ class ReportListFragment : CoreFragment<ReportListParent>(), ListAction {
     private val adapter = ReportListAdapter()
     private lateinit var toolbar: MaterialToolbar
     private lateinit var theme: MenuItem
+    private lateinit var themeSelection: LinearLayout
     private lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
     private lateinit var darkTheme: View
     private lateinit var lightTheme: View
     private lateinit var systemTheme: View
     private lateinit var autoTheme: View
+    private var screenWidth: Int = 0
     //endregion
 
     //region set up
@@ -61,12 +64,15 @@ class ReportListFragment : CoreFragment<ReportListParent>(), ListAction {
         list = view.findViewById(R.id.list)
         toolbar = view.findViewById(R.id.toolbar)
         theme = toolbar.menu.findItem(R.id.theme)
-        val themeSelection = view.findViewById<LinearLayout>(R.id.theme_selection)
+        themeSelection = view.findViewById(R.id.theme_selection)
         sheetBehavior = BottomSheetBehavior.from(themeSelection)
         darkTheme = view.findViewById(R.id.dark)
         lightTheme = view.findViewById(R.id.light)
         systemTheme = view.findViewById(R.id.system)
         autoTheme = view.findViewById(R.id.auto)
+        val metrics = DisplayMetrics()
+        activity?.windowManager?.defaultDisplay?.getMetrics(metrics)
+        screenWidth = metrics.widthPixels
     }
 
     override fun initView(state: Bundle?) {
@@ -94,30 +100,29 @@ class ReportListFragment : CoreFragment<ReportListParent>(), ListAction {
             if (it == false)
                 refresh.isRefreshing = false
         }
-        vm.listCommand.observe(this::executeCommand)
+        vm.themeSelection.observe(this::updateBottomSheet)
     }
+
     //endregion
 
     //region listeners
 
     private val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            if (isAdded) {
-                action.rotation = (-slideOffset * 135f)
-                val offset = ((this@ReportListFragment.view?.measuredWidth ?: 0) - action.width - (action.paddingEnd * 2) - (action.marginEnd * 2)) / 2
-                action.translationX = (slideOffset * (-offset))
+            Timber.d("Sliding $slideOffset")
+            if (isAdded && slideOffset > 0f && slideOffset < 1f) {
+                updateActionButton(slideOffset)
             }
         }
 
-        override fun onStateChanged(bottomSheet: View, newState: Int) {}
-
+        override fun onStateChanged(bottomSheet: View, newState: Int) = Unit
     }
 
     private fun actionClick() {
         if (sheetBehavior.state == STATE_COLLAPSED) {
             vm.newReport()
         } else {
-            updateBottomSheet(null)
+            vm.closeThemeSelection()
         }
     }
 
@@ -126,25 +131,27 @@ class ReportListFragment : CoreFragment<ReportListParent>(), ListAction {
     private fun backClicked() {
         Toast.makeText(activity!!, "BACK", Toast.LENGTH_LONG).show()
     }
-
-    private fun executeCommand(cmd: ReportListCommand?) {
-        if (cmd is ReportListCommand.ShowThemeSelection) {
-            updateBottomSheet(cmd.current)
-        }
-    }
     //endregion
 
     //region commands
     private fun updateBottomSheet(setting: ThemeSetting?) {
         if (setting != null) {
+            updateActionButton(1f)
+            sheetBehavior.saveFlags
             sheetBehavior.state = STATE_EXPANDED
             darkTheme.isActivated = setting == ThemeSetting.Dark
             lightTheme.isActivated = setting == ThemeSetting.Light
             systemTheme.isActivated = setting == ThemeSetting.System
             autoTheme.isActivated = setting == ThemeSetting.Auto
         } else {
+            updateActionButton(0f)
             sheetBehavior.state = STATE_COLLAPSED
         }
+    }
+
+    private fun updateActionButton(slideOffset: Float) {
+        action.rotation = (-slideOffset * 135f)
+        action.moveBy(slideOffset, screenWidth / 2)
     }
     //endregion
 

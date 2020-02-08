@@ -20,7 +20,6 @@ import gr.blackswamp.damagereports.data.repos.ReportRepository
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.ui.model.ReportHeader
 import gr.blackswamp.damagereports.ui.reports.commands.ReportActivityCommand
-import gr.blackswamp.damagereports.ui.reports.commands.ReportListCommand
 import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.base.BaseViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportListParent
@@ -63,7 +62,7 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
     override val report = MutableLiveData<Report>() // this is used for showing (if needed) the correct fragment and updating the view fragment's data
 
     override fun showThemeSettings() {
-        listCommand.postValue(ReportListCommand.ShowThemeSelection(repo.themeSetting))
+        themeSelection.postValue(repo.themeSetting)
     }
 
     override fun backPressed() {
@@ -84,7 +83,8 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
 
     override var reportHeaderList: LiveData<PagedList<ReportHeader>> =
         Transformations.switchMap(filter, this::dbHeaderToUi)
-    override val listCommand = LiveEvent<ReportListCommand>()
+
+    override val themeSelection = MutableLiveData<ThemeSetting>(null)
 
     override val refreshing = MutableLiveData<Boolean>()
 
@@ -180,7 +180,11 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
 
     override fun changeTheme(theme: ThemeSetting) {
         repo.setTheme(theme)
-        listCommand.postValue(ReportListCommand.ShowThemeSelection(null))
+        themeSelection.postValue(null)
+    }
+
+    override fun closeThemeSelection() {
+        themeSelection.postValue(null)
     }
 
     //endregion
@@ -197,11 +201,13 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
 
     override fun pickModel() {
         val current = report.value as? ReportData ?: return
-        if (current.brand == null) {
-            error.setValue(getString(R.string.error_no_brand_selected))
-            return
-        }
-        activityCommand.postValue(ReportActivityCommand.ShowModelSelection(current.brand.id))
+        activityCommand.postValue(ReportActivityCommand.ShowModelSelection(UUID.randomUUID()))
+        //todo:re-enable this after ui tests finish
+//        if (current.brand == null) {
+//            error.setValue(getString(R.string.error_no_brand_selected))
+//            return
+//        }
+//        activityCommand.postValue(ReportActivityCommand.ShowModelSelection(current.brand.id))
     }
 
     override fun nameChanged(name: String) {

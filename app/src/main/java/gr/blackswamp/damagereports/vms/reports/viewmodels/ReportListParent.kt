@@ -4,13 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.paging.PagedList
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.ui.model.ReportHeader
-import gr.blackswamp.damagereports.ui.reports.commands.ReportListCommand
 import java.util.*
 
 interface ReportListParent {
+    val themeSelection: LiveData<ThemeSetting>
     val refreshing: LiveData<Boolean>
     var reportHeaderList: LiveData<PagedList<ReportHeader>>
-    val listCommand: LiveData<ReportListCommand>
 
     fun newReport()
     fun reloadReports()
@@ -20,4 +19,5 @@ interface ReportListParent {
     fun editReport(id: UUID)
     fun showThemeSettings()
     fun changeTheme(theme: ThemeSetting)
+    fun closeThemeSelection()
 }
