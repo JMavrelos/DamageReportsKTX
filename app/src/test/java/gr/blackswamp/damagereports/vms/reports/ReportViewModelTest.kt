@@ -8,12 +8,10 @@ import com.nhaarman.mockitokotlin2.whenever
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.core.db.paging.StaticDataSource
-import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.core.test
 import gr.blackswamp.core.testing.AndroidKoinTest
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatchers
-import gr.blackswamp.core.testing.TestLog
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.UnitTestData
@@ -49,7 +47,6 @@ class ReportViewModelTest : AndroidKoinTest() {
     private val repo: ReportRepository = mock(ReportRepository::class.java)
     override val modules: Module = module {
         single<IDispatchers> { TestDispatchers }
-        single<ILog> { TestLog }
         single { repo }
     }
 

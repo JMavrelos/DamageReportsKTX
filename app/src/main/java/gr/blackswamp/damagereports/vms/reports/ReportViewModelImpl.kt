@@ -10,9 +10,8 @@ import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.db.paging.StaticDataSource
-import gr.blackswamp.core.lifecycle.SingleLiveEvent
+import gr.blackswamp.core.lifecycle.LiveEvent
 import gr.blackswamp.core.lifecycle.call
-import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.util.isNullOrBlank
 import gr.blackswamp.damagereports.R
@@ -29,6 +28,7 @@ import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportViewModel
 import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportViewParent
 import kotlinx.coroutines.launch
 import org.koin.core.inject
+import timber.log.Timber
 import java.util.*
 import kotlin.contracts.ExperimentalContracts
 
@@ -39,7 +39,6 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
         internal const val LIST_PAGE_SIZE = 30
     }
 
-    private val log: ILog by inject()
     private val repo: ReportRepository by inject()
     private val dispatchers: IDispatchers by inject()
     @VisibleForTesting
@@ -59,8 +58,8 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
 
     //region IReportActivityViewModel implementation
     override val loading = MutableLiveData<Boolean>()
-    override val error = SingleLiveEvent<String>()
-    override val activityCommand = SingleLiveEvent<ReportActivityCommand>()
+    override val error = LiveEvent<String>()
+    override val activityCommand = LiveEvent<ReportActivityCommand>()
     override val report = MutableLiveData<Report>() // this is used for showing (if needed) the correct fragment and updating the view fragment's data
 
     override fun showThemeSettings() {
@@ -85,19 +84,19 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
 
     override var reportHeaderList: LiveData<PagedList<ReportHeader>> =
         Transformations.switchMap(filter, this::dbHeaderToUi)
-    override val listCommand = SingleLiveEvent<ReportListCommand>()
+    override val listCommand = LiveEvent<ReportListCommand>()
 
     override val refreshing = MutableLiveData<Boolean>()
 
     private fun dbHeaderToUi(filter: String?): LiveData<PagedList<ReportHeader>> {
-        log.d(TAG, "transforming for \"$filter\"")
+        Timber.d(TAG, "transforming for \"$filter\"")
         val response = repo.getReportHeaders(filter ?: "")
         return if (response.hasError) {
             error.postValue(response.errorMessage)
             StaticDataSource.factory(listOf<ReportHeader>())
         } else {
             response.get.map {
-                log.d(TAG, "Loaded $it")
+                Timber.d(TAG, "Loaded $it")
                 it as ReportHeader
             }
         }.toLiveData(pageSize = LIST_PAGE_SIZE)

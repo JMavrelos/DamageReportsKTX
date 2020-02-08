@@ -54,22 +54,20 @@ class ReportRepositoryImpl : BaseRepositoryImpl(), ReportRepository, KoinCompone
     }
 
     override suspend fun loadReport(id: UUID): Response<ReportData> {
-        return withContext(dispatchers.IO) {
-            try {
-                val report = db.reportDao.loadReportById(id) ?: return@withContext Response.failure<ReportData>(getString(R.string.error_report_not_found, id))
-                val brand = db.brandDao.loadBrandById(report.brand) ?: return@withContext Response.failure<ReportData>(getString(R.string.error_brand_not_found, report.brand))
-                val model = db.modelDao.loadModelById(report.model) ?: return@withContext Response.failure<ReportData>(getString(R.string.error_model_not_found, report.model))
-                if (model.brand != brand.id) return@withContext Response.failure<ReportData>(getString(R.string.error_invalid_model_brand))
-                Response.success(report.toData(brand, model))
-            } catch (t: Throwable) {
-                Response.failure<ReportData>(getString(R.string.error_loading_report, id), t)
-            }
+        return try {
+            val report = db.reportDao.loadReportById(id) ?: return Response.failure(getString(R.string.error_report_not_found, id))
+            val brand = db.brandDao.loadBrandById(report.brand) ?: return Response.failure(getString(R.string.error_brand_not_found, report.brand))
+            val model = db.modelDao.loadModelById(report.model) ?: return Response.failure(getString(R.string.error_model_not_found, report.model))
+            if (model.brand != brand.id) return Response.failure(getString(R.string.error_invalid_model_brand))
+            Response.success(report.toData(brand, model))
+        } catch (t: Throwable) {
+            Response.failure(getString(R.string.error_loading_report, id), t)
         }
     }
 
     override suspend fun deleteReport(id: UUID): Response<Unit> {
         return try {
-            val affected = withContext(dispatchers.IO) { db.reportDao.flagReportDeleted(id) }
+            val affected = db.reportDao.flagReportDeleted(id)
             if (affected == 0)
                 return Response.failure(getString(R.string.error_report_not_found, id))
             Response.success()
@@ -80,7 +78,7 @@ class ReportRepositoryImpl : BaseRepositoryImpl(), ReportRepository, KoinCompone
 
     override suspend fun unDeleteReport(id: UUID): Response<Unit> {
         return try {
-            val affected = withContext(dispatchers.IO) { db.reportDao.unFlagReportDeleted(id) }
+            val affected = db.reportDao.unFlagReportDeleted(id)
             if (affected == 0)
                 return Response.failure(getString(R.string.error_no_deleted_report, id))
             Response.success()

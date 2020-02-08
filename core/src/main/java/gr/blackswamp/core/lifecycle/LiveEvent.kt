@@ -4,11 +4,10 @@ import androidx.annotation.MainThread
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import gr.blackswamp.core.logging.AppLog
-import gr.blackswamp.core.logging.ILog
+import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 
-class SingleLiveEvent<T>(private val log: ILog = AppLog) : MutableLiveData<T>() {
+class LiveEvent<T> : MutableLiveData<T>() {
     companion object {
         const val TAG = "SingleLiveEvent"
     }
@@ -18,7 +17,7 @@ class SingleLiveEvent<T>(private val log: ILog = AppLog) : MutableLiveData<T>() 
     @MainThread
     override fun observe(owner: LifecycleOwner, observer: Observer<in T>) {
         if (hasActiveObservers()) {
-            log.w(TAG, "Multiple observers registered but only one will be notified of changes.")
+            Timber.w("Multiple observers registered but only one will be notified of changes.")
         }
         super.observe(owner, Observer {
             if (pending.compareAndSet(true, false)) {
@@ -47,6 +46,6 @@ class SingleLiveEvent<T>(private val log: ILog = AppLog) : MutableLiveData<T>() 
     }
 }
 
-fun SingleLiveEvent<Unit>.call() {
+fun LiveEvent<Unit>.call() {
     this.setValue(Unit)
 }

@@ -3,8 +3,6 @@ package gr.blackswamp.damagereports.di
 import androidx.room.Room
 import gr.blackswamp.core.coroutines.AppDispatchers
 import gr.blackswamp.core.coroutines.IDispatchers
-import gr.blackswamp.core.logging.AppLog
-import gr.blackswamp.core.logging.ILog
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.AppDatabaseImpl
 import gr.blackswamp.damagereports.data.prefs.Preferences
@@ -19,7 +17,6 @@ import org.koin.dsl.module
 
 val applicationModule = module {
     single<IDispatchers> { AppDispatchers }
-    single<ILog> { AppLog }
     single<Preferences> { PreferencesImpl(androidApplication()) }
     single<AppDatabase> {
         Room.databaseBuilder(androidContext(), AppDatabaseImpl::class.java, AppDatabaseImpl.DATABASE)
@@ -34,5 +31,5 @@ val applicationModule = module {
 
     viewModel { ReportViewModelImpl(androidApplication(), true) }
 
-    viewModel { MakeViewModelImpl(androidApplication()) }
+    viewModel { paramList -> MakeViewModelImpl(androidApplication(), paramList[0]) }
 }
