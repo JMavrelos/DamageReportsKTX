@@ -9,10 +9,10 @@ import com.nhaarman.mockitokotlin2.whenever
 import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.core.db.paging.StaticDataSource
-import gr.blackswamp.core.test
 import gr.blackswamp.core.testing.AndroidKoinTest
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatchers
+import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.UnitTestData
@@ -68,46 +68,43 @@ class ReportViewModelTest : AndroidKoinTest() {
     fun `load reports with no filter from the start`() {
         assertNull(vm.filter.value)
         assertNull(vm.reportHeaderList.value)
-        vm.reportHeaderList.test()
+
         whenever(repo.getReportHeaders("")).thenReturn(Response.success(StaticDataSource.factory(listOf())))
 
         vm.initialize()
+
+        assertEquals(0, vm.reportHeaderList.getOrAwait().count())
         assertEquals("", vm.filter.value)
         verify(repo).getReportHeaders("")
-        assertEquals(0, vm.reportHeaderList.value!!.count())
     }
 
     @Test
     fun `when there is an error while loading show an empty list and pop a message`() {
         assertNull(vm.filter.value)
         assertNull(vm.reportHeaderList.value)
-        vm.reportHeaderList.test()
+
         val error = SQLiteException("Hello world")
         whenever(repo.getReportHeaders(FILTER)).thenReturn(Response.failure(error))
 
         vm.newReportFilter(FILTER, true)
 
         assertEquals(FILTER, vm.filter.value)
+        assertEquals(0, vm.reportHeaderList.getOrAwait().count())
         verify(repo).getReportHeaders(FILTER)
-        assertEquals(0, vm.reportHeaderList.value!!.count())
     }
 
     @Test
     fun `when the filter changes the results change`() {
         assertNull(vm.filter.value)
         assertNull(vm.reportHeaderList.value)
-        vm.reportHeaderList.test()
         val expected = UnitTestData.REPORT_HEADERS.map { it.toData() }
-
         whenever(repo.getReportHeaders(FILTER)).thenReturn(Response.success(StaticDataSource.factory(expected, false)))
 
         vm.newReportFilter(FILTER, true)
 
+        val values = vm.reportHeaderList.getOrAwait().toList()
         assertEquals(FILTER, vm.filter.value)
         verify(repo).getReportHeaders(FILTER)
-
-        val values = vm.reportHeaderList.value!!.toList()
-
         assertEquals(LIST_PAGE_SIZE * 3, values.size)
         assertEquals(LIST_PAGE_SIZE * 3, expected.map { it.id }.intersect(values.map { it.id }).size)
 
@@ -118,12 +115,11 @@ class ReportViewModelTest : AndroidKoinTest() {
         runBlockingTest {
             val deleted = UnitTestData.REPORT_HEADERS.random()
             whenever(repo.deleteReport(deleted.id)).thenReturn(Response.success())
-            vm.showUndo.test() //we add an observer otherwise it won't trigger
 
             vm.deleteReport(deleted.id)
 
             assertFalse(vm.loading.value!!)
-            assertTrue(vm.showUndo.value!!)
+            assertTrue(vm.showUndo.getOrAwait())
             assertEquals(deleted.id, vm.lastDeleted.value)
         }
     }
@@ -133,14 +129,13 @@ class ReportViewModelTest : AndroidKoinTest() {
         runBlockingTest {
             val deleted = UnitTestData.REPORT_HEADERS.random()
             whenever(repo.deleteReport(deleted.id)).thenReturn(Response.failure(ERROR))
-            vm.showUndo.test()
 
             vm.deleteReport(deleted.id)
 
             verify(repo).deleteReport(deleted.id)
             assertEquals(ERROR, vm.error.value)
             assertFalse(vm.loading.value!!)
-            assertFalse(vm.showUndo.value ?: false)
+            assertFalse(vm.showUndo.getOrAwait())
         }
     }
 
@@ -489,7 +484,6 @@ class ReportViewModelTest : AndroidKoinTest() {
         vm.report.value = ReportData(id, "name", "descr", BrandData(brandId, "brand name"), null, Date(0), true)
 
         vm.pickModel()
-
 
         assertTrue(vm.activityCommand.value is ReportActivityCommand.ShowModelSelection)
 

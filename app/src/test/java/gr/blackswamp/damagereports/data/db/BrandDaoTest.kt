@@ -6,8 +6,8 @@ import androidx.room.Room
 import androidx.room.paging.LimitOffsetDataSource
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import gr.blackswamp.core.count
-import gr.blackswamp.core.countWhere
+import gr.blackswamp.core.db.count
+import gr.blackswamp.core.db.countWhere
 import gr.blackswamp.damagereports.TestApp
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.db.dao.BrandDao

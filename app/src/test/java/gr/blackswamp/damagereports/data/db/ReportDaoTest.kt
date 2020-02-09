@@ -7,8 +7,8 @@ import androidx.room.Room
 import androidx.room.paging.LimitOffsetDataSource
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import gr.blackswamp.core.countWhere
-import gr.blackswamp.core.test
+import gr.blackswamp.core.db.countWhere
+import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.damagereports.TestApp
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.db.dao.ReportDao
@@ -292,17 +292,19 @@ class ReportDaoTest {
     fun `flagging a report as deleted retriggers the paging query source`() {
         runBlockingTest {
             initData()
-            val source = dao.loadReportHeaders("").toLiveData(1000).apply { test() }
+            val source = dao.loadReportHeaders("").toLiveData(1000)
+            var value = source.getOrAwait()
 
             //+1 because of the separator
-            assertEquals(UnitTestData.REPORTS.size + 1, source.value!!.size)
+            assertEquals(UnitTestData.REPORTS.size + 1, value.size)
 
             val toDelete = UnitTestData.REPORTS.random()
 
             dao.flagReportDeleted(toDelete.id)
 
+            value = source.getOrAwait()
             //+1 because of the separator
-            assertEquals(UnitTestData.REPORTS.size, source.value!!.size)
+            assertEquals(UnitTestData.REPORTS.size, value.size)
         }
     }
 

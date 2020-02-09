@@ -28,6 +28,8 @@ dependencies {
 
     implementation deps.arch_core.testing
 
+    implementation deps.lifecycle.livedata //lifecycle
+
     implementation deps.kotlin.stdlib //kotlin
 
     implementation deps.junit // Junit
@@ -38,5 +40,5 @@ dependencies {
 
     implementation deps.timber //timber
 
-    implementation deps.mockito.kotlin // Mockito
+    implementation deps.mockito.kotlin
 }

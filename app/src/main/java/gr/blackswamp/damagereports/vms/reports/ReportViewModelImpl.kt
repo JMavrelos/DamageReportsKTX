@@ -202,12 +202,11 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
     override fun pickModel() {
         val current = report.value as? ReportData ?: return
         activityCommand.postValue(ReportActivityCommand.ShowModelSelection(UUID.randomUUID()))
-        //todo:re-enable this after ui tests finish
-//        if (current.brand == null) {
-//            error.setValue(getString(R.string.error_no_brand_selected))
-//            return
-//        }
-//        activityCommand.postValue(ReportActivityCommand.ShowModelSelection(current.brand.id))
+        if (current.brand == null) {
+            error.setValue(getString(R.string.error_no_brand_selected))
+            return
+        }
+        activityCommand.postValue(ReportActivityCommand.ShowModelSelection(current.brand.id))
     }
 
     override fun nameChanged(name: String) {
