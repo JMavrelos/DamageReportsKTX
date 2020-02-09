@@ -106,7 +106,7 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
         viewModelScope.launch(dispatchers.UI) {
             try {
                 loading.postValue(true)
-                repo.deleteReport(id).throwOrGet()
+                repo.deleteReport(id).getOrThrow
                 lastDeleted.postValue(id)
             } catch (t: Throwable) {
                 error.postValue(t.message ?: getString(R.string.error_deleting, id))
@@ -129,7 +129,7 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
                     throw Throwable(getString(R.string.error_un_deleting_no_saved_value))
                 }
                 loading.postValue(true)
-                repo.unDeleteReport(last).throwOrGet()
+                repo.unDeleteReport(last).getOrThrow
             } catch (t: Throwable) {
                 error.postValue(t.message ?: getString(R.string.error_un_deleting, last))
             } finally {
@@ -147,7 +147,7 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
         viewModelScope.launch(dispatchers.UI) {
             loading.postValue(true)
             try {
-                val data = repo.loadReport(id).throwOrGet()
+                val data = repo.loadReport(id).getOrThrow
                 editMode.postValue(inEditMode)
                 report.postValue(data)
             } catch (t: Throwable) {

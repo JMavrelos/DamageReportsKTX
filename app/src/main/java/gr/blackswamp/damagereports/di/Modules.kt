@@ -31,5 +31,5 @@ val applicationModule = module {
 
     viewModel { ReportViewModelImpl(androidApplication(), true) }
 
-    viewModel { paramList -> MakeViewModelImpl(androidApplication(), paramList[0]) }
+    viewModel { paramList -> MakeViewModelImpl(androidApplication(), paramList[0], true) }
 }

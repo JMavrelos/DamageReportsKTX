@@ -4,10 +4,17 @@ import android.app.Application
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.switchMap
+import androidx.paging.PagedList
+import androidx.paging.toLiveData
 import gr.blackswamp.core.coroutines.IDispatchers
+import gr.blackswamp.core.db.paging.StaticDataSource
+import gr.blackswamp.core.lifecycle.LiveEvent
+import gr.blackswamp.core.lifecycle.call
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.repos.MakeRepository
+import gr.blackswamp.damagereports.data.toData
 import gr.blackswamp.damagereports.ui.model.Brand
 import gr.blackswamp.damagereports.ui.model.Model
 import gr.blackswamp.damagereports.vms.BrandData
@@ -20,7 +27,7 @@ import org.koin.core.inject
 import timber.log.Timber
 import java.util.*
 
-class MakeViewModelImpl(application: Application, val brandId: UUID?) :
+class MakeViewModelImpl(application: Application, val brandId: UUID?, runInit: Boolean = true) :
     BaseViewModel(application)
     , MakeViewModel
     , BrandParent
@@ -39,10 +46,31 @@ class MakeViewModelImpl(application: Application, val brandId: UUID?) :
 
     init {
         Timber.d(TAG, "Brand id $brandId")
+        if (runInit) initialize()
     }
 
+    @VisibleForTesting
+    internal fun initialize() {
+        brandFilter.postValue("")
+    }
+
+    //region make activity view model
+    override val error = LiveEvent<String>()
+
+    //endregion
     //region brand parent
+    internal val brandFilter = MutableLiveData<String>()
     override val brand = MutableLiveData<Brand>()
+    override val brandList: LiveData<PagedList<Brand>> =
+        brandFilter.switchMap(this::brandDbToUi)
+
+    override fun newBrandFilter(filter: String, submitted: Boolean): Boolean {
+        if (brandId != null) return true//if we do not have a pre set brand then we change the filter
+        brandFilter.postValue(filter)
+        if (submitted)
+            hideKeyboard.call()
+        return true
+    }
 
     override fun editBrand(id: UUID) {
         brand.postValue(BrandData(id, "test brand"))
@@ -58,6 +86,18 @@ class MakeViewModelImpl(application: Application, val brandId: UUID?) :
 
     override fun cancelBrand() {
         brand.postValue(null)
+    }
+
+
+    private fun brandDbToUi(filter: String): LiveData<PagedList<Brand>> {
+        return repo.getBrands(filter, brandId).let { response ->
+            if (response.hasError) {
+                error.postValue(response.errorMessage)
+                StaticDataSource.factory(listOf<Brand>())
+            } else {
+                response.get.map { it.toData() as Brand }
+            }.toLiveData(LIST_PAGE_SIZE)
+        }
     }
     //endregion
 
@@ -80,6 +120,4 @@ class MakeViewModelImpl(application: Application, val brandId: UUID?) :
         model.postValue(null)
     }
     //endregion
-
-
 }

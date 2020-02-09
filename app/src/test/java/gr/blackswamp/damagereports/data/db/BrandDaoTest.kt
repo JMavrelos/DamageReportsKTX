@@ -2,12 +2,14 @@ package gr.blackswamp.damagereports.data.db
 
 import android.database.sqlite.SQLiteConstraintException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.paging.toLiveData
 import androidx.room.Room
 import androidx.room.paging.LimitOffsetDataSource
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import gr.blackswamp.core.db.count
 import gr.blackswamp.core.db.countWhere
+import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.damagereports.TestApp
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.db.dao.BrandDao
@@ -110,6 +112,28 @@ class BrandDaoTest {
     }
 
     @Test
+    fun `when searching brands with a filter then we do not return deleted ones`() {
+        runBlockingTest {
+            initBrands()
+            val filter = "Hello World" //this is on purpose 11 characters so that the random brands cannot possibly contain it in their name
+            val unexpected = listOf(
+                BrandEntity(UUID.randomUUID(), "3${filter}3", true)
+                , BrandEntity(UUID.randomUUID(), "1${filter}4", true)
+            )
+            val expected = listOf(
+                BrandEntity(UUID.randomUUID(), "5${filter}1", false)
+                , BrandEntity(UUID.randomUUID(), "2${filter}2", false)
+            )
+            expected.forEach { dao.saveBrand(it) }
+            unexpected.forEach { dao.saveBrand(it) }
+
+            val entities = (dao.loadBrands(filter).create() as LimitOffsetDataSource).loadRange(0, 1000)
+
+            assertEquals(expected.sortedBy { it.name }, entities)
+        }
+    }
+
+    @Test
     fun `delete brand with no models under`() {
         runBlockingTest {
             initBrands()
@@ -156,7 +180,7 @@ class BrandDaoTest {
     }
 
     @Test
-    fun `load model by id successfully`() {
+    fun `load brand by id successfully`() {
         runBlockingTest {
             initBrands()
             val expected = UnitTestData.BRANDS.random()
@@ -168,7 +192,31 @@ class BrandDaoTest {
     }
 
     @Test
-    fun `load model that does not exist`() {
+    fun `load brand by id as factory`() {
+        runBlockingTest {
+            initBrands()
+            val expected = UnitTestData.BRANDS.random()
+
+            val source = dao.loadBrandFactoryById(expected.id)
+
+            assertEquals(listOf(expected), source.toLiveData(1000).getOrAwait())
+        }
+    }
+
+    @Test
+    fun `load brand by id as factory even if deleted`() {
+        runBlockingTest {
+            initBrands()
+            val expected = UnitTestData.DELETED_BRANDS.random()
+
+            val source = dao.loadBrandFactoryById(expected.id)
+
+            assertEquals(listOf(expected), source.toLiveData(1000).getOrAwait())
+        }
+    }
+
+    @Test
+    fun `load brand that does not exist`() {
         runBlockingTest {
             initBrands()
 
@@ -178,10 +226,10 @@ class BrandDaoTest {
         }
     }
 
+
     private suspend fun initBrands() {
         UnitTestData.BRANDS.union(UnitTestData.DELETED_BRANDS).forEach {
             dao.saveBrand(it)
-            //we add the test so there will be a subscriber so the save will go through
         }
 
     }

@@ -10,7 +10,6 @@ import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.toData
 import gr.blackswamp.damagereports.vms.ReportData
 import gr.blackswamp.damagereports.vms.ReportHeaderData
-import kotlinx.coroutines.withContext
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.util.*
@@ -35,12 +34,6 @@ class ReportRepositoryImpl : BaseRepositoryImpl(), ReportRepository, KoinCompone
             null
         } catch (t: Throwable) {
             t
-        }
-    }
-
-    override suspend fun switchTheme() {
-        withContext(dispatchers.IO) {
-
         }
     }
 

@@ -10,11 +10,6 @@ import java.util.*
 interface ReportRepository : BaseRepository {
 
     suspend fun newReport(name: String, description: String, brandId: UUID, modelId: UUID): Throwable?
-    /**
-     * Changes the current theme
-     * @return true if it switched to dark theme or false for light theme
-     */
-    suspend fun switchTheme()
 
     /**
      * gets a make_list of report headers according to a filter

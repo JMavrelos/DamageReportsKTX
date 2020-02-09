@@ -15,9 +15,9 @@ internal fun ReportHeaderEntity.toData(): ReportHeaderData =
 internal fun ReportEntity.toData(brand: BrandEntity, model: ModelEntity): ReportData =
     ReportData(this.id, this.name, this.description, brand.toData(), model.toData(), this.created)
 
-private fun ModelEntity.toData(): ModelData =
+internal fun ModelEntity.toData(): ModelData =
     ModelData(this.id, this.name, this.brand)
 
-private fun BrandEntity.toData(): BrandData =
+internal fun BrandEntity.toData(): BrandData =
     BrandData(this.id, this.name)
 
