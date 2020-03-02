@@ -15,6 +15,7 @@ import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.widget.TextChangeListener
 import gr.blackswamp.core.widget.updateText
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.databinding.FragmentReportViewBinding
 import gr.blackswamp.damagereports.ui.base.BaseFragment
 import gr.blackswamp.damagereports.ui.model.Report
 import gr.blackswamp.damagereports.vms.reports.ReportViewModelImpl
@@ -22,46 +23,32 @@ import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportViewParent
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 
 @Suppress("UNUSED_PARAMETER")
-class ReportViewFragment : BaseFragment<ReportViewParent>() {
+class ReportViewFragment : BaseFragment<ReportViewParent, FragmentReportViewBinding>() {
     companion object {
         const val TAG = "ReportViewFragment"
         fun newInstance(): Fragment = ReportViewFragment()
     }
 
-    override val vm: ReportViewParent by sharedViewModel<ReportViewModelImpl>()
-    override val layoutId: Int = R.layout.fragment_report_view
     private val nameListener = TextChangeListener(after = this::nameChanged)
     private val descriptionListener = TextChangeListener(after = this::descriptionChanged)
 
     //region bindings
-    private lateinit var toolbar: Toolbar
-    private lateinit var id: TextView
-    private lateinit var name: EditText
-    private lateinit var description: EditText
-    private lateinit var model: Button
-    private lateinit var brand: Button
-    private lateinit var refreshDamages: SwipeRefreshLayout
-    private lateinit var damages: RecyclerView
-    private lateinit var action: FloatingActionButton
-    private lateinit var save: MenuItem
-    private lateinit var edit: MenuItem
+    override val vm: ReportViewParent by sharedViewModel<ReportViewModelImpl>()
+    override val binding: FragmentReportViewBinding by lazy { FragmentReportViewBinding.inflate(layoutInflater) }
+    private val toolbar: Toolbar by lazy { binding.toolbar }
+    private val id: TextView by lazy { binding.id }
+    private val name: EditText by lazy { binding.name }
+    private val description: EditText by lazy { binding.description }
+    private val model: Button by lazy { binding.model }
+    private val brand: Button by lazy { binding.brand }
+    private val refreshDamages: SwipeRefreshLayout by lazy { binding.refresh }
+    private val damages: RecyclerView by lazy { binding.damages }
+    private val action: FloatingActionButton by lazy { binding.action }
+    private val save: MenuItem by lazy { binding.toolbar.menu.findItem(R.id.save) }
+    private val edit: MenuItem by lazy { binding.toolbar.menu.findItem(R.id.edit) }
     //endregion
 
     //region lifecycle methods
-    override fun setUpBindings(view: View) {
-        toolbar = view.findViewById(R.id.toolbar)
-        save = toolbar.menu.findItem(R.id.save)
-        edit = toolbar.menu.findItem(R.id.edit)
-        id = view.findViewById(R.id.id)
-        name = view.findViewById(R.id.name)
-        description = view.findViewById(R.id.description)
-        model = view.findViewById(R.id.model)
-        brand = view.findViewById(R.id.brand)
-        refreshDamages = view.findViewById(R.id.refresh)
-        damages = view.findViewById(R.id.damages)
-        action = view.findViewById(R.id.action)
-    }
-
     override fun setUpListeners() {
         model.setOnClickListener(this::pickModel)
         brand.setOnClickListener(this::pickBrand)

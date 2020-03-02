@@ -10,6 +10,7 @@ import gr.blackswamp.core.dialogs.DialogBuilders
 import gr.blackswamp.core.dialogs.DialogFinishedListener
 import gr.blackswamp.core.widget.visible
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.databinding.ActivityReportBinding
 import gr.blackswamp.damagereports.ui.base.BaseActivity
 import gr.blackswamp.damagereports.ui.make.MakeActivity
 import gr.blackswamp.damagereports.ui.model.Report
@@ -21,24 +22,19 @@ import gr.blackswamp.damagereports.vms.reports.viewmodels.ReportViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.util.*
 
-class ReportActivity : BaseActivity<ReportViewModel>(), DialogFinishedListener {
+class ReportActivity : BaseActivity<ReportViewModel, ActivityReportBinding>(), DialogFinishedListener {
     companion object {
         private const val TAG = "ReportActivity"
         private const val SHOW_REPORT = "show_report"
         private const val DISCARD_CONFIRM_ID = 39012
     }
 
-    override val layoutId: Int = R.layout.activity_report
+    //region bindings
     override val vm: ReportViewModel by viewModel<ReportViewModelImpl>()
-    private lateinit var progress: View
-
-
+    override val binding: ActivityReportBinding by lazy { ActivityReportBinding.inflate(layoutInflater) }
     private var undo: Snackbar? = null
-
-    //region lifecycle methods
-    override fun setUpBindings() {
-        progress = findViewById(R.id.progress)
-    }
+    private val progress: View by lazy { binding.progress }
+    //endregion
 
     override fun initView(state: Bundle?) {
         if (state == null) {
@@ -98,7 +94,7 @@ class ReportActivity : BaseActivity<ReportViewModel>(), DialogFinishedListener {
         undo = Snackbar.make(progress, R.string.undo_delete, Snackbar.LENGTH_LONG).apply {
             //attach an action to undo the last deletion
             this.setAction(R.string.undo) { vm.undoLastDelete() }
-            //and a callback that will clear the last deleted value when the snackbar is dismissed
+            //and a callback that will clear the last deleted value when the snack bar is dismissed
             this.addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     vm.dismissedUndo()

@@ -40,9 +40,23 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
 
     private val repo: ReportRepository by inject()
     private val dispatchers: IDispatchers by inject()
+    //region live data
     @VisibleForTesting
     internal val filter = MutableLiveData<String>()
     override val themeSetting: LiveData<ThemeSetting> = repo.themeSettingLive
+    override val themeSelection = MutableLiveData<ThemeSetting>(null)
+    override val loading = MutableLiveData<Boolean>()
+    @VisibleForTesting
+    internal val lastDeleted = MutableLiveData<UUID>()
+    override val refreshing = MutableLiveData<Boolean>()
+    override val showUndo: LiveData<Boolean> = Transformations.map(lastDeleted) { it != null }
+    override val error = LiveEvent<String>()
+    override val activityCommand = LiveEvent<ReportActivityCommand>()
+    override val report = MutableLiveData<Report>() // this is used for showing (if needed) the correct fragment and updating the view fragment's data
+    override var reportHeaderList: LiveData<PagedList<ReportHeader>> = Transformations.switchMap(filter, this::dbHeaderToUi)
+    @VisibleForTesting
+    override val editMode = MutableLiveData<Boolean>()
+    //endregion
 
     init {
         if (runInit) {
@@ -56,11 +70,6 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
     }
 
     //region IReportActivityViewModel implementation
-    override val loading = MutableLiveData<Boolean>()
-    override val error = LiveEvent<String>()
-    override val activityCommand = LiveEvent<ReportActivityCommand>()
-    override val report = MutableLiveData<Report>() // this is used for showing (if needed) the correct fragment and updating the view fragment's data
-
     override fun showThemeSettings() {
         themeSelection.postValue(repo.themeSetting)
     }
@@ -75,28 +84,15 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
     //endregion
 
     //region IReportListViewModel implementation
-    @VisibleForTesting
-    internal val lastDeleted = MutableLiveData<UUID>()
-
-    override val showUndo: LiveData<Boolean> =
-        Transformations.map(lastDeleted) { it != null }
-
-    override var reportHeaderList: LiveData<PagedList<ReportHeader>> =
-        Transformations.switchMap(filter, this::dbHeaderToUi)
-
-    override val themeSelection = MutableLiveData<ThemeSetting>(null)
-
-    override val refreshing = MutableLiveData<Boolean>()
-
     private fun dbHeaderToUi(filter: String?): LiveData<PagedList<ReportHeader>> {
-        Timber.d(TAG, "transforming for \"$filter\"")
+        Timber.d("transforming for \"$filter\"")
         val response = repo.getReportHeaders(filter ?: "")
         return if (response.hasError) {
             error.postValue(response.errorMessage)
             StaticDataSource.factory(listOf<ReportHeader>())
         } else {
             response.get.map {
-                Timber.d(TAG, "Loaded $it")
+                Timber.d("Loaded $it")
                 it as ReportHeader
             }
         }.toLiveData(pageSize = LIST_PAGE_SIZE)
@@ -190,9 +186,6 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
     //endregion
 
     //region IReportViewViewModel implementation
-    @VisibleForTesting
-    override val editMode = MutableLiveData<Boolean>()
-
     override fun pickBrand() {
         if (report.value as? ReportData == null) return
         activityCommand.postValue(ReportActivityCommand.ShowBrandSelection)

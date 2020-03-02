@@ -1,13 +1,15 @@
 package gr.blackswamp.damagereports.ui.base
 
 import androidx.appcompat.app.AppCompatDelegate.*
+import androidx.viewbinding.ViewBinding
 import gr.blackswamp.core.ui.CoreActivity
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.vms.base.IBaseViewModel
 
-abstract class BaseActivity<T : IBaseViewModel> : CoreActivity<T>() {
+abstract class BaseActivity<T : IBaseViewModel, V : ViewBinding> : CoreActivity<T>() {
     override val theme: Int? = R.style.AppTheme
+    abstract val binding: V
     override fun setUpObservers(vm: T) {
         vm.themeSetting.observe {
             when (it) {
@@ -20,5 +22,9 @@ abstract class BaseActivity<T : IBaseViewModel> : CoreActivity<T>() {
         }
         vm.hideKeyboard.observe { hideKeyboard() }
         vm.back.observe { super.onBackPressed() }
+    }
+
+    final override fun setUpBindings() {
+        setContentView(binding.root)
     }
 }

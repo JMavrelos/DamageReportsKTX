@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import gr.blackswamp.core.util.getUUIDExtra
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.databinding.ActivityMakeBinding
 import gr.blackswamp.damagereports.ui.base.BaseActivity
 import gr.blackswamp.damagereports.ui.make.fragments.BrandFragment
 import gr.blackswamp.damagereports.ui.make.fragments.ModelFragment
@@ -14,7 +15,7 @@ import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import java.util.*
 
-class MakeActivity : BaseActivity<MakeViewModel>() {
+class MakeActivity : BaseActivity<MakeViewModel, ActivityMakeBinding>() {
     companion object {
         const val TAG = "MakeActivity"
         private const val BRAND = "${TAG}_brand"
@@ -26,10 +27,9 @@ class MakeActivity : BaseActivity<MakeViewModel>() {
             }
     }
 
-    override val layoutId: Int = R.layout.activity_make
+    //region bindings
     override val vm: MakeViewModel by viewModel<MakeViewModelImpl> { parametersOf(intent.getUUIDExtra(BRAND)) }
-    //region view bindings
-
+    override val binding: ActivityMakeBinding by lazy { ActivityMakeBinding.inflate(layoutInflater) }
     //endregion
 
     //region arguments

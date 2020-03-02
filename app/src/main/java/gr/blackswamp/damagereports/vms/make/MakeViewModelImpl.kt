@@ -42,10 +42,16 @@ class MakeViewModelImpl(application: Application, val brandId: UUID?, runInit: B
         internal const val LIST_PAGE_SIZE = 100
     }
 
+    //region live data
     override val themeSetting: LiveData<ThemeSetting> = repo.themeSettingLive
+    internal val brandFilter = MutableLiveData<String>()
+    override val brand = MutableLiveData<Brand>()
+    override val brandList: LiveData<PagedList<Brand>> = brandFilter.switchMap(this::brandDbToUi)
+    override val model = MutableLiveData<Model>()
+    //endregion
 
     init {
-        Timber.d(TAG, "Brand id $brandId")
+        Timber.d("Brand id $brandId")
         if (runInit) initialize()
     }
 
@@ -59,11 +65,6 @@ class MakeViewModelImpl(application: Application, val brandId: UUID?, runInit: B
 
     //endregion
     //region brand parent
-    internal val brandFilter = MutableLiveData<String>()
-    override val brand = MutableLiveData<Brand>()
-    override val brandList: LiveData<PagedList<Brand>> =
-        brandFilter.switchMap(this::brandDbToUi)
-
     override fun newBrandFilter(filter: String, submitted: Boolean): Boolean {
         if (brandId != null) return true//if we do not have a pre set brand then we change the filter
         brandFilter.postValue(filter)
@@ -102,8 +103,6 @@ class MakeViewModelImpl(application: Application, val brandId: UUID?, runInit: B
     //endregion
 
     //region model parent
-    override val model = MutableLiveData<Model>()
-
     override fun editModel(id: UUID) {
         model.postValue(ModelData(id, "test model", EmptyUUID))
     }

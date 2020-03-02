@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.annotation.LayoutRes
 import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
@@ -20,8 +19,6 @@ abstract class CoreActivity<T : Any> : AppCompatActivity(), DialogFinishedListen
     }
 
     abstract val vm: T
-    @get:LayoutRes
-    abstract val layoutId: Int
     @StyleRes
     open val theme: Int? = null
 
@@ -30,7 +27,6 @@ abstract class CoreActivity<T : Any> : AppCompatActivity(), DialogFinishedListen
             setTheme(it)
         }
         super.onCreate(savedInstanceState)
-        setContentView(layoutId)
         setUpBindings()
         initView(savedInstanceState)
         setUpListeners()

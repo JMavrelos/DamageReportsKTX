@@ -16,9 +16,10 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import gr.blackswamp.core.ui.CoreFragment
 import gr.blackswamp.core.widget.*
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.databinding.FragmentMakeBinding
+import gr.blackswamp.damagereports.ui.base.BaseFragment
 import gr.blackswamp.damagereports.ui.base.ListAction
 import gr.blackswamp.damagereports.ui.make.adapters.ModelAdapter
 import gr.blackswamp.damagereports.ui.model.Model
@@ -29,47 +30,33 @@ import org.koin.android.viewmodel.ext.android.sharedViewModel
 import java.util.*
 import kotlin.math.abs
 
-class ModelFragment : CoreFragment<ModelParent>(), ListAction {
+class ModelFragment : BaseFragment<ModelParent, FragmentMakeBinding>(), ListAction {
     companion object {
         const val TAG = "ModelFragment"
         fun newInstance(): Fragment = ModelFragment()
     }
 
+    //region  bindings
     override val vm: ModelParent by sharedViewModel<MakeViewModelImpl>()
-    override val layoutId: Int = R.layout.fragment_make
-
-    //region view bindings
-    private lateinit var refresh: SwipeRefreshLayout
-    private lateinit var action: FloatingActionButton
-    private lateinit var cancel: FloatingActionButton
-    private lateinit var list: RecyclerView
-    private lateinit var name: EditText
-    private var adapter = ModelAdapter()
-    private lateinit var toolbar: MaterialToolbar
-    private lateinit var sheetBehavior: BottomSheetBehavior<FrameLayout>
-    private lateinit var byUse: MenuItem
-    private lateinit var byName: MenuItem
+    override val binding: FragmentMakeBinding by lazy { FragmentMakeBinding.inflate(layoutInflater) }
+    private val refresh: SwipeRefreshLayout by lazy { binding.refresh }
+    private val action: FloatingActionButton by lazy { binding.action }
+    private val cancel: FloatingActionButton by lazy { binding.cancel }
+    private val list: RecyclerView by lazy { binding.list }
+    private val name: EditText by lazy { binding.name }
+    private val adapter = ModelAdapter()
+    private val toolbar: MaterialToolbar by lazy { binding.toolbar }
+    private val sheetBehavior: BottomSheetBehavior<FrameLayout> by lazy { BottomSheetBehavior.from(binding.create) }
+    private val byUse: MenuItem by lazy { binding.toolbar.menu.findItem(R.id.sort_use) }
+    private val byName: MenuItem by lazy { binding.toolbar.menu.findItem(R.id.sort_name) }
     private var screenWidth: Int = 0
     //endregion
 
     //region set up
-    override fun setUpBindings(view: View) {
-        refresh = view.findViewById(R.id.refresh)
-        action = view.findViewById(R.id.action)
-        cancel = view.findViewById(R.id.cancel)
-        list = view.findViewById(R.id.list)
-        toolbar = view.findViewById(R.id.toolbar)
-        name = view.findViewById(R.id.name)
-        byName = toolbar.menu.findItem(R.id.sort_name)
-        byUse = toolbar.menu.findItem(R.id.sort_use)
-        val brandInput = view.findViewById<FrameLayout>(R.id.create)
-        sheetBehavior = BottomSheetBehavior.from(brandInput)
+    override fun initView(state: Bundle?) {
         val metrics = DisplayMetrics()
         activity?.windowManager?.defaultDisplay?.getMetrics(metrics)
         screenWidth = metrics.widthPixels
-    }
-
-    override fun initView(state: Bundle?) {
         list.adapter = adapter
         ItemTouchHelper(CItemTouchHelperCallback(adapter, allowSwipe = true, allowDrag = false)).attachToRecyclerView(list)
     }

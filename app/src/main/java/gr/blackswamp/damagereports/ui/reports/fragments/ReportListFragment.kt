@@ -2,7 +2,6 @@ package gr.blackswamp.damagereports.ui.reports.fragments
 
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -16,13 +15,14 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import gr.blackswamp.core.ui.CoreFragment
 import gr.blackswamp.core.widget.CItemTouchHelperCallback
 import gr.blackswamp.core.widget.SearchListener
 import gr.blackswamp.core.widget.onClick
 import gr.blackswamp.core.widget.onNavigationClick
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
+import gr.blackswamp.damagereports.databinding.FragmentReportListBinding
+import gr.blackswamp.damagereports.ui.base.BaseFragment
 import gr.blackswamp.damagereports.ui.base.ListAction
 import gr.blackswamp.damagereports.ui.moveBy
 import gr.blackswamp.damagereports.ui.reports.adapters.ReportListAdapter
@@ -32,50 +32,32 @@ import org.koin.android.viewmodel.ext.android.sharedViewModel
 import timber.log.Timber
 import java.util.*
 
-class ReportListFragment : CoreFragment<ReportListParent>(), ListAction {
+class ReportListFragment : BaseFragment<ReportListParent, FragmentReportListBinding>(), ListAction {
     companion object {
         const val TAG = "ReportListFragment"
         fun newInstance(): Fragment = ReportListFragment()
     }
 
+    //region bindings
     override val vm: ReportListParent by sharedViewModel<ReportViewModelImpl>()
-    override val layoutId: Int = R.layout.fragment_report_list
-
-    //region view bindings
-    private lateinit var refresh: SwipeRefreshLayout
-    private lateinit var action: FloatingActionButton
-    private lateinit var list: RecyclerView
-    private val adapter = ReportListAdapter()
-    private lateinit var toolbar: MaterialToolbar
-    private lateinit var theme: MenuItem
-    private lateinit var themeSelection: LinearLayout
-    private lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
-    private lateinit var darkTheme: View
-    private lateinit var lightTheme: View
-    private lateinit var systemTheme: View
-    private lateinit var autoTheme: View
+    override val binding: FragmentReportListBinding by lazy { FragmentReportListBinding.inflate(layoutInflater) }
+    private val refresh: SwipeRefreshLayout by lazy { binding.refresh }
+    private val action: FloatingActionButton by lazy { binding.action }
+    private val list: RecyclerView by lazy { binding.list }
+    private val adapter: ReportListAdapter by lazy { ReportListAdapter() }
+    private val toolbar: MaterialToolbar by lazy { binding.toolbar }
+    private val sheetBehavior: BottomSheetBehavior<LinearLayout> by lazy { BottomSheetBehavior.from(binding.themeSelection) }
+    private val darkTheme: View by lazy { binding.dark }
+    private val lightTheme: View by lazy { binding.light }
+    private val systemTheme: View by lazy { binding.system }
+    private val autoTheme: View by lazy { binding.auto }
     private var screenWidth: Int = 0
     //endregion
 
-    //region set up
-    override fun setUpBindings(view: View) {
-        refresh = view.findViewById(R.id.refresh)
-        action = view.findViewById(R.id.action)
-        list = view.findViewById(R.id.list)
-        toolbar = view.findViewById(R.id.toolbar)
-        theme = toolbar.menu.findItem(R.id.theme)
-        themeSelection = view.findViewById(R.id.theme_selection)
-        sheetBehavior = BottomSheetBehavior.from(themeSelection)
-        darkTheme = view.findViewById(R.id.dark)
-        lightTheme = view.findViewById(R.id.light)
-        systemTheme = view.findViewById(R.id.system)
-        autoTheme = view.findViewById(R.id.auto)
+    override fun initView(state: Bundle?) {
         val metrics = DisplayMetrics()
         activity?.windowManager?.defaultDisplay?.getMetrics(metrics)
         screenWidth = metrics.widthPixels
-    }
-
-    override fun initView(state: Bundle?) {
         list.adapter = adapter
         ItemTouchHelper(CItemTouchHelperCallback(adapter, allowSwipe = true, allowDrag = false)).attachToRecyclerView(list)
     }
@@ -106,7 +88,6 @@ class ReportListFragment : CoreFragment<ReportListParent>(), ListAction {
     //endregion
 
     //region listeners
-
     private val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
             Timber.d("Sliding $slideOffset")
