@@ -30,8 +30,8 @@ dependencies {
     implementation deps.support.design
     implementation deps.constraint_layout
     implementation deps.support.core_ktx
-    implementation deps.lifecycle.kotlin
     implementation deps.timber
+    implementation deps.coroutines.core
 
     implementation deps.koin.core //koin
 }

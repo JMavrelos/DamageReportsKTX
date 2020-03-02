@@ -83,7 +83,7 @@ class ReportDaoTest {
         runBlockingTest {
             val model = UnitTestData.MODELS.random()
             val brand = UnitTestData.BRANDS.filter { it.id == model.brand }.random()
-            db.brandDao.saveBrand(brand)
+            db.brandDao.insertBrand(brand)
             val report = ReportEntity(UUID.randomUUID(), "hello", "world", model.brand, model.id)
 
             var error: Throwable? = null
@@ -103,7 +103,7 @@ class ReportDaoTest {
         runBlockingTest {
             val model = UnitTestData.MODELS.random()
             val brand = UnitTestData.BRANDS.filter { it.id == model.brand }.random()
-            db.brandDao.saveBrand(brand)
+            db.brandDao.insertBrand(brand)
             db.modelDao.saveModel(model)
             val report = ReportEntity(UUID.randomUUID(), "hello", "world", UUID.randomUUID(), model.id)
 
@@ -125,7 +125,7 @@ class ReportDaoTest {
         runBlockingTest {
             val model = UnitTestData.MODELS.random()
             val brand = UnitTestData.BRANDS.filter { it.id == model.brand }.random()
-            db.brandDao.saveBrand(brand)
+            db.brandDao.insertBrand(brand)
             db.modelDao.saveModel(model)
             val report = ReportEntity(UUID.randomUUID(), "hello", "world", model.brand, model.id)
 
@@ -333,7 +333,7 @@ class ReportDaoTest {
 
     private suspend fun initData() {
         UnitTestData.BRANDS.union(UnitTestData.DELETED_BRANDS).forEach {
-            db.brandDao.saveBrand(it)
+            db.brandDao.insertBrand(it)
         }
         UnitTestData.MODELS.union(UnitTestData.DELETED_MODELS).forEach {
             db.modelDao.saveModel(it)

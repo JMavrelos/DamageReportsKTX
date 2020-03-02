@@ -56,7 +56,7 @@ class ModelDaoTest {
         runBlockingTest {
             val brand = UnitTestData.BRANDS.random()
             val model = UnitTestData.MODELS.filter { it.brand == brand.id }.random()
-            db.brandDao.saveBrand(brand)
+            db.brandDao.insertBrand(brand)
             dao.saveModel(model)
 
             assertEquals(1, db.count("models"))
@@ -176,7 +176,7 @@ class ModelDaoTest {
 
     private suspend fun initModels() {
         UnitTestData.BRANDS.union(UnitTestData.DELETED_BRANDS).forEach {
-            db.brandDao.saveBrand(it)
+            db.brandDao.insertBrand(it)
         }
         UnitTestData.MODELS.union(UnitTestData.DELETED_MODELS).forEach {
             dao.saveModel(it)

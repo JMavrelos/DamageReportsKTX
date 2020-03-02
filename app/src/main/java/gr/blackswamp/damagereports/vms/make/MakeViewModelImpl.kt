@@ -4,14 +4,16 @@ import android.app.Application
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.switchMap
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
-import gr.blackswamp.core.coroutines.IDispatchers
 import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.lifecycle.LiveEvent
 import gr.blackswamp.core.lifecycle.call
 import gr.blackswamp.core.util.EmptyUUID
+import gr.blackswamp.core.util.toThrowable
+import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.repos.MakeRepository
 import gr.blackswamp.damagereports.data.toData
@@ -23,6 +25,7 @@ import gr.blackswamp.damagereports.vms.base.BaseViewModel
 import gr.blackswamp.damagereports.vms.make.viewmodels.BrandParent
 import gr.blackswamp.damagereports.vms.make.viewmodels.MakeViewModel
 import gr.blackswamp.damagereports.vms.make.viewmodels.ModelParent
+import kotlinx.coroutines.launch
 import org.koin.core.inject
 import timber.log.Timber
 import java.util.*
@@ -34,7 +37,6 @@ class MakeViewModelImpl(application: Application, val brandId: UUID?, runInit: B
     , ModelParent {
 
     private val repo: MakeRepository by inject()
-    private val dispatchers: IDispatchers by inject()
 
     companion object {
         const val TAG = "MakeViewModel"
@@ -43,11 +45,15 @@ class MakeViewModelImpl(application: Application, val brandId: UUID?, runInit: B
     }
 
     //region live data
+    override val error = LiveEvent<String>()
+    override val loading = MutableLiveData<Boolean>(false)
     override val themeSetting: LiveData<ThemeSetting> = repo.themeSettingLive
     internal val brandFilter = MutableLiveData<String>()
-    override val brand = MutableLiveData<Brand>()
+    private val brandData = MutableLiveData<BrandData>()
+    override val brand: LiveData<Brand> = Transformations.map(brandData) { it as? Brand }
     override val brandList: LiveData<PagedList<Brand>> = brandFilter.switchMap(this::brandDbToUi)
-    override val model = MutableLiveData<Model>()
+    private val modelData = MutableLiveData<ModelData>()
+    override val model: LiveData<Model> = Transformations.map(modelData) { it as? Model }
     //endregion
 
     init {
@@ -61,8 +67,6 @@ class MakeViewModelImpl(application: Application, val brandId: UUID?, runInit: B
     }
 
     //region make activity view model
-    override val error = LiveEvent<String>()
-
     //endregion
     //region brand parent
     override fun newBrandFilter(filter: String, submitted: Boolean): Boolean {
@@ -74,19 +78,36 @@ class MakeViewModelImpl(application: Application, val brandId: UUID?, runInit: B
     }
 
     override fun editBrand(id: UUID) {
-        brand.postValue(BrandData(id, "test brand"))
+        brandData.postValue(BrandData(id, "test brand"))
     }
 
     override fun saveBrand(name: String) {
-        brand.postValue(null)
+        launch {
+            loading.postValue(true)
+            try {
+                val current = brandData.value ?: throw getString(R.string.error_new_brand_not_found).toThrowable()
+                if (name.isBlank()) throw getString(R.string.error_empty_brand_name).toThrowable()
+
+                if (current.id == EmptyUUID) {
+                    repo.newBrand(name)
+                } else {
+                    repo.updateBrand(current.id, name)
+                }.getOrThrow(getString(R.string.error_saving_brand))
+                brandData.postValue(null)
+            } catch (t: Throwable) {
+                error.postValue(t.message ?: getString(R.string.error_saving_brand))
+            } finally {
+                loading.postValue(false)
+            }
+        }
     }
 
     override fun newBrand() {
-        brand.postValue(BrandData(EmptyUUID, ""))
+        brandData.postValue(BrandData(EmptyUUID, ""))
     }
 
     override fun cancelBrand() {
-        brand.postValue(null)
+        brandData.postValue(null)
     }
 
 
@@ -104,19 +125,19 @@ class MakeViewModelImpl(application: Application, val brandId: UUID?, runInit: B
 
     //region model parent
     override fun editModel(id: UUID) {
-        model.postValue(ModelData(id, "test model", EmptyUUID))
+        modelData.postValue(ModelData(id, "test model", EmptyUUID))
     }
 
     override fun saveModel(name: String) {
-        model.postValue(null)
+        modelData.postValue(null)
     }
 
     override fun newModel() {
-        model.postValue(ModelData(EmptyUUID, "", EmptyUUID))
+        modelData.postValue(ModelData(EmptyUUID, "", EmptyUUID))
     }
 
     override fun cancelModel() {
-        model.postValue(null)
+        modelData.postValue(null)
     }
     //endregion
 }

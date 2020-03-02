@@ -5,19 +5,21 @@ import com.nhaarman.mockitokotlin2.reset
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
-import gr.blackswamp.core.coroutines.IDispatchers
+import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.testing.AndroidKoinTest
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
-import gr.blackswamp.core.testing.TestDispatchers
+import gr.blackswamp.core.testing.TestDispatcher
 import gr.blackswamp.core.testing.getOrAwait
+import gr.blackswamp.core.util.EmptyUUID
+import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.repos.MakeRepository
 import gr.blackswamp.damagereports.data.toData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.koin.dsl.module
@@ -31,17 +33,16 @@ class BrandParentTest : AndroidKoinTest() {
         const val ERROR = "this is an error"
     }
 
-
     @get:Rule
     val coroutineScope = MainCoroutineScopeRule()
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
 
-    val repo = Mockito.mock(MakeRepository::class.java)
+    private val repo = Mockito.mock(MakeRepository::class.java)
 
     override val modules = module {
-        single<IDispatchers> { TestDispatchers }
+        single<Dispatcher> { TestDispatcher }
         single { repo }
     }
 
@@ -139,4 +140,84 @@ class BrandParentTest : AndroidKoinTest() {
         verifyNoMoreInteractions(repo)
     }
 
+    @Test
+    fun `pressing add new creates an empty brand and shows it`() {
+        initVm(null)
+
+        vm.newBrand()
+
+        val value = vm.brand.getOrAwait()
+
+        assertNotNull(value)
+        assertFalse(vm.loading.value!!)
+        assertEquals(EmptyUUID, value.id)
+        assertEquals("", value.name)
+    }
+
+    @Test
+    fun `pressing save with no new brand pressed shows an error`() {
+        initVm(null)
+
+        vm.brand.getOrAwait(time = 10, throwError = false) //just to make sure the transformation is observed
+        vm.saveBrand("hello")
+
+        assertNotNull(vm.error.value)
+        assertFalse(vm.loading.value!!)
+        verify(app).getString(R.string.error_new_brand_not_found)
+        verifyNoMoreInteractions(app, repo)
+    }
+
+    @Test
+    fun `pressing save with an empty named new brand shows an error`() {
+        initVm(null)
+
+        vm.newBrand()
+        vm.brand.getOrAwait()
+        vm.saveBrand("")
+
+        assertNotNull(vm.error.value)
+        assertFalse(vm.loading.value!!)
+        verify(app).getString(R.string.error_empty_brand_name)
+        verifyNoMoreInteractions(app, repo)
+    }
+
+    @Test
+    fun `pressing save with a new brand saves a new item`() {
+        runBlocking {
+            val name = "hello world"
+            initVm(null)
+            whenever(repo.newBrand(name)).thenReturn(Response.success())
+
+            vm.newBrand()
+            vm.brand.getOrAwait()
+
+            vm.saveBrand(name)
+            vm.brand.getOrAwait(0, throwError = false)
+
+            assertNull(vm.error.value)
+            assertFalse(vm.loading.value!!)
+            assertNull(vm.brand.value)
+            verify(repo).newBrand(name)
+        }
+    }
+
+    @Test
+    fun `pressing save with a new brand which has a problem shows the problem `() {
+        runBlocking {
+            val name = "hello world"
+            initVm(null)
+            whenever(repo.newBrand(name)).thenReturn(Response.failure(ERROR))
+            vm.newBrand()
+            vm.brand.getOrAwait()
+
+            vm.saveBrand(name)
+            vm.brand.getOrAwait()
+
+            assertEquals(APP_STRING, vm.error.value)
+            verify(app).getString(R.string.error_saving_brand)
+            assertFalse(vm.loading.value!!)
+            assertNotNull(vm.brand.value)
+            verify(repo).newBrand(name)
+        }
+    }
 }

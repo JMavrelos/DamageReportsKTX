@@ -3,7 +3,9 @@ package gr.blackswamp.damagereports.ui.make
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import gr.blackswamp.core.util.getUUIDExtra
+import gr.blackswamp.core.widget.visible
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.databinding.ActivityMakeBinding
 import gr.blackswamp.damagereports.ui.base.BaseActivity
@@ -30,6 +32,7 @@ class MakeActivity : BaseActivity<MakeViewModel, ActivityMakeBinding>() {
     //region bindings
     override val vm: MakeViewModel by viewModel<MakeViewModelImpl> { parametersOf(intent.getUUIDExtra(BRAND)) }
     override val binding: ActivityMakeBinding by lazy { ActivityMakeBinding.inflate(layoutInflater) }
+    private val progress: View by lazy { binding.progress }
     //endregion
 
     //region arguments
@@ -53,6 +56,10 @@ class MakeActivity : BaseActivity<MakeViewModel, ActivityMakeBinding>() {
                     .commit()
             }
         }
+    }
+
+    override fun setUpObservers(vm: MakeViewModel) {
+        vm.loading.observe { progress.visible = (it == true) }
     }
 
     override fun setUpListeners() {}

@@ -58,8 +58,36 @@ class BrandDaoTest {
     @Test
     fun `insert new brand`() {
         val brand = UnitTestData.BRANDS[0]
-        runBlocking { dao.saveBrand(brand) }
+        runBlocking { dao.insertBrand(brand) }
         assertEquals(1, db.count("brands"))
+    }
+
+    @Test(expected = SQLiteConstraintException::class)
+    fun `insert new brand that already exists`() {
+        runBlocking {
+            initBrands()
+            val brand = UnitTestData.BRANDS[0]
+            dao.insertBrand(brand)
+        }
+    }
+
+    @Test(expected = SQLiteConstraintException::class)
+    fun `insert brand with the same name as existing one`() {
+        runBlocking {
+            initBrands()
+            val brand = UnitTestData.BRANDS[0].copy(UUID.randomUUID())
+            dao.insertBrand(brand)
+        }
+    }
+
+    @Test(expected = SQLiteConstraintException::class)
+    fun `insert brand with the same name as existing one but different case`() {
+        runBlocking {
+            initBrands()
+            val name = UnitTestData.BRANDS[0].name.toUpperCase()
+            val brand = UnitTestData.BRANDS[0].copy(UUID.randomUUID(), name = name)
+            dao.insertBrand(brand)
+        }
     }
 
     @Test
@@ -76,9 +104,29 @@ class BrandDaoTest {
         runBlockingTest {
             initBrands()
             val updated = UnitTestData.BRANDS[2].copy(name = "this is the new thang")
-            dao.saveBrand(updated)
+            val affected = dao.updateBrand(updated)
             assertEquals(UnitTestData.BRANDS.size + UnitTestData.DELETED_BRANDS.size, db.count("brands"))
             assertEquals(1, db.countWhere("brands", " name = '${updated.name}'"))
+            assertEquals(1, affected)
+        }
+    }
+
+    @Test
+    fun `update brand that does not exist`() {
+        runBlocking {
+            initBrands()
+            val brand = BrandEntity(UUID.randomUUID(), "hello", false)
+            val affected = dao.updateBrand(brand)
+            assertEquals(0, affected)
+        }
+    }
+
+    @Test(expected = SQLiteConstraintException::class)
+    fun `update brand with the same name as another brand`() {
+        runBlocking {
+            initBrands()
+            val brand = BrandEntity(UnitTestData.BRANDS[0].id, UnitTestData.BRANDS[1].name, false)
+            dao.updateBrand(brand)
         }
     }
 
@@ -103,7 +151,7 @@ class BrandDaoTest {
                 , BrandEntity(UUID.randomUUID(), "3${filter}3", false)
                 , BrandEntity(UUID.randomUUID(), "1${filter}4", false)
             )
-            expected.forEach { dao.saveBrand(it) }
+            expected.forEach { dao.insertBrand(it) }
 
             val entities = (dao.loadBrands(filter).create() as LimitOffsetDataSource).loadRange(0, 1000)
 
@@ -124,8 +172,8 @@ class BrandDaoTest {
                 BrandEntity(UUID.randomUUID(), "5${filter}1", false)
                 , BrandEntity(UUID.randomUUID(), "2${filter}2", false)
             )
-            expected.forEach { dao.saveBrand(it) }
-            unexpected.forEach { dao.saveBrand(it) }
+            expected.forEach { dao.insertBrand(it) }
+            unexpected.forEach { dao.insertBrand(it) }
 
             val entities = (dao.loadBrands(filter).create() as LimitOffsetDataSource).loadRange(0, 1000)
 
@@ -229,7 +277,7 @@ class BrandDaoTest {
 
     private suspend fun initBrands() {
         UnitTestData.BRANDS.union(UnitTestData.DELETED_BRANDS).forEach {
-            dao.saveBrand(it)
+            dao.insertBrand(it)
         }
 
     }

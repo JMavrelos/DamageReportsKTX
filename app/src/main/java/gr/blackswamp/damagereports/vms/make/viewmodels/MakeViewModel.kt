@@ -5,4 +5,5 @@ import gr.blackswamp.damagereports.vms.base.IBaseViewModel
 
 interface MakeViewModel : IBaseViewModel {
     val error: LiveData<String>
+    val loading: LiveData<Boolean>
 }

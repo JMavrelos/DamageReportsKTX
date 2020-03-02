@@ -1,7 +1,7 @@
 package gr.blackswamp.damagereports.data.repos
 
 import androidx.paging.DataSource
-import gr.blackswamp.core.coroutines.IDispatchers
+import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.db.AppDatabase
@@ -17,7 +17,7 @@ import kotlin.random.Random
 
 class ReportRepositoryImpl : BaseRepositoryImpl(), ReportRepository, KoinComponent {
     private val db: AppDatabase by inject()
-    private val dispatchers: IDispatchers by inject()
+    private val dispatchers: Dispatcher by inject()
 
     override suspend fun newReport(
         name: String,

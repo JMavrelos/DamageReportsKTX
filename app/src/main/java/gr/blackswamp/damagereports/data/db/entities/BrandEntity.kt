@@ -1,15 +1,19 @@
 package gr.blackswamp.damagereports.data.db.entities
 
+import androidx.room.ColumnInfo
+import androidx.room.ColumnInfo.NOCASE
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.*
 
-@Entity(tableName = "brands"
-    , indices = [Index(value = ["name"]), Index(value = ["deleted"])])
+@Entity(
+    tableName = "brands"
+    , indices = [Index(value = ["name"], unique = true), Index(value = ["deleted"])]
+)
 
 data class BrandEntity(
     @PrimaryKey val id: UUID
-    , val name: String
+    , @ColumnInfo(collate = NOCASE) val name: String
     , val deleted: Boolean
 )

@@ -5,10 +5,9 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
-import androidx.lifecycle.viewModelScope
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
-import gr.blackswamp.core.coroutines.IDispatchers
+import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.lifecycle.LiveEvent
 import gr.blackswamp.core.lifecycle.call
@@ -39,7 +38,7 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
     }
 
     private val repo: ReportRepository by inject()
-    private val dispatchers: IDispatchers by inject()
+    private val dispatchers: Dispatcher by inject()
     //region live data
     @VisibleForTesting
     internal val filter = MutableLiveData<String>()
@@ -99,7 +98,7 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
     }
 
     override fun deleteReport(id: UUID) {
-        viewModelScope.launch(dispatchers.UI) {
+        launch {
             try {
                 loading.postValue(true)
                 repo.deleteReport(id).getOrThrow
@@ -118,7 +117,7 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
     }
 
     override fun undoLastDelete() {
-        viewModelScope.launch(dispatchers.UI) {
+        launch {
             val last = lastDeleted.value
             try {
                 if (last == null) {
@@ -140,7 +139,7 @@ class ReportViewModelImpl(application: Application, runInit: Boolean = true) : B
     override fun editReport(id: UUID) = showReport(id, true)
 
     private fun showReport(id: UUID, inEditMode: Boolean) {
-        viewModelScope.launch(dispatchers.UI) {
+        launch {
             loading.postValue(true)
             try {
                 val data = repo.loadReport(id).getOrThrow

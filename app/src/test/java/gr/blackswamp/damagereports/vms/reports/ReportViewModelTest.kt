@@ -6,12 +6,12 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
-import gr.blackswamp.core.coroutines.IDispatchers
+import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.testing.AndroidKoinTest
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
-import gr.blackswamp.core.testing.TestDispatchers
+import gr.blackswamp.core.testing.TestDispatcher
 import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
@@ -46,7 +46,7 @@ class ReportViewModelTest : AndroidKoinTest() {
 
     private val repo: ReportRepository = mock(ReportRepository::class.java)
     override val modules: Module = module {
-        single<IDispatchers> { TestDispatchers }
+        single<Dispatcher> { TestDispatcher }
         single { repo }
     }
 

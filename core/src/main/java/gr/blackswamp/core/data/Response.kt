@@ -25,8 +25,16 @@ class Response<T : Any?>(private val value: Any?) {
 
     val getOrThrow: T
         get() {
-        if (hasError)
-            throw error
+            if (hasError)
+                throw error
+            return get
+        }
+
+    fun getOrThrow(message: String): T {
+        if (hasError) {
+            throw Throwable(message, error)
+        }
         return get
     }
+
 }

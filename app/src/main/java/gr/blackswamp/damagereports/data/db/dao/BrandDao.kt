@@ -3,16 +3,19 @@ package gr.blackswamp.damagereports.data.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import gr.blackswamp.damagereports.data.db.entities.BrandEntity
 import java.util.*
 
 @Dao
 interface BrandDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun saveBrand(brand: BrandEntity)
+    @Insert
+    suspend fun insertBrand(brand: BrandEntity)
+
+    @Update
+    suspend fun updateBrand(brand: BrandEntity): Int
 
     @Query("DELETE FROM brands WHERE id = :id")
     suspend fun deleteBrandById(id: UUID)
@@ -28,4 +31,5 @@ interface BrandDao {
 
     @Query("SELECT * FROM brands WHERE id = :id")
     fun loadBrandFactoryById(id: UUID): DataSource.Factory<Int, BrandEntity>
+
 }

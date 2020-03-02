@@ -39,4 +39,7 @@
     <string name="sort">Ταξινόμιση</string>
     <string name="by_use">Κατά Χρήση</string>
     <string name="alphabetically">Αλφαβητικά</string>
+    <string name="error_new_brand_not_found">Δεν βρέθηκε καταχώηρηση για νέα μάρκα</string>
+    <string name="error_empty_brand_name">Το όνομα της μάρκας δε μπορεί να είναι άδειο</string>
+    <string name="error_saving_brand">Πρόβλημα κατά την αποθήκευση της μάρκας</string>
 </resources>

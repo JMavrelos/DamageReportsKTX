@@ -68,7 +68,6 @@ dependencies {
     implementation deps.swipe_refresh //design
     implementation deps.lifecycle.extensions //lifecycle
     implementation deps.lifecycle.runtime //lifecycle
-    implementation deps.lifecycle.kotlin
     implementation deps.lifecycle.livedata
     implementation deps.paging.kotlin //paging library
     implementation deps.timber //timber

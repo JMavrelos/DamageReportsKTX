@@ -37,3 +37,5 @@ fun UUID?.isNullOrBlank(): Boolean {
     }
     return this == null || this == EmptyUUID
 }
+
+fun String.toThrowable(): Throwable = Throwable(this)
