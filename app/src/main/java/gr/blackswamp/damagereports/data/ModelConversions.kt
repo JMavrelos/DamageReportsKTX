@@ -4,10 +4,10 @@ import gr.blackswamp.damagereports.data.db.entities.BrandEntity
 import gr.blackswamp.damagereports.data.db.entities.ModelEntity
 import gr.blackswamp.damagereports.data.db.entities.ReportEntity
 import gr.blackswamp.damagereports.data.db.entities.ReportHeaderEntity
-import gr.blackswamp.damagereports.vms.BrandData
-import gr.blackswamp.damagereports.vms.ModelData
-import gr.blackswamp.damagereports.vms.ReportData
-import gr.blackswamp.damagereports.vms.ReportHeaderData
+import gr.blackswamp.damagereports.logic.model.BrandData
+import gr.blackswamp.damagereports.logic.model.ModelData
+import gr.blackswamp.damagereports.logic.model.ReportData
+import gr.blackswamp.damagereports.logic.model.ReportHeaderData
 
 internal fun ReportHeaderEntity.toData(): ReportHeaderData =
     ReportHeaderData(id, name, description, date)

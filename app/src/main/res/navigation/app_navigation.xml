@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/app_navigation"
+    app:startDestination="@+id/report_list_dest">
+
+    <fragment
+        android:id="@+id/report_list_dest"
+        android:name="gr.blackswamp.damagereports.ui.fragments.ReportListFragment"
+        android:label="ReportListFragment"
+        tools:layout="@layout/fragment_report_list" />
+
+    <fragment
+        android:id="@+id/report_view_dest"
+        android:name="gr.blackswamp.damagereports.ui.fragments.ReportViewFragment"
+        android:label="ReportViewFragment"
+        tools:layout="@layout/fragment_report_view" />
+
+    <fragment
+        android:id="@+id/brand_dest"
+        android:name="gr.blackswamp.damagereports.ui.fragments.BrandFragment"
+        android:label="BrandFragment"
+        tools:layout="@layout/fragment_brand" />
+
+    <fragment
+        android:id="@+id/model_dest"
+        android:name="gr.blackswamp.damagereports.ui.fragments.ModelFragment"
+        android:label="ModelFragment"
+        tools:layout="@layout/fragment_model" />
+
+</navigation>

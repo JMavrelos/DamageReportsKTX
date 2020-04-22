@@ -7,15 +7,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.viewbinding.ViewBinding
 
 @Suppress("SameParameterValue")
-abstract class CoreFragment<T : Any> : Fragment() {
+abstract class CoreFragment<T : Any, V : ViewBinding> : Fragment() {
     abstract val vm: T
+    abstract val binding: V
     protected open val withOptionsMenu = false
 
     final override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         setHasOptionsMenu(withOptionsMenu)
-        val view = setUpBindings()
+        val view = binding.root
         initView(savedInstanceState)
         setUpListeners()
         return view
@@ -25,8 +27,6 @@ abstract class CoreFragment<T : Any> : Fragment() {
         super.onActivityCreated(savedInstanceState)
         setUpObservers(vm)
     }
-
-    protected abstract fun setUpBindings(): View
 
     protected open fun initView(state: Bundle?) {}
 
