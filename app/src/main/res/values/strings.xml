@@ -6,8 +6,12 @@
     <string name="name">Ονομασία</string>
     <string name="description">Περιγραφή</string>
     <string name="brand">Μάρκα</string>
+    <string name="brands">Μάρκες</string>
     <string name="select_brand">Επιλέξτε Μάρκα</string>
     <string name="model">Μοντέλο</string>
+    <string name="models">Μοντέλα</string>
+    <string name="damage_report">Αναφορά βλάβης</string>
+    <string name="damage_view">Βλάβη</string>
     <string name="select_model">Επιλέξτε Μοντέλο</string>
     <string name="damage_thumbnail">Φωτογραφία Προβλήματος</string>
     <string name="cancel">Ακύρωση</string>
@@ -25,6 +29,8 @@
     <string name="undo_delete">Πιέστε το κουμπί για αναίρεση διαγραφής</string>
     <string name="undo">Αναίρεση</string>
     <string name="error_loading_report">Υπήρξε πρόβλημα κατά την εύρεση της αναφοράς %1$s</string>
+    <string name="error_loading_model">Υπήρξε πρόβλημα κατά την εύρεση του μοντέλου %1$s</string>
+    <string name="error_loading_brand">Υπήρξε πρόβλημα κατά την εύρεση της μάρκας %1$s</string>
     <string name="error_invalid_model_brand">Η σύνδεση μοντέλου/μάρκας είναι λάθος</string>
     <string name="edit">Τροποποίηση</string>
     <string name="confirm_discard_changes">Αν συνεχίσετε θα χαθούν όλες οι αλλαγές που έχετε κάνει\nΘέλετε σίγουρα να συνεχίσετε;</string>
@@ -42,4 +48,12 @@
     <string name="error_new_brand_not_found">Δεν βρέθηκε καταχώηρηση για νέα μάρκα</string>
     <string name="error_empty_brand_name">Το όνομα της μάρκας δε μπορεί να είναι άδειο</string>
     <string name="error_saving_brand">Πρόβλημα κατά την αποθήκευση της μάρκας</string>
+    <string name="error_new_model_not_found">Δεν βρέθηκε καταχώηρηση για νέο μοντέλο</string>
+    <string name="error_empty_model_name">Το όνομα του μοντέλου  δε μπορεί να είναι άδειο</string>
+    <string name="error_saving_model">Πρόβλημα κατά την αποθήκευση του μοντέλου</string>
+    <string name="total_damage_price">Συνολική αξία ζημιάς</string>
+    <string name="symbol_add">+</string>
+    <string name="symbol_subtract">-</string>
+    <string name="image">image</string>
+    <string name="error_invalid_report_data">Λήφθηκαν λάθος δεδομένα αναφοράς</string>
 </resources>

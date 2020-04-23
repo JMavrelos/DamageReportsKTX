@@ -8,25 +8,87 @@
     <fragment
         android:id="@+id/report_list_dest"
         android:name="gr.blackswamp.damagereports.ui.fragments.ReportListFragment"
-        android:label="ReportListFragment"
-        tools:layout="@layout/fragment_report_list" />
+        android:label="@string/damage_reports"
+        tools:layout="@layout/fragment_report_list">
+        <action
+            android:id="@+id/show_report"
+            app:destination="@id/report_view_dest"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
 
     <fragment
         android:id="@+id/report_view_dest"
         android:name="gr.blackswamp.damagereports.ui.fragments.ReportViewFragment"
-        android:label="ReportViewFragment"
-        tools:layout="@layout/fragment_report_view" />
+        android:label="@string/damage_report"
+        tools:layout="@layout/fragment_report_view">
+        <argument
+            android:name="report"
+            app:argType="gr.blackswamp.damagereports.ui.model.Report"
+            app:nullable="false" />
+        <argument
+            android:name="inEditMode"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <action
+            android:id="@+id/select_brand"
+            app:destination="@id/brand_dest"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/select_model"
+            app:destination="@id/model_dest"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/show_damage"
+            app:destination="@id/damage_dest"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
 
     <fragment
         android:id="@+id/brand_dest"
         android:name="gr.blackswamp.damagereports.ui.fragments.BrandFragment"
-        android:label="BrandFragment"
-        tools:layout="@layout/fragment_brand" />
+        android:label="@string/brands"
+        tools:layout="@layout/fragment_brand">
+
+        <action
+            android:id="@+id/select_model"
+            app:destination="@id/model_dest"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
 
     <fragment
         android:id="@+id/model_dest"
         android:name="gr.blackswamp.damagereports.ui.fragments.ModelFragment"
-        android:label="ModelFragment"
-        tools:layout="@layout/fragment_model" />
+        android:label="@string/models"
+        tools:layout="@layout/fragment_model">
+        <argument
+            android:name="brand"
+            app:argType="gr.blackswamp.damagereports.ui.model.Brand"
+            app:nullable="false" />
+
+        <action
+            android:id="@+id/finish_model"
+            app:popUpTo="@id/report_view_dest" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/damage_dest"
+        android:name="gr.blackswamp.damagereports.ui.fragments.DamageFragment"
+        android:label="@string/damage_view"
+        tools:layout="@layout/fragment_damage" />
 
 </navigation>

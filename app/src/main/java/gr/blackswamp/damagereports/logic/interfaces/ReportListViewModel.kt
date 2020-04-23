@@ -1,8 +1,9 @@
-package gr.blackswamp.damagereports.logic.vms
+package gr.blackswamp.damagereports.logic.interfaces
 
 import androidx.lifecycle.LiveData
 import androidx.paging.PagedList
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
+import gr.blackswamp.damagereports.logic.commands.ReportListCommand
 import gr.blackswamp.damagereports.ui.model.ReportHeader
 import java.util.*
 
@@ -11,6 +12,7 @@ interface ReportListViewModel {
     val refreshing: LiveData<Boolean>
     var reportHeaderList: LiveData<PagedList<ReportHeader>>
     val showUndo: LiveData<Boolean>
+    val command: LiveData<ReportListCommand>
 
     fun newReport()
     fun reloadReports()

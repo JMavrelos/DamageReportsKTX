@@ -123,7 +123,7 @@ class BrandViewModelTest : AndroidKoinTest() {
         val expected = UnitTestData.BRANDS.shuffled().take(30)
         whenever(repo.getBrands(FILTER, null)).thenReturn(Response.success(StaticDataSource.factory(expected, false)))
 
-        vm.newBrandFilter(FILTER, true)
+        vm.newFilter(FILTER, true)
 
         val values = vm.brandList.getOrAwait().toList()
         assertEquals(FILTER, vm.brandFilter.value)
@@ -136,7 +136,7 @@ class BrandViewModelTest : AndroidKoinTest() {
     fun `we ignore filter changes when we start with a brand`() {
         initVm(null)
 
-        vm.newBrandFilter(FILTER, true)
+        vm.newFilter(FILTER, true)
 
         verifyNoMoreInteractions(repo)
     }
@@ -145,7 +145,7 @@ class BrandViewModelTest : AndroidKoinTest() {
     fun `pressing add new creates an empty brand and shows it`() {
         initVm(null)
 
-        vm.newBrand()
+        vm.create()
 
         val value = vm.brand.getOrAwait()
 
@@ -160,7 +160,7 @@ class BrandViewModelTest : AndroidKoinTest() {
         initVm(null)
 
         vm.brand.getOrAwait(time = 10, throwError = false) //just to make sure the transformation is observed
-        vm.saveBrand("hello")
+        vm.save("hello")
 
 //        assertNotNull(vm.error.value)
 //        assertFalse(vm.loading.value!!)
@@ -172,9 +172,9 @@ class BrandViewModelTest : AndroidKoinTest() {
     fun `pressing save with an empty named new brand shows an error`() {
         initVm(null)
 
-        vm.newBrand()
+        vm.create()
         vm.brand.getOrAwait()
-        vm.saveBrand("")
+        vm.save("")
 
 //        assertNotNull(vm.error.value)
 //        assertFalse(vm.loading.value!!)
@@ -189,10 +189,10 @@ class BrandViewModelTest : AndroidKoinTest() {
             initVm(null)
             whenever(repo.newBrand(name)).thenReturn(Response.success())
 
-            vm.newBrand()
+            vm.create()
             vm.brand.getOrAwait()
 
-            vm.saveBrand(name)
+            vm.save(name)
             vm.brand.getOrAwait(0, throwError = false)
 
 //            assertNull(vm.error.value)
@@ -208,10 +208,10 @@ class BrandViewModelTest : AndroidKoinTest() {
             val name = "hello world"
             initVm(null)
             whenever(repo.newBrand(name)).thenReturn(Response.failure(ERROR))
-            vm.newBrand()
+            vm.create()
             vm.brand.getOrAwait()
 
-            vm.saveBrand(name)
+            vm.save(name)
             vm.brand.getOrAwait()
 
 //            assertEquals(APP_STRING, vm.error.value)

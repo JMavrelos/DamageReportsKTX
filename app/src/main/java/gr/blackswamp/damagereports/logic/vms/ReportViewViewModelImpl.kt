@@ -3,31 +3,33 @@ package gr.blackswamp.damagereports.logic.vms
 import android.app.Application
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.MutableLiveData
-import gr.blackswamp.core.coroutines.Dispatcher
+import gr.blackswamp.core.lifecycle.LiveEvent
 import gr.blackswamp.core.lifecycle.call
 import gr.blackswamp.core.util.EmptyUUID
+import gr.blackswamp.core.util.toThrowable
 import gr.blackswamp.core.vms.CoreViewModel
+import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.repos.ReportViewRepository
+import gr.blackswamp.damagereports.logic.commands.ReportViewCommand
+import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
+import gr.blackswamp.damagereports.logic.interfaces.ReportViewViewModel
 import gr.blackswamp.damagereports.logic.model.ReportData
 import gr.blackswamp.damagereports.ui.model.Report
 import org.koin.core.inject
-import java.util.*
 
-class ReportViewViewModelImpl(application: Application, runInit: Boolean = true) : CoreViewModel(application), ReportViewViewModel {
+class ReportViewViewModelImpl(application: Application, private val parent: FragmentParent, report: Report, inEditMode: Boolean, runInit: Boolean = true) :
+    CoreViewModel(application),
+    ReportViewViewModel {
     companion object {
         const val TAG = "ReportViewViewModel"
     }
 
     private val repo: ReportViewRepository by inject()
-    private val dispatchers: Dispatcher by inject()
 
     //region live data
-    @VisibleForTesting
-    internal val filter = MutableLiveData<String>()
-
-    @VisibleForTesting
-    internal val lastDeleted = MutableLiveData<UUID>()
-    override val report = MutableLiveData<Report>() // this is used for showing (if needed) the correct fragment and updating the view fragment's data
+    override val report = MutableLiveData<Report>() // this is used for showing the changes to the current report
+    override val command = LiveEvent<ReportViewCommand>()
+    private val reportData get() = report.value as? ReportData
 
     @VisibleForTesting
     override val editMode = MutableLiveData<Boolean>()
@@ -35,30 +37,35 @@ class ReportViewViewModelImpl(application: Application, runInit: Boolean = true)
 
     init {
         if (runInit) {
-            initialize()
+            initialize(report, inEditMode)
         }
     }
 
     @VisibleForTesting
-    internal fun initialize() {
-        filter.postValue("")
+    internal fun initialize(report: Report, inEditMode: Boolean) {
+        try {
+            if (report !is ReportData)
+                throw getString(R.string.error_invalid_report_data).toThrowable()
+            editMode.postValue(inEditMode)
+            this.report.postValue(report)
+        } catch (t: Throwable) {
+            parent.showError(t.message!!)
+        }
     }
 
     //region IReportViewViewModel implementation
     override fun pickBrand() {
-        if (report.value as? ReportData == null) return
-//        activityCommand.postValue(ReportActivityCommand.ShowBrandSelection)
-
+        if (reportData == null) return
+        command.postValue(ReportViewCommand.ShowBrandSelect)
     }
 
     override fun pickModel() {
-        val current = report.value as? ReportData ?: return
-//        activityCommand.postValue(ReportActivityCommand.ShowModelSelection(UUID.randomUUID()))
+        val current = reportData ?: return
         if (current.brand == null) {
-//            error.setValue(getString(R.string.error_no_brand_selected))
+            parent.showError(getString(R.string.error_no_brand_selected))
             return
         }
-//        activityCommand.postValue(ReportActivityCommand.ShowModelSelection(current.brand.id))
+        command.postValue(ReportViewCommand.ShowModelSelect(current.brand))
     }
 
     override fun nameChanged(name: String) {

@@ -9,40 +9,41 @@ import androidx.lifecycle.switchMap
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import gr.blackswamp.core.db.paging.StaticDataSource
+import gr.blackswamp.core.lifecycle.LiveEvent
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.util.toThrowable
 import gr.blackswamp.core.vms.CoreViewModel
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.repos.BrandRepository
+import gr.blackswamp.damagereports.logic.commands.BrandCommand
+import gr.blackswamp.damagereports.logic.interfaces.BrandViewModel
+import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
 import gr.blackswamp.damagereports.logic.model.BrandData
-import gr.blackswamp.damagereports.logic.model.ModelData
 import gr.blackswamp.damagereports.ui.model.Brand
 import kotlinx.coroutines.launch
 import org.koin.core.inject
-import timber.log.Timber
 import java.util.*
 
-class BrandViewModelImpl(application: Application, val brandId: UUID?, runInit: Boolean = true) :
+class BrandViewModelImpl(application: Application, private val parent: FragmentParent, runInit: Boolean = true) :
     CoreViewModel(application), BrandViewModel {
-
-    private val repo: BrandRepository by inject()
-
     companion object {
         const val TAG = "MakeViewModel"
+
         @VisibleForTesting
         internal const val LIST_PAGE_SIZE = 100
     }
 
+    private val repo: BrandRepository by inject()
+
     //region live data
+    override val command = LiveEvent<BrandCommand>()
     internal val brandFilter = MutableLiveData<String>()
     private val brandData = MutableLiveData<BrandData>()
     override val brand: LiveData<Brand> = Transformations.map(brandData) { it }
     override val brandList: LiveData<PagedList<Brand>> = brandFilter.switchMap(this::brandDbToUi)
-    private val modelData = MutableLiveData<ModelData>()
     //endregion
 
     init {
-        Timber.d("Brand id $brandId")
         if (runInit) initialize()
     }
 
@@ -51,21 +52,24 @@ class BrandViewModelImpl(application: Application, val brandId: UUID?, runInit: 
         brandFilter.postValue("")
     }
 
-    override fun newBrandFilter(filter: String, submitted: Boolean): Boolean {
-        if (brandId != null) return true//if we do not have a pre set brand then we change the filter
+    override fun newFilter(filter: String, submitted: Boolean): Boolean {
         brandFilter.postValue(filter)
-//        if (submitted)
-//            hideKeyboard.call()
+        if (submitted)
+            parent.hideKeyboard()
         return true
     }
 
-    override fun editBrand(id: UUID) {
+    override fun create() {
+        brandData.postValue(BrandData(EmptyUUID, ""))
+    }
+
+    override fun edit(id: UUID) {
         brandData.postValue(BrandData(id, "test brand"))
     }
 
-    override fun saveBrand(name: String) {
+    override fun save(name: String) {
         launch {
-//            loading.postValue(true)
+            parent.showLoading(true)
             try {
                 val current = brandData.value ?: throw getString(R.string.error_new_brand_not_found).toThrowable()
                 if (name.isBlank()) throw getString(R.string.error_empty_brand_name).toThrowable()
@@ -77,31 +81,43 @@ class BrandViewModelImpl(application: Application, val brandId: UUID?, runInit: 
                 }.getOrThrow(getString(R.string.error_saving_brand))
                 brandData.postValue(null)
             } catch (t: Throwable) {
-//                error.postValue(t.message ?: getString(R.string.error_saving_brand))
+                parent.showError(t.message ?: getString(R.string.error_saving_brand))
             } finally {
-//                loading.postValue(false)
+                parent.showLoading(false)
             }
         }
     }
 
-    override fun newBrand() {
-        brandData.postValue(BrandData(EmptyUUID, ""))
+    override fun delete(id: UUID) {
+        TODO("Not yet implemented")
     }
 
-    override fun cancelBrand() {
+    override fun select(id: UUID) {
+        launch {
+            parent.showLoading(true)
+            try {
+                val brand = repo.getBrand(id).getOrThrow
+                command.postValue(BrandCommand.ShowModelSelect(brand))
+            } catch (t: Throwable) {
+                parent.showError(t.message ?: getString(R.string.error_loading_brand, id))
+            } finally {
+                parent.showLoading(false)
+            }
+        }
+    }
+
+    override fun cancel() {
         brandData.postValue(null)
     }
 
-
     private fun brandDbToUi(filter: String): LiveData<PagedList<Brand>> {
-        return repo.getBrands(filter, brandId).let { response ->
-//            if (response.hasError) {
-//                error.postValue(response.errorMessage)
+        return repo.getBrands(filter).let { response ->
+            if (response.hasError) {
+                parent.showError(response.errorMessage)
                 StaticDataSource.factory(listOf<Brand>())
-//            } else {
-//                response.get.map { it.toData() }
-//            }
-                    .toLiveData(LIST_PAGE_SIZE)
-        }
+            } else {
+                response.get.map { it as Brand }
+            }
+        }.toLiveData(LIST_PAGE_SIZE)
     }
 }

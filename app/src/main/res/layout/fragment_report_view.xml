@@ -6,22 +6,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fitsSystemWindows="true">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            style="?toolbarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:menu="@menu/report_view"
-            app:navigationIcon="@drawable/ic_nav_back"
-            app:subtitle="@string/select_create_report"
-            app:title="@string/damage_reports" />
-    </com.google.android.material.appbar.AppBarLayout>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

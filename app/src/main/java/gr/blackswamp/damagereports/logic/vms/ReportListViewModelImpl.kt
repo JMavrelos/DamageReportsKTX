@@ -5,16 +5,22 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
+import androidx.lifecycle.switchMap
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
-import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.db.paging.StaticDataSource
+import gr.blackswamp.core.lifecycle.LiveEvent
 import gr.blackswamp.core.lifecycle.call
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.vms.CoreViewModel
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.repos.ReportListRepository
+import gr.blackswamp.damagereports.logic.commands.ReportListCommand
+import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
+import gr.blackswamp.damagereports.logic.interfaces.ReportListViewModel
+import gr.blackswamp.damagereports.logic.model.BrandData
+import gr.blackswamp.damagereports.logic.model.ModelData
 import gr.blackswamp.damagereports.logic.model.ReportData
 import gr.blackswamp.damagereports.ui.model.ReportHeader
 import kotlinx.coroutines.launch
@@ -22,7 +28,8 @@ import org.koin.core.inject
 import timber.log.Timber
 import java.util.*
 
-class ReportListViewModelImpl(application: Application, runInit: Boolean = true) : CoreViewModel(application), ReportListViewModel {
+class ReportListViewModelImpl(application: Application, val parent: FragmentParent, runInit: Boolean = true) : CoreViewModel(application),
+    ReportListViewModel {
     companion object {
         const val TAG = "ReportViewModel"
 
@@ -31,18 +38,17 @@ class ReportListViewModelImpl(application: Application, runInit: Boolean = true)
     }
 
     private val repo: ReportListRepository by inject()
-    private val dispatchers: Dispatcher by inject()
 
     //region live data
     @VisibleForTesting
     internal val filter = MutableLiveData<String>()
     override val themeSelection = MutableLiveData<ThemeSetting>(null)
-
     @VisibleForTesting
     internal val lastDeleted = MutableLiveData<UUID>()
+    override val command = LiveEvent<ReportListCommand>()
     override val showUndo: LiveData<Boolean> = Transformations.map(lastDeleted) { it != null }
     override val refreshing = MutableLiveData<Boolean>()
-    override var reportHeaderList: LiveData<PagedList<ReportHeader>> = Transformations.switchMap(filter, this::dbHeaderToUi)
+    override var reportHeaderList: LiveData<PagedList<ReportHeader>> = filter.switchMap(this::dbHeaderToUi)
     //endregion
 
     init {
@@ -67,7 +73,7 @@ class ReportListViewModelImpl(application: Application, runInit: Boolean = true)
         Timber.d("transforming for \"$filter\"")
         val response = repo.getReportHeaders(filter ?: "")
         return if (response.hasError) {
-//            error.postValue(response.errorMessage)
+            parent.showError(response.errorMessage)
             StaticDataSource.factory(listOf<ReportHeader>())
         } else {
             response.get.map {
@@ -80,14 +86,14 @@ class ReportListViewModelImpl(application: Application, runInit: Boolean = true)
     override fun deleteReport(id: UUID) {
         launch {
             try {
-//                loading.postValue(true)
+                parent.showLoading(true)
                 repo.deleteReport(id).getOrThrow
                 lastDeleted.postValue(id)
             } catch (t: Throwable) {
-//                error.postValue(t.message ?: getString(R.string.error_deleting, id))
+                parent.showError(t.message ?: getString(R.string.error_deleting, id))
                 lastDeleted.postValue(null)
             } finally {
-//                loading.postValue(false)
+                parent.showLoading(false)
             }
         }
     }
@@ -103,13 +109,13 @@ class ReportListViewModelImpl(application: Application, runInit: Boolean = true)
                 if (last == null) {
                     throw Throwable(getString(R.string.error_un_deleting_no_saved_value))
                 }
-//                loading.postValue(true)
+                parent.showLoading(true)
                 repo.unDeleteReport(last).getOrThrow
             } catch (t: Throwable) {
-//                error.postValue(t.message ?: getString(R.string.error_un_deleting, last))
+                parent.showError(t.message ?: getString(R.string.error_un_deleting, last))
             } finally {
                 lastDeleted.postValue(null)
-//                loading.postValue(false)
+                parent.showLoading(false)
             }
         }
     }
@@ -120,23 +126,29 @@ class ReportListViewModelImpl(application: Application, runInit: Boolean = true)
 
     private fun showReport(id: UUID, inEditMode: Boolean) {
         launch {
-//            loading.postValue(true)
+            parent.showLoading(true)
             try {
                 val data = repo.loadReport(id).getOrThrow
-//                editMode.postValue(inEditMode)
-//                report.postValue(data)
+                command.postValue(ReportListCommand.ShowReport(data, inEditMode))
             } catch (t: Throwable) {
-//                error.postValue(t.message ?: t::class.java.name)
+                parent.showError(t.message ?: t::class.java.name)
             } finally {
-//                loading.postValue(false)
+                parent.showLoading(false)
             }
         }
     }
 
     override fun newReport() {
-        val newReport = ReportData(EmptyUUID, "", "", null, null, Date(System.currentTimeMillis()), false)
-//        editMode.value = true
-//        report.value = newReport
+        val newReport = ReportData(
+            EmptyUUID,
+            "test",
+            "also test",
+            BrandData(UUID.randomUUID(), "hello"),
+            ModelData(UUID.randomUUID(), "World", UUID.randomUUID()),
+            Date(System.currentTimeMillis()),
+            false
+        )
+        command.postValue(ReportListCommand.ShowReport(newReport, true))
     }
 
     override fun newReportFilter(filter: String, submitted: Boolean): Boolean {

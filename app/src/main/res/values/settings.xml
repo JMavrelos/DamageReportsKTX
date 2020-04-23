@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="KEY_THEME" translatable="false">APP_THEME</string>
-    <string name="system_value">system</string>
-    <string name="dark_value">dark</string>
-    <string name="light_value">light</string>
-    <string name="auto_value">auto</string>
+    <string name="system_value" translatable="false">system</string>
+    <string name="dark_value" translatable="false">dark</string>
+    <string name="light_value" translatable="false">light</string>
+    <string name="auto_value" translatable="false">auto</string>
 </resources>

@@ -1,4 +1,4 @@
-package gr.blackswamp.damagereports.logic.vms
+package gr.blackswamp.damagereports.logic.interfaces
 
 import androidx.lifecycle.LiveData
 import gr.blackswamp.core.vms.ICoreViewModel

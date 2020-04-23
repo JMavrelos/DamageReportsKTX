@@ -1,8 +1,9 @@
 package gr.blackswamp.damagereports.ui.model
 
+import android.os.Parcelable
 import java.util.*
 
-interface Report {
+interface Report : Parcelable {
     val id: UUID
     val name: String
     val description: String

@@ -1,13 +1,17 @@
 package gr.blackswamp.damagereports.ui.fragments
 
 import android.text.Editable
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -17,25 +21,31 @@ import gr.blackswamp.core.widget.TextChangeListener
 import gr.blackswamp.core.widget.updateText
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.databinding.FragmentReportViewBinding
-import gr.blackswamp.damagereports.logic.vms.ReportViewViewModel
+import gr.blackswamp.damagereports.logic.commands.ReportViewCommand
+import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
+import gr.blackswamp.damagereports.logic.interfaces.ReportViewViewModel
+import gr.blackswamp.damagereports.logic.vms.MainViewModelImpl
 import gr.blackswamp.damagereports.logic.vms.ReportViewViewModelImpl
 import gr.blackswamp.damagereports.ui.model.Report
+import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 @Suppress("UNUSED_PARAMETER")
 class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewBinding>() {
     companion object {
         const val TAG = "ReportViewFragment"
-        fun newInstance(): Fragment = ReportViewFragment()
     }
 
     private val nameListener = TextChangeListener(after = this::nameChanged)
     private val descriptionListener = TextChangeListener(after = this::descriptionChanged)
 
     //region bindings
-    override val vm: ReportViewViewModel by viewModel<ReportViewViewModelImpl>()
+    private val parent: FragmentParent by sharedViewModel<MainViewModelImpl>()
+    private val args: ReportViewFragmentArgs by navArgs()
+    override val vm: ReportViewViewModel by viewModel<ReportViewViewModelImpl> { parametersOf(parent, args.report, args.inEditMode) }
     override val binding: FragmentReportViewBinding by lazy { FragmentReportViewBinding.inflate(layoutInflater) }
-    private val toolbar: Toolbar by lazy { binding.toolbar }
+    override val optionsMenuId: Int = R.menu.report_view
     private val id: TextView by lazy { binding.id }
     private val name: EditText by lazy { binding.name }
     private val description: EditText by lazy { binding.description }
@@ -44,24 +54,28 @@ class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewB
     private val refreshDamages: SwipeRefreshLayout by lazy { binding.refresh }
     private val damages: RecyclerView by lazy { binding.damages }
     private val action: FloatingActionButton by lazy { binding.action }
-    private val save: MenuItem by lazy { binding.toolbar.menu.findItem(R.id.save) }
-    private val edit: MenuItem by lazy { binding.toolbar.menu.findItem(R.id.edit) }
     //endregion
 
     //region lifecycle methods
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        val editing = vm.editMode.value == true
+        menu.findItem(R.id.edit)?.isVisible = !editing
+        menu.findItem(R.id.save)?.isVisible = editing
+    }
+
     override fun setUpListeners() {
         model.setOnClickListener(this::pickModel)
         brand.setOnClickListener(this::pickBrand)
-        save.setOnMenuItemClickListener(this::saveReport)
-        edit.setOnMenuItemClickListener(this::editReport)
-        toolbar.setNavigationOnClickListener(this::exit)
         name.addTextChangedListener(nameListener)
+        requireActivity().onBackPressedDispatcher.addCallback(this, backPressedCallback)
         description.addTextChangedListener(descriptionListener)
     }
 
     override fun setUpObservers(vm: ReportViewViewModel) {
         vm.report.observe(this::updateReport)
         vm.editMode.observe(this::updateEditable)
+        vm.command.observe(this::executeCommand)
     }
 
     override fun onDestroy() {
@@ -74,17 +88,54 @@ class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewB
     //region observers
     private fun updateReport(report: Report?) {
         showReport(report)
-        updateNavigationIcon(report, vm.editMode.value)
+        backPressedCallback.isEnabled = vm.editMode.value == true
+//        updateNavigationIcon(report, vm.editMode.value)
+        requireActivity().invalidateOptionsMenu()
 
     }
 
     private fun updateEditable(editable: Boolean?) {
         setEditable(editable == true)
-        updateNavigationIcon(vm.report.value, editable)
+        backPressedCallback.isEnabled = editable == true
+//        updateNavigationIcon(vm.report.value, editable)
+        requireActivity().invalidateOptionsMenu()
+    }
+
+    private fun executeCommand(command: ReportViewCommand?) {
+        when (command) {
+            is ReportViewCommand.ShowBrandSelect -> {
+                val action = ReportViewFragmentDirections.selectBrand()
+                findNavController().navigate(action)
+            }
+            is ReportViewCommand.ShowModelSelect -> {
+                val action = ReportViewFragmentDirections.selectModel(command.brand)
+                findNavController().navigate(action)
+            }
+        }
     }
 
     //endregion
     //region listeners
+    private val backPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            Toast.makeText(context, "exit pressed", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.save -> {
+                vm.saveReport()
+                true
+            }
+            R.id.edit -> {
+                vm.editReport()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     private fun pickModel(v: View) = vm.pickModel()
 
     private fun pickBrand(v: View) = vm.pickBrand()
@@ -113,8 +164,9 @@ class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewB
 
     //region private methods
     private fun setEditable(editable: Boolean) {
-        save.isVisible = editable
-        edit.isVisible = !editable
+//        save.isVisible = editable
+//        edit.isVisible = !editable
+
         model.isEnabled = editable
         brand.isEnabled = editable
         description.isEnabled = editable
@@ -149,9 +201,9 @@ class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewB
         val new = report?.id == EmptyUUID
         val edit = editMode == true
         if (new || (edit && !changed)) {
-            toolbar.setNavigationIcon(R.drawable.ic_nav_back)
+//            toolbar.setNavigationIcon(R.drawable.ic_nav_back)
         } else {
-            toolbar.setNavigationIcon(R.drawable.ic_undo)
+//            toolbar.setNavigationIcon(R.drawable.ic_undo)
         }
     }
     //endregion

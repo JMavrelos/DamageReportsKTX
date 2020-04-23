@@ -1,26 +1,33 @@
 package gr.blackswamp.damagereports.data.repos
 
 import androidx.paging.DataSource
-import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.data.Response
+import gr.blackswamp.core.util.toThrowable
+import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.entities.BrandEntity
+import gr.blackswamp.damagereports.data.toData
+import gr.blackswamp.damagereports.logic.model.BrandData
 import org.koin.core.inject
 import java.util.*
 
 class BrandRepositoryImpl : BaseRepositoryImpl(), BrandRepository {
     private val db: AppDatabase by inject()
-    private val dispatchers: Dispatcher by inject()
 
-    override fun getBrands(filter: String, withId: UUID?): Response<DataSource.Factory<Int, BrandEntity>> {
+    override fun getBrands(filter: String): Response<DataSource.Factory<Int, BrandData>> {
         return try {
-            Response.success(
-                if (withId == null) {
-                    db.brandDao.loadBrands(filter)
-                } else {
-                    db.brandDao.loadBrandFactoryById(withId)
-                }
-            )
+            Response.success(db.brandDao.loadBrands(filter).map(BrandEntity::toData))
+        } catch (t: Throwable) {
+            Response.failure(t)
+        }
+    }
+
+    override suspend fun getBrand(id: UUID): Response<BrandData> {
+        return try {
+            val brand =
+                db.brandDao.loadBrandById(id)?.toData()
+                    ?: throw getString(R.string.error_brand_not_found, id).toThrowable()
+            Response.success(brand)
         } catch (t: Throwable) {
             Response.failure(t)
         }

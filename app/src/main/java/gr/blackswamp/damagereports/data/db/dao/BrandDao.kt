@@ -28,8 +28,4 @@ interface BrandDao {
 
     @Query("SELECT * FROM brands WHERE NOT deleted AND (:filter = '' OR lower(name) LIKE '%' || lower(:filter) || '%') ORDER BY name ")
     fun loadBrands(filter: String = ""): DataSource.Factory<Int, BrandEntity>
-
-    @Query("SELECT * FROM brands WHERE id = :id")
-    fun loadBrandFactoryById(id: UUID): DataSource.Factory<Int, BrandEntity>
-
 }

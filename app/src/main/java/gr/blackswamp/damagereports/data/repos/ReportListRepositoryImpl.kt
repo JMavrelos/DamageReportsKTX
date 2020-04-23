@@ -5,6 +5,7 @@ import gr.blackswamp.core.data.Response
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.entities.ReportEntity
+import gr.blackswamp.damagereports.data.db.entities.ReportHeaderEntity
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.toData
 import gr.blackswamp.damagereports.logic.model.ReportData
@@ -39,8 +40,7 @@ class ReportListRepositoryImpl : BaseRepositoryImpl(), ReportListRepository, Koi
 
     override fun getReportHeaders(filter: String): Response<DataSource.Factory<Int, ReportHeaderData>> {
         return try {
-            Response.success(db.reportDao.loadReportHeaders(filter)
-                .map { entity -> entity.toData() })
+            Response.success(db.reportDao.loadReportHeaders(filter).map(ReportHeaderEntity::toData))
         } catch (t: Throwable) {
             Response.failure(t)
         }

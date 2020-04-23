@@ -8,10 +8,7 @@ import gr.blackswamp.damagereports.data.db.AppDatabaseImpl
 import gr.blackswamp.damagereports.data.prefs.Preferences
 import gr.blackswamp.damagereports.data.prefs.PreferencesImpl
 import gr.blackswamp.damagereports.data.repos.*
-import gr.blackswamp.damagereports.logic.vms.BrandViewModelImpl
-import gr.blackswamp.damagereports.logic.vms.ModelViewModelImpl
-import gr.blackswamp.damagereports.logic.vms.ReportListViewModelImpl
-import gr.blackswamp.damagereports.logic.vms.ReportViewViewModelImpl
+import gr.blackswamp.damagereports.logic.vms.*
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.viewmodel.dsl.viewModel
@@ -31,8 +28,9 @@ val applicationModule = module {
     single<ModelRepository> { ModelRepositoryImpl() }
     single<SettingsRepository> { SettingsRepositoryImpl() }
 
-    viewModel { ReportListViewModelImpl(androidApplication(), true) }
-    viewModel { ReportViewViewModelImpl(androidApplication(), true) }
+    viewModel { MainViewModelImpl(androidApplication()) }
+    viewModel { paramList -> ReportListViewModelImpl(androidApplication(), paramList[0], true) }
+    viewModel { paramList -> ReportViewViewModelImpl(androidApplication(), paramList[0], paramList[1], paramList[2], true) }
     viewModel { paramList -> BrandViewModelImpl(androidApplication(), paramList[0], true) }
-    viewModel { paramList -> ModelViewModelImpl(androidApplication(), paramList[0], true) }
+    viewModel { paramList -> ModelViewModelImpl(androidApplication(), paramList[0], paramList[1], true) }
 }

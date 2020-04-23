@@ -1,6 +1,8 @@
 package gr.blackswamp.damagereports.ui.model
 
-interface ReportDamage {
+import android.os.Parcelable
+
+interface ReportDamage : Parcelable {
     val name: String
     val pictures: Int
     val parts: Int

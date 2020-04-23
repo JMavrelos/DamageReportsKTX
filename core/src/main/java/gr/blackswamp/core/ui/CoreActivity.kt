@@ -9,16 +9,19 @@ import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.viewbinding.ViewBinding
 import com.google.android.material.snackbar.Snackbar
 import gr.blackswamp.core.dialogs.DialogBuilders
 import gr.blackswamp.core.dialogs.DialogFinishedListener
 
-abstract class CoreActivity<T : Any> : AppCompatActivity(), DialogFinishedListener {
+abstract class CoreActivity<T : Any, V : ViewBinding> : AppCompatActivity(), DialogFinishedListener {
     companion object {
         protected const val MESSAGE_DIALOG_ID: Int = 8008135
     }
 
     abstract val vm: T
+    abstract val binding: V
+
     @StyleRes
     open val theme: Int? = null
 
@@ -27,6 +30,7 @@ abstract class CoreActivity<T : Any> : AppCompatActivity(), DialogFinishedListen
             setTheme(it)
         }
         super.onCreate(savedInstanceState)
+        setContentView(binding.root)
         setUpBindings()
         initView(savedInstanceState)
         setUpListeners()

@@ -2,53 +2,60 @@ package gr.blackswamp.damagereports.ui.fragments
 
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.appcompat.widget.SearchView
-import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import gr.blackswamp.core.ui.CoreFragment
-import gr.blackswamp.core.widget.*
+import gr.blackswamp.core.widget.CItemTouchHelperCallback
+import gr.blackswamp.core.widget.SearchListener
+import gr.blackswamp.core.widget.onClick
+import gr.blackswamp.core.widget.visible
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.databinding.FragmentBrandBinding
-import gr.blackswamp.damagereports.logic.vms.BrandViewModel
+import gr.blackswamp.damagereports.logic.commands.BrandCommand
+import gr.blackswamp.damagereports.logic.interfaces.BrandViewModel
+import gr.blackswamp.damagereports.logic.interfaces.MainViewModel
 import gr.blackswamp.damagereports.logic.vms.BrandViewModelImpl
+import gr.blackswamp.damagereports.logic.vms.MainViewModelImpl
 import gr.blackswamp.damagereports.ui.adapters.BrandAdapter
 import gr.blackswamp.damagereports.ui.adapters.ListAction
 import gr.blackswamp.damagereports.ui.model.Brand
 import gr.blackswamp.damagereports.utils.moveBy
+import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import java.util.*
 import kotlin.math.abs
 
 class BrandFragment : CoreFragment<BrandViewModel, FragmentBrandBinding>(), ListAction {
     companion object {
         const val TAG = "BrandFragment"
-        fun newInstance(): Fragment = BrandFragment()
     }
 
     //region  bindings
-    override val vm: BrandViewModel by viewModel<BrandViewModelImpl>()
+    private val parent: MainViewModel by sharedViewModel<MainViewModelImpl>()
+    override val vm: BrandViewModel by viewModel<BrandViewModelImpl> { parametersOf(parent) }
     override val binding: FragmentBrandBinding by lazy { FragmentBrandBinding.inflate(layoutInflater) }
+    override val optionsMenuId: Int = R.menu.list
     private val refresh: SwipeRefreshLayout by lazy { binding.refresh }
     private val action: FloatingActionButton by lazy { binding.action }
     private val cancel: FloatingActionButton by lazy { binding.cancel }
     private val list: RecyclerView by lazy { binding.list }
     private val name: EditText by lazy { binding.name }
     private val adapter = BrandAdapter()
-    private val toolbar: MaterialToolbar by lazy { binding.toolbar }
     private val sheetBehavior: BottomSheetBehavior<FrameLayout> by lazy { BottomSheetBehavior.from(binding.create) }
-    private val byUse: MenuItem by lazy { binding.toolbar.menu.findItem(R.id.sort_use) }
-    private val byName: MenuItem by lazy { binding.toolbar.menu.findItem(R.id.sort_name) }
     private var screenWidth: Int = 0
     //endregion
 
@@ -61,39 +68,56 @@ class BrandFragment : CoreFragment<BrandViewModel, FragmentBrandBinding>(), List
         ItemTouchHelper(CItemTouchHelperCallback(adapter, allowSwipe = true, allowDrag = false)).attachToRecyclerView(list)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        (menu.findItem(R.id.list_search)?.actionView as? SearchView)?.setOnQueryTextListener(SearchListener(vm::newFilter))
+    }
+
     override fun setUpListeners() {
         adapter.setListener(this)
         action.onClick(this::actionClick)
         refresh.onClick(this::refresh)
-        byUse.onClick(this::toggleByUse)
-        byName.onClick(this::toggleByName)
-        (toolbar.menu?.findItem(R.id.list_search)?.actionView as? SearchView)?.setOnQueryTextListener(SearchListener(this::newFilter))
-        toolbar.onNavigationClick(this::backClicked)
-        cancel.onClick(this::cancelEdit)
+        cancel.onClick(vm::cancel)
         sheetBehavior.addBottomSheetCallback(bottomSheetCallback)
     }
 
     override fun setUpObservers(vm: BrandViewModel) {
         vm.brand.observe(this::showBrand)
+        vm.command.observe(this::executeCommand)
     }
 
     //endregion
 
     //region listeners
-    override fun delete(id: UUID) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.sort_use -> {
+                toggleByUse()
+                true
+            }
+            R.id.sort_name -> {
+                toggleByName()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
+
+    override fun delete(id: UUID) {
+        vm.delete(id)
     }
 
     override fun select(id: UUID) {
-
+        vm.select(id)
     }
 
     override fun edit(id: UUID) {
-
+        vm.edit(id)
     }
 
     private fun toggleByUse() {
-        vm.editBrand(UUID.randomUUID())
+
     }
 
     private fun toggleByName() {
@@ -102,26 +126,14 @@ class BrandFragment : CoreFragment<BrandViewModel, FragmentBrandBinding>(), List
 
     private fun actionClick() {
         if (sheetBehavior.state == STATE_EXPANDED) {
-            vm.saveBrand(name.text.toString())
+            vm.save(name.text.toString())
         } else {
-            vm.newBrand()
+            vm.create()
         }
     }
 
     private fun refresh() {
 
-    }
-
-    private fun newFilter(filter: String, submitted: Boolean): Boolean {
-        return true
-    }
-
-    private fun backClicked() {
-
-    }
-
-    private fun cancelEdit() {
-        vm.cancelBrand()
     }
 
     private val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
@@ -167,5 +179,15 @@ class BrandFragment : CoreFragment<BrandViewModel, FragmentBrandBinding>(), List
             sheetBehavior.state = STATE_EXPANDED
         }
     }
+
+    private fun executeCommand(command: BrandCommand?) {
+        when (command) {
+            is BrandCommand.ShowModelSelect -> {
+                val action = BrandFragmentDirections.selectModel(command.brand)
+                findNavController().navigate(action)
+            }
+        }
+    }
+
     //endregion
 }

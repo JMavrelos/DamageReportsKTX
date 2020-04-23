@@ -1,7 +1,6 @@
 package gr.blackswamp.damagereports.ui.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.paging.PagedListAdapter
@@ -9,7 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.widget.CItemTouchAdapter
-import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.databinding.ListItemModelBinding
 import gr.blackswamp.damagereports.ui.model.Model
 
 @Suppress("unused")
@@ -38,7 +37,7 @@ class ModelAdapter : PagedListAdapter<Model, ModelAdapter.ModelViewHolder>(DIFF_
     override fun getItemViewType(position: Int): Int = if (getItem(position)?.id == LABEL_ID) LABEL else HEADER
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ModelViewHolder =
-        ModelViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_item_make, parent, false))
+        ModelViewHolder(ListItemModelBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
     override fun onBindViewHolder(holder: ModelViewHolder, position: Int) {
         getItem(position)?.let {
@@ -75,8 +74,8 @@ class ModelAdapter : PagedListAdapter<Model, ModelAdapter.ModelViewHolder>(DIFF_
     //endregion
 
     //region view holder
-    inner class ModelViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val name: TextView = view.findViewById(R.id.name)
+    inner class ModelViewHolder(binding: ListItemModelBinding) : RecyclerView.ViewHolder(binding.root) {
+        val name: TextView = binding.name
 
         fun update(model: Model) {
             name.text = model.name
