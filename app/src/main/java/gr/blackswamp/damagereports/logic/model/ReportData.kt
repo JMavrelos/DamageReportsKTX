@@ -10,8 +10,8 @@ data class ReportData(
     override val id: UUID,
     override val name: String = "",
     override val description: String = "",
-    val brand: BrandData?,
-    val model: ModelData?,
+    val brand: BrandData? = null,
+    val model: ModelData? = null,
     override val created: Date,
     override val changed: Boolean = false
 ) : Report {

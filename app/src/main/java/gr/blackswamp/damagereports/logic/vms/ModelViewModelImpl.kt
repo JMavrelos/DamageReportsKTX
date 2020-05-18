@@ -23,7 +23,7 @@ import org.koin.core.inject
 import timber.log.Timber
 import java.util.*
 
-class ModelViewModelImpl(application: Application, val parent: FragmentParent, val brandId: UUID, runInit: Boolean = true) :
+class ModelViewModelImpl(application: Application, val parent: FragmentParent, private val brandId: UUID, runInit: Boolean = true) :
     CoreViewModel(application), ModelViewModel {
     companion object {
         const val TAG = "ModelViewModel"

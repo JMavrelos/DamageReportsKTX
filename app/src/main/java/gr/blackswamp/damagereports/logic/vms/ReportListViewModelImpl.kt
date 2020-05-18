@@ -19,8 +19,6 @@ import gr.blackswamp.damagereports.data.repos.ReportListRepository
 import gr.blackswamp.damagereports.logic.commands.ReportListCommand
 import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
 import gr.blackswamp.damagereports.logic.interfaces.ReportListViewModel
-import gr.blackswamp.damagereports.logic.model.BrandData
-import gr.blackswamp.damagereports.logic.model.ModelData
 import gr.blackswamp.damagereports.logic.model.ReportData
 import gr.blackswamp.damagereports.ui.model.ReportHeader
 import kotlinx.coroutines.launch
@@ -139,15 +137,7 @@ class ReportListViewModelImpl(application: Application, val parent: FragmentPare
     }
 
     override fun newReport() {
-        val newReport = ReportData(
-            EmptyUUID,
-            "test",
-            "also test",
-            BrandData(UUID.randomUUID(), "hello"),
-            ModelData(UUID.randomUUID(), "World", UUID.randomUUID()),
-            Date(System.currentTimeMillis()),
-            false
-        )
+        val newReport = ReportData(EmptyUUID, created = Date())
         command.postValue(ReportListCommand.ShowReport(newReport, true))
     }
 

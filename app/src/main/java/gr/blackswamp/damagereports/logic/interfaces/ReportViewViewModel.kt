@@ -14,6 +14,7 @@ interface ReportViewViewModel {
     fun saveReport()
     fun editReport()
     fun exitReport()
+    fun confirmDiscardChanges()
     fun nameChanged(name: String)
     fun descriptionChanged(description: String)
 //    val viewNavIcon: MutableLiveData<Int>

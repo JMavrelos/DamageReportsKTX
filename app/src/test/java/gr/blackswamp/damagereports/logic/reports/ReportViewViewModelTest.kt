@@ -1,6 +1,7 @@
 package gr.blackswamp.damagereports.logic.reports
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import gr.blackswamp.core.coroutines.Dispatcher
@@ -10,12 +11,15 @@ import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatcher
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.data.repos.ReportListRepository
+import gr.blackswamp.damagereports.data.repos.ReportViewRepository
+import gr.blackswamp.damagereports.logic.commands.ReportViewCommand
+import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
 import gr.blackswamp.damagereports.logic.model.BrandData
 import gr.blackswamp.damagereports.logic.model.ModelData
 import gr.blackswamp.damagereports.logic.model.ReportData
 import gr.blackswamp.damagereports.logic.vms.ReportViewViewModelImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -23,6 +27,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.reset
 import java.util.*
@@ -31,17 +36,33 @@ import kotlin.contracts.ExperimentalContracts
 @ExperimentalCoroutinesApi
 class ReportViewViewModelTest : AndroidKoinTest() {
     companion object {
-        private const val FILTER = "a filter"
         private const val ERROR = " there was an error"
     }
 
-    private val repo: ReportListRepository = mock(ReportListRepository::class.java)
+    private val repo: ReportViewRepository = mock(ReportViewRepository::class.java)
     override val modules: Module = module {
         single<Dispatcher> { TestDispatcher }
         single { repo }
     }
 
     private lateinit var vm: ReportViewViewModelImpl
+    private val parent = mock(FragmentParent::class.java)
+    private val newReport = ReportData(
+        EmptyUUID
+        , model = null
+        , brand = null
+        , created = Date()
+        , changed = false
+    )
+    private val report = ReportData(
+        UUID.randomUUID()
+        , name = "Hello world"
+        , model = ModelData(UUID.randomUUID(), "hello model", UUID.fromString("e40eeee0-2cb4-4fc5-a3c6-01934e176c4d"))
+        , brand = BrandData(UUID.fromString("e40eeee0-2cb4-4fc5-a3c6-01934e176c4d"), "hello brand")
+        , created = Date()
+        , changed = false
+        , description = "hello description"
+    )
 
     @get:Rule
     val coroutineScope = MainCoroutineScopeRule()
@@ -52,33 +73,49 @@ class ReportViewViewModelTest : AndroidKoinTest() {
     @Before
     override fun setUp() {
         super.setUp()
-        vm = ReportViewViewModelImpl(app, false)
+        //initial values do not matter, we call initialize manually
+        vm = ReportViewViewModelImpl(app, parent, report, inEditMode = false, runInit = false)
         reset(repo)
     }
 
     @Test
-    fun `new report shows correctly`() {
+    fun `initialize for view`() {
         runBlockingTest {
-//    //            vm.newReport()
+            vm.initialize(report, false)
 
-            val report = vm.report.value!!
-            val timeDiff = System.currentTimeMillis() - report.created.time
+            val shown = vm.report.value!!
+
+            assertFalse(vm.editMode.value!!)
+            assertEquals(report.id, shown.id)
+            assertEquals(report.brandName, shown.brandName)
+            assertEquals(report.modelName, shown.modelName)
+            assertEquals(report.description, shown.description)
+            assertEquals(report.name, shown.name)
+            assertFalse(report.changed)
+        }
+    }
+
+    @Test
+    fun `initialize on new`() {
+        runBlockingTest {
+            vm.initialize(newReport, true)
+
+            val shown = vm.report.value!!
 
             assertTrue(vm.editMode.value!!)
-            assertTrue(timeDiff in 0..100) //this may fail if the test takes too much but 100 ms is long enough
-            assertEquals(EmptyUUID, report.id)
-            assertNull(report.brandName)
-            assertNull(report.modelName)
-            assertEquals("", report.description)
-            assertEquals("", report.name)
-            assertFalse((report as ReportData).changed)
+            assertEquals(newReport.id, shown.id)
+            assertEquals(newReport.brandName, shown.brandName)
+            assertEquals(newReport.modelName, shown.modelName)
+            assertEquals(newReport.description, shown.description)
+            assertEquals(newReport.name, shown.name)
+            assertFalse(newReport.changed)
         }
     }
 
 
     @Test
     fun `when name changes then the selected report is updated`() {
-//            vm.newReport()
+        vm.initialize(report, true)
 
         vm.nameChanged("hello world")
 
@@ -88,8 +125,7 @@ class ReportViewViewModelTest : AndroidKoinTest() {
 
     @Test
     fun `when description changes then the selected report is updated`() {
-
-//            vm.newReport()
+        vm.initialize(report, true)
 
         vm.descriptionChanged("hello world")
 
@@ -97,61 +133,37 @@ class ReportViewViewModelTest : AndroidKoinTest() {
         assertEquals("hello world", vm.report.value!!.description)
     }
 
-
     @Test
     fun `user presses exit after opening a new report with no changes made`() {
-//            vm.newReport()
+        vm.initialize(newReport, true)
 
         vm.exitReport()
 
-        assertNull(vm.report.value)
-        assertNull(vm.editMode.value)
+        assertEquals(ReportViewCommand.MoveBack, vm.command.value)
     }
 
     @Test
     fun `user presses exit after opening a new report with changes made`() {
-//            vm.newReport()
-        vm.nameChanged("wlke;lq")
+        vm.initialize(newReport.copy(changed = true), true)
 
         vm.exitReport()
 
-//        assertTrue(vm.activityCommand.value is ReportActivityCommand.ConfirmDiscard)
+        assertTrue(vm.command.value is ReportViewCommand.ConfirmDiscard)
         assertNotNull(vm.report.value)
     }
 
     @Test
-    fun `the user presses exit on a non edited screen`() {
-        val report =
-            ReportData(
-                UUID.randomUUID()
-                , "a name"
-                , "a description"
-                , BrandData(UUID.randomUUID(), "a brand")
-                , ModelData(UUID.randomUUID(), " a model", UUID.randomUUID())
-                , Date(0)
-            )
-        vm.report.value = report
-        vm.editMode.value = false
+    fun `the user presses exit while viewing an existing report`() {
+        vm.initialize(report, false)
 
         vm.exitReport()
 
-        assertNull(vm.report.value)
+        assertTrue(vm.command.value is ReportViewCommand.MoveBack)
     }
 
     @Test
-    fun `the user presses exit we are in edit mode but no changes have been made`() {
-        val report = ReportData(
-            UUID.randomUUID()
-            , "a name"
-            , "a description"
-            , BrandData(UUID.randomUUID(), "a brand")
-            , ModelData(UUID.randomUUID(), " a model", UUID.randomUUID())
-            , Date(0),
-            false
-        )
-
-        vm.report.value = report
-        vm.editMode.value = true
+    fun `the user presses exit while editing an existing report but no changes have been made`() {
+        vm.initialize(report, true)
 
         vm.exitReport()
 
@@ -160,22 +172,12 @@ class ReportViewViewModelTest : AndroidKoinTest() {
     }
 
     @Test
-    fun `user presses exit in edit mode and there are changes`() {
-        val id = UUID.randomUUID()
-        val report = ReportData(
-            id, "a name"
-            , "a description"
-            , BrandData(UUID.randomUUID(), "a brand")
-            , ModelData(UUID.randomUUID(), " a model", UUID.randomUUID())
-            , Date(0)
-            , true
-        )
-        vm.report.value = report
-        vm.editMode.value = true
+    fun `user presses exit while viewing an existing report and there are changes`() {
+        vm.initialize(report.copy(changed = true), true)
 
         vm.exitReport()
 
-//        assertTrue(vm.activityCommand.value is ReportActivityCommand.ConfirmDiscard)
+        assertTrue(vm.command.value is ReportViewCommand.ConfirmDiscard)
     }
 
 
@@ -185,122 +187,83 @@ class ReportViewViewModelTest : AndroidKoinTest() {
         vm.report.value = ReportData(EmptyUUID, "", "", null, null, Date(), true)
         vm.editMode.value = true
 
-//        vm.confirmDiscardChanges()
+        vm.confirmDiscardChanges()
 
-        assertNull(vm.report.value)
+        assertTrue(vm.command.value is ReportViewCommand.MoveBack)
     }
 
     @ExperimentalContracts
     @Test
     fun `when the user confirms discard on an edited report it is reloaded`() {
-        runBlockingTest {
-            val id = UUID.randomUUID()
-            val report = ReportData(
-                id
-                , "a name"
-                , "a description"
-                , BrandData(UUID.randomUUID(), "a brand")
-                , ModelData(UUID.randomUUID(), " a model", UUID.randomUUID())
-                , Date(0)
-            )
+        runBlocking {
+            vm.initialize(report.copy(name = "this is changed", changed = true), true)
+            whenever(repo.loadReport(report.id)).thenReturn(Response.success(report))
 
-            vm.report.value = report.copy(changed = true)
-            vm.editMode.value = true
-            vm.nameChanged("hello")
-            whenever(repo.loadReport(id)).thenReturn(Response.success(report))
+            vm.confirmDiscardChanges()
 
-//            vm.confirmDiscardChanges()
-
-            assertFalse(vm.editMode.value!!)
             assertEquals(report, vm.report.value)
+            assertFalse(vm.editMode.value!!)
+            verify(parent, never()).showError(anyString())
+            verify(parent).showLoading(false)
         }
     }
 
+    @ExperimentalContracts
     @Test
-    fun `when back is pressed in list it is sent to the system to be evaluated`() {
-        vm.report.value = null
-//        vm.backPressed()
+    fun `when the user confirms discard on an edited report it is reloaded but the reload fails`() {
+        runBlocking {
+            val changed = report.copy(name = "this is changed", changed = true)
+            vm.initialize(changed, true)
+            whenever(repo.loadReport(report.id)).thenReturn(Response.failure(ERROR))
 
-        assertNotNull(vm.back.value)
+            vm.confirmDiscardChanges()
+
+            assertEquals(changed, vm.report.value)
+            verify(parent).showError(ERROR)
+            verify(parent).showLoading(false)
+            assertTrue(vm.editMode.value!!)
+        }
     }
 
+
     @Test
-    fun `when back is pressed on an edited report then the discard dialog shows`() {
-        val id = UUID.randomUUID()
-        val report = ReportData(
-            id, "a name"
-            , "a description"
-            , BrandData(UUID.randomUUID(), "a brand")
-            , ModelData(UUID.randomUUID(), " a model", UUID.randomUUID())
-            , Date(0)
-            , true
-        )
-        vm.report.value = report
-        vm.editMode.value = true
+    fun `when the user confirms discard on a new report we exit`() {
+        vm.initialize(newReport.copy(changed = true), true)
 
-//        vm.backPressed()
+        vm.confirmDiscardChanges()
 
-//        assertTrue(vm.activityCommand.value is ReportActivityCommand.ConfirmDiscard)
+        assertEquals(ReportViewCommand.MoveBack, vm.command.value)
     }
 
     @Test
     fun `when the user tries to pick a model before trying to pick a brand then a message is shown`() {
-        val id = UUID.randomUUID()
-        vm.report.value = ReportData(id, "name", "descr", null, null, Date(0), true)
+        vm.initialize(newReport, true)
 
-        vm.editMode.value = true
         vm.pickModel()
 
-//        assertEquals(APP_STRING, vm.error.value)
         verify(app).getString(R.string.error_no_brand_selected)
-    }
-
-    @Test
-    fun `when the user tries to pick a model with no current selection nothing happens`() {
-        vm.report.value = null
-
-        vm.pickModel()
-
-//        assertNull(vm.activityCommand.value)
-    }
-
-    @Test
-    fun `when the user tries to pick a brand with no current selection nothing happens`() {
-        vm.report.value = null
-
-        vm.pickBrand()
-
-//        assertNull(vm.activityCommand.value)
+        verify(parent).showError(APP_STRING)
     }
 
     @Test
     fun `when the user tries to pick a brand with a selection a signal is sent to show the brand screen`() {
-        val id = UUID.randomUUID()
-        vm.report.value = ReportData(id, "name", "descr", null, null, Date(0), true)
+        vm.initialize(newReport, true)
 
         vm.pickBrand()
 
-//        assertEquals(ReportActivityCommand.ShowBrandSelection, vm.activityCommand.value)
+        assertEquals(ReportViewCommand.ShowBrandSelect, vm.command.value)
     }
 
     @Test
     fun `when the user tries to pick a model with a valid selection a signal is sent to show the brand screen`() {
-        val id = UUID.randomUUID()
-        val brandId = UUID.randomUUID()
-        vm.report.value = ReportData(
-            id,
-            "name",
-            "descr",
-            BrandData(brandId, "brand name"),
-            null,
-            Date(0),
-            true
-        )
+        val brand = BrandData(UUID.randomUUID(), "brandName")
+        vm.initialize(newReport.copy(brand = brand, changed = true), true)
 
         vm.pickModel()
 
-//        assertTrue(vm.activityCommand.value is ReportActivityCommand.ShowModelSelection)
 
-//        assertEquals(brandId, (vm.activityCommand.value as ReportActivityCommand.ShowModelSelection).brandId)
+        assertTrue(vm.command.value is ReportViewCommand.ShowModelSelect)
+
+        assertEquals(brand, (vm.command.value as ReportViewCommand.ShowModelSelect).brand)
     }
 }

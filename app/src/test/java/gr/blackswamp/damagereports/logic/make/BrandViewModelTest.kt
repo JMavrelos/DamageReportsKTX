@@ -1,10 +1,7 @@
 package gr.blackswamp.damagereports.logic.make
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.nhaarman.mockitokotlin2.reset
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.core.db.paging.StaticDataSource
@@ -17,6 +14,7 @@ import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.repos.BrandRepository
 import gr.blackswamp.damagereports.data.toData
+import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
 import gr.blackswamp.damagereports.logic.vms.BrandViewModelImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -24,8 +22,8 @@ import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.koin.dsl.module
-import org.mockito.Mockito
-import java.util.*
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito.mock
 
 @ExperimentalCoroutinesApi
 class BrandViewModelTest : AndroidKoinTest() {
@@ -40,7 +38,8 @@ class BrandViewModelTest : AndroidKoinTest() {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
 
-    private val repo = Mockito.mock(BrandRepository::class.java)
+    private val repo = mock(BrandRepository::class.java)
+    private val parent = mock(FragmentParent::class.java)
 
     override val modules = module {
         single<Dispatcher> { TestDispatcher }
@@ -49,135 +48,88 @@ class BrandViewModelTest : AndroidKoinTest() {
 
     private lateinit var vm: BrandViewModelImpl
 
-    private fun initVm(brandId: UUID?) {
-        vm = BrandViewModelImpl(app, brandId, false)
-        reset(repo)
-    }
-
     @Test
-    fun `load brands with no filter from the start with no pre set brand`() {
-        initVm(null)
-        assertNull(vm.brandFilter.value)
-        assertNull(vm.brandList.value)
-
-        whenever(repo.getBrands("", null)).thenReturn(Response.success(StaticDataSource.factory(listOf())))
-
-        vm.initialize()
-
-
-        assertEquals(0, vm.brandList.getOrAwait().count())
-        assertEquals("", vm.brandFilter.value)
-        verify(repo).getBrands("", null)
-    }
-
-    @Test
-    fun `when there is an error while loading without a pre set brand show an empty list and pop a message`() {
-        initVm(null)
-        assertNull(vm.brandFilter.value)
-        assertNull(vm.brandList.value)
-        whenever(repo.getBrands("", null)).thenReturn(Response.failure(ERROR))
-
-        vm.initialize()
-
-        assertEquals(0, vm.brandList.getOrAwait().count())
-//        assertEquals(ERROR, vm.error.value)
-        verify(repo).getBrands("", null)
-    }
-
-    @Test
-    fun `load brands with no filter from the start with a pre set brand`() {
+    fun `initialization works`() {
         val brand = UnitTestData.BRANDS.random()
-        initVm(brand.id)
+        initVm()
         assertNull(vm.brandFilter.value)
         assertNull(vm.brandList.value)
-        whenever(repo.getBrands("", brand.id)).thenReturn(Response.success(StaticDataSource.factory(listOf(brand))))
+        whenever(repo.getBrands("")).thenReturn(Response.success(StaticDataSource.factory(listOf(brand).map { it.toData() })))
 
         vm.initialize()
 
         assertEquals(listOf(brand.toData()), vm.brandList.getOrAwait())
         assertEquals("", vm.brandFilter.value)
-        verify(repo).getBrands("", brand.id)
+        verify(repo).getBrands("")
     }
 
     @Test
-    fun `when there is an error while loading without a set brand show an empty list and pop a message`() {
-        val id = UUID.randomUUID()
-        initVm(id)
-
+    fun `when there is an error while while initializing show an empty list and pop a message`() {
+        initVm()
         assertNull(vm.brandFilter.value)
         assertNull(vm.brandList.value)
-        whenever(repo.getBrands("", id)).thenReturn(Response.failure(Throwable(ERROR)))
+        whenever(repo.getBrands("")).thenReturn(Response.failure(ERROR))
 
         vm.initialize()
 
         assertEquals(0, vm.brandList.getOrAwait().count())
-//        assertEquals(ERROR, vm.error.value)
-        verify(repo).getBrands("", id)
+        verify(parent).showError(ERROR)
+        verify(repo).getBrands("")
     }
 
     @Test
     fun `when the filter changes the results change`() {
-        initVm(null)
+        initVm()
         assertNull(vm.brandFilter.value)
         assertNull(vm.brandList.value)
-        val expected = UnitTestData.BRANDS.shuffled().take(30)
-        whenever(repo.getBrands(FILTER, null)).thenReturn(Response.success(StaticDataSource.factory(expected, false)))
+        val expected = UnitTestData.BRANDS.shuffled().take(30).map { it.toData() }
+        whenever(repo.getBrands(FILTER)).thenReturn(Response.success(StaticDataSource.factory(expected, false)))
 
         vm.newFilter(FILTER, true)
 
         val values = vm.brandList.getOrAwait().toList()
         assertEquals(FILTER, vm.brandFilter.value)
-        verify(repo).getBrands(FILTER, null)
+        verify(repo).getBrands(FILTER)
         assertEquals(expected.size, values.size)
         assertEquals(expected.size, expected.map { it.id }.intersect(values.map { it.id }).size)
     }
 
     @Test
-    fun `we ignore filter changes when we start with a brand`() {
-        initVm(null)
-
-        vm.newFilter(FILTER, true)
-
-        verifyNoMoreInteractions(repo)
-    }
-
-    @Test
     fun `pressing add new creates an empty brand and shows it`() {
-        initVm(null)
+        initVm()
 
         vm.create()
 
         val value = vm.brand.getOrAwait()
 
         assertNotNull(value)
-//        assertFalse(vm.loading.value!!)
         assertEquals(EmptyUUID, value.id)
         assertEquals("", value.name)
     }
 
     @Test
     fun `pressing save with no new brand pressed shows an error`() {
-        initVm(null)
+        initVm()
 
         vm.brand.getOrAwait(time = 10, throwError = false) //just to make sure the transformation is observed
         vm.save("hello")
 
-//        assertNotNull(vm.error.value)
-//        assertFalse(vm.loading.value!!)
+        verify(parent).showError(anyString())
+        verify(parent).showLoading(false)
         verify(app).getString(R.string.error_new_brand_not_found)
         verifyNoMoreInteractions(app, repo)
     }
 
     @Test
     fun `pressing save with an empty named new brand shows an error`() {
-        initVm(null)
+        initVm()
 
         vm.create()
         vm.brand.getOrAwait()
         vm.save("")
 
-//        assertNotNull(vm.error.value)
-//        assertFalse(vm.loading.value!!)
+        verify(parent).showError(anyString())
+        verify(parent).showLoading(false)
         verify(app).getString(R.string.error_empty_brand_name)
         verifyNoMoreInteractions(app, repo)
     }
@@ -186,7 +138,7 @@ class BrandViewModelTest : AndroidKoinTest() {
     fun `pressing save with a new brand saves a new item`() {
         runBlocking {
             val name = "hello world"
-            initVm(null)
+            initVm()
             whenever(repo.newBrand(name)).thenReturn(Response.success())
 
             vm.create()
@@ -195,8 +147,8 @@ class BrandViewModelTest : AndroidKoinTest() {
             vm.save(name)
             vm.brand.getOrAwait(0, throwError = false)
 
-//            assertNull(vm.error.value)
-//            assertFalse(vm.loading.value!!)
+            verify(parent, never()).showError(anyString())
+            verify(parent).showLoading(false)
             assertNull(vm.brand.value)
             verify(repo).newBrand(name)
         }
@@ -206,7 +158,7 @@ class BrandViewModelTest : AndroidKoinTest() {
     fun `pressing save with a new brand which has a problem shows the problem `() {
         runBlocking {
             val name = "hello world"
-            initVm(null)
+            initVm()
             whenever(repo.newBrand(name)).thenReturn(Response.failure(ERROR))
             vm.create()
             vm.brand.getOrAwait()
@@ -214,11 +166,17 @@ class BrandViewModelTest : AndroidKoinTest() {
             vm.save(name)
             vm.brand.getOrAwait()
 
-//            assertEquals(APP_STRING, vm.error.value)
+
+            verify(parent).showError(APP_STRING)
+            verify(parent).showLoading(false)
             verify(app).getString(R.string.error_saving_brand)
-//            assertFalse(vm.loading.value!!)
             assertNotNull(vm.brand.value)
             verify(repo).newBrand(name)
         }
+    }
+
+    private fun initVm() {
+        vm = BrandViewModelImpl(app, parent, false)
+        reset(repo)
     }
 }

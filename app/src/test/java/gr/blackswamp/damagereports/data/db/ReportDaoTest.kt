@@ -104,7 +104,7 @@ class ReportDaoTest {
             val model = UnitTestData.MODELS.random()
             val brand = UnitTestData.BRANDS.filter { it.id == model.brand }.random()
             db.brandDao.insertBrand(brand)
-            db.modelDao.saveModel(model)
+            db.modelDao.insertModel(model)
             val report = ReportEntity(UUID.randomUUID(), "hello", "world", UUID.randomUUID(), model.id)
 
             var error: Throwable? = null
@@ -126,7 +126,7 @@ class ReportDaoTest {
             val model = UnitTestData.MODELS.random()
             val brand = UnitTestData.BRANDS.filter { it.id == model.brand }.random()
             db.brandDao.insertBrand(brand)
-            db.modelDao.saveModel(model)
+            db.modelDao.insertModel(model)
             val report = ReportEntity(UUID.randomUUID(), "hello", "world", model.brand, model.id)
 
             dao.saveReport(report)
@@ -336,7 +336,7 @@ class ReportDaoTest {
             db.brandDao.insertBrand(it)
         }
         UnitTestData.MODELS.union(UnitTestData.DELETED_MODELS).forEach {
-            db.modelDao.saveModel(it)
+            db.modelDao.insertModel(it)
         }
         UnitTestData.REPORTS.forEach {
             dao.saveReport(it)

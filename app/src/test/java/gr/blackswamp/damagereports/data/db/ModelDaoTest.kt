@@ -57,7 +57,7 @@ class ModelDaoTest {
             val brand = UnitTestData.BRANDS.random()
             val model = UnitTestData.MODELS.filter { it.brand == brand.id }.random()
             db.brandDao.insertBrand(brand)
-            dao.saveModel(model)
+            dao.insertModel(model)
 
             assertEquals(1, db.count("models"))
         }
@@ -70,7 +70,7 @@ class ModelDaoTest {
             val model = UnitTestData.MODELS.first { it.brand == brand.id }
             var error: Throwable? = null
             try {
-                dao.saveModel(model)
+                dao.insertModel(model)
             } catch (t: Throwable) {
                 println(t.message)
                 error = t
@@ -86,7 +86,7 @@ class ModelDaoTest {
         runBlockingTest {
             initModels()
             val updated = UnitTestData.MODELS.random().copy(name = "this is the new thang")
-            dao.saveModel(updated)
+            dao.updateModel(updated)
             assertEquals(UnitTestData.MODELS.size + UnitTestData.DELETED_MODELS.size, db.count("models"))
             assertEquals(1, db.countWhere("models", " name = '${updated.name}'"))
         }
@@ -96,8 +96,10 @@ class ModelDaoTest {
     fun `search models with no args`() {
         runBlockingTest {
             initModels()
-            val loaded = (dao.loadModels("").create() as LimitOffsetDataSource).loadRange(0, 1000)
-            assertEquals(UnitTestData.MODELS.size, loaded.count { l -> UnitTestData.MODELS.any { it == l } })
+
+            val loaded = (dao.loadModels(UnitTestData.BRANDS[2].id, "").create() as LimitOffsetDataSource).loadRange(0, 1000)
+
+            assertEquals(UnitTestData.MODELS.count { it.brand == UnitTestData.BRANDS[2].id }, loaded.count { l -> UnitTestData.MODELS.any { it == l } })
         }
     }
 
@@ -112,9 +114,9 @@ class ModelDaoTest {
                 , ModelEntity(UUID.randomUUID(), "3${filter}3", UnitTestData.BRANDS[70].id, false)
                 , ModelEntity(UUID.randomUUID(), "1${filter}4", UnitTestData.BRANDS[70].id, false)
             )
-            expected.forEach { dao.saveModel(it) }
+            expected.forEach { dao.insertModel(it) }
 
-            val loaded = (dao.loadModels(filter).create() as LimitOffsetDataSource).loadRange(0, 1000)
+            val loaded = (dao.loadModels(UnitTestData.BRANDS[70].id, filter).create() as LimitOffsetDataSource).loadRange(0, 1000)
 
             assertEquals(expected.sortedBy { it.name }, loaded)
         }
@@ -179,7 +181,7 @@ class ModelDaoTest {
             db.brandDao.insertBrand(it)
         }
         UnitTestData.MODELS.union(UnitTestData.DELETED_MODELS).forEach {
-            dao.saveModel(it)
+            dao.insertModel(it)
         }
     }
 }

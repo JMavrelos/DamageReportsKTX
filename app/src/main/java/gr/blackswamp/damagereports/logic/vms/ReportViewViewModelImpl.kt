@@ -15,6 +15,7 @@ import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
 import gr.blackswamp.damagereports.logic.interfaces.ReportViewViewModel
 import gr.blackswamp.damagereports.logic.model.ReportData
 import gr.blackswamp.damagereports.ui.model.Report
+import kotlinx.coroutines.launch
 import org.koin.core.inject
 
 class ReportViewViewModelImpl(application: Application, private val parent: FragmentParent, report: Report, inEditMode: Boolean, runInit: Boolean = true) :
@@ -80,7 +81,11 @@ class ReportViewViewModelImpl(application: Application, private val parent: Frag
 
     override fun saveReport() {
         this.editMode.postValue(false)
+        //todo:validations
         hideKeyboard.call()
+        launch {
+            repo
+        }
     }
 
     override fun editReport() {
@@ -88,19 +93,36 @@ class ReportViewViewModelImpl(application: Application, private val parent: Frag
     }
 
     override fun exitReport() {
-        val report = report.value as ReportData
-        if (editMode.value == true && report.changed) {
-//            activityCommand.postValue(ReportActivityCommand.ConfirmDiscard)
-        } else if (editMode.value == true && report.id != EmptyUUID) {
+        val report = report.value as? ReportData ?: return
+        if (editMode.value == true && report.changed) { //we are editing a changed report
+            command.postValue(ReportViewCommand.ConfirmDiscard)
+        } else if (editMode.value == true && !report.changed && report.id != EmptyUUID) {
             editMode.postValue(false)
         } else {
-            exitView()
+            command.postValue(ReportViewCommand.MoveBack)
         }
     }
 
-    private fun exitView() {
-        editMode.postValue(null)
-        report.postValue(null)
+    override fun confirmDiscardChanges() {
+        parent.showLoading(true)
+        launch {
+            try {
+                val report = report.value as? ReportData ?: return@launch
+                if (report.id == EmptyUUID) {
+                    command.postValue(ReportViewCommand.MoveBack)
+                } else {
+                    val org = repo.loadReport(report.id).getOrThrow
+                    this@ReportViewViewModelImpl.report.postValue(org)
+                    editMode.postValue(false)
+                }
+            } catch (t: Throwable) {
+                parent.showError(t.message ?: t::class.java.name)
+            } finally {
+                parent.showLoading(false)
+            }
+        }
+
     }
+
     //endregion
 }

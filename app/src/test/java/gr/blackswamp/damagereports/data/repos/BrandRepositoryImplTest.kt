@@ -14,6 +14,7 @@ import gr.blackswamp.damagereports.data.db.dao.BrandDao
 import gr.blackswamp.damagereports.data.db.dao.ModelDao
 import gr.blackswamp.damagereports.data.db.entities.BrandEntity
 import gr.blackswamp.damagereports.data.prefs.Preferences
+import gr.blackswamp.damagereports.data.toData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
@@ -54,41 +55,25 @@ class BrandRepositoryImplTest : AndroidKoinTest() {
     }
 
     @Test
-    fun `calling get brands with a null brand calls the appropriate method`() {
-        val id = UUID.randomUUID()
-        val brand = UnitTestData.BRANDS.random()
-        whenever(bDao.loadBrandFactoryById(id)).thenReturn(StaticDataSource.factory(listOf(brand)))
-
-        val response = repo.getBrands("askjdlasd", id)
-
-        assertFalse(response.hasError)
-
-        verify(bDao).loadBrandFactoryById(id)
-        verifyNoMoreInteractions(bDao)
-        assertEquals(listOf(brand), response.get.toLiveData(100).getOrAwait())
-    }
-
-    @Test
-    fun `calling get brands with a non-null brand calls the appropriate method`() {
+    fun `calling get brands calls the appropriate method`() {
         val filter = randomString(19)
-        val brands = UnitTestData.BRANDS.shuffled().take(50)
-        whenever(bDao.loadBrands(filter)).thenReturn(StaticDataSource.factory(brands))
+        val brand = UnitTestData.BRANDS.random()
+        whenever(bDao.loadBrands(filter)).thenReturn(StaticDataSource.factory(listOf(brand)))
 
-        val response = repo.getBrands(filter, null)
+        val response = repo.getBrands(filter)
 
         assertFalse(response.hasError)
-
         verify(bDao).loadBrands(filter)
         verifyNoMoreInteractions(bDao)
-        assertEquals(brands, response.get.toLiveData(100).getOrAwait())
+        assertEquals(listOf(brand.toData()), response.get.toLiveData(100).getOrAwait())
     }
 
     @Test
     fun `calling get brands and it causing an error returns the appropriate response`() {
-        val error = SQLiteException("error with sqlite")
+        val error = SQLiteException("error with SQLite")
         whenever(bDao.loadBrands(any())).thenThrow(error)
 
-        val response = repo.getBrands("", null)
+        val response = repo.getBrands("")
 
         assertTrue(response.hasError)
         assertEquals(error, response.error)

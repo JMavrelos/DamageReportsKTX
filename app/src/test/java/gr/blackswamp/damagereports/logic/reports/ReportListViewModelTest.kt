@@ -2,10 +2,7 @@ package gr.blackswamp.damagereports.logic.reports
 
 import android.database.sqlite.SQLiteException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
-import com.nhaarman.mockitokotlin2.verifyZeroInteractions
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.core.db.paging.StaticDataSource
@@ -13,11 +10,14 @@ import gr.blackswamp.core.testing.AndroidKoinTest
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatcher
 import gr.blackswamp.core.testing.getOrAwait
+import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.repos.ReportListRepository
 import gr.blackswamp.damagereports.data.toData
+import gr.blackswamp.damagereports.logic.commands.ReportListCommand
+import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
 import gr.blackswamp.damagereports.logic.model.BrandData
 import gr.blackswamp.damagereports.logic.model.ModelData
 import gr.blackswamp.damagereports.logic.model.ReportData
@@ -31,6 +31,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.reset
 import java.util.*
@@ -43,6 +44,7 @@ class ReportListViewModelTest : AndroidKoinTest() {
     }
 
     private val repo: ReportListRepository = mock(ReportListRepository::class.java)
+    private val parent = mock(FragmentParent::class.java)
     override val modules: Module = module {
         single<Dispatcher> { TestDispatcher }
         single { repo }
@@ -59,7 +61,7 @@ class ReportListViewModelTest : AndroidKoinTest() {
     @Before
     override fun setUp() {
         super.setUp()
-        vm = ReportListViewModelImpl(app, false)
+        vm = ReportListViewModelImpl(app, parent, false)
         reset(repo)
     }
 
@@ -117,7 +119,7 @@ class ReportListViewModelTest : AndroidKoinTest() {
 
             vm.deleteReport(deleted.id)
 
-//            assertFalse(vm.loading.value!!)
+            verify(parent).showLoading(false)
             assertTrue(vm.showUndo.getOrAwait())
             assertEquals(deleted.id, vm.lastDeleted.value)
         }
@@ -132,8 +134,8 @@ class ReportListViewModelTest : AndroidKoinTest() {
             vm.deleteReport(deleted.id)
 
             verify(repo).deleteReport(deleted.id)
-//            assertEquals(ERROR, vm.error.value)
-//            assertFalse(vm.loading.value!!)
+            verify(parent).showLoading(false)
+            verify(parent).showError(ERROR)
             assertFalse(vm.showUndo.getOrAwait())
         }
     }
@@ -149,8 +151,8 @@ class ReportListViewModelTest : AndroidKoinTest() {
             vm.undoLastDelete()
 
             verify(repo).unDeleteReport(deleted.id)
-//            assertNull(vm.error.value)
-//            assertFalse(vm.loading.value!!)
+            verify(parent, times(2)).showLoading(false)
+            verify(parent, never()).showError(anyString())
             assertFalse(vm.showUndo.value ?: false)
         }
     }
@@ -161,10 +163,11 @@ class ReportListViewModelTest : AndroidKoinTest() {
             vm.undoLastDelete()
 
             verifyZeroInteractions(repo)
-//            assertEquals(APP_STRING, vm.error.value)
+
+            verify(parent).showLoading(false)
+            verify(parent).showError(APP_STRING)
             verify(app).getString(R.string.error_un_deleting_no_saved_value)
             assertFalse(vm.showUndo.value ?: false)
-//            assertFalse(vm.loading.value!!)
         }
     }
 
@@ -179,9 +182,9 @@ class ReportListViewModelTest : AndroidKoinTest() {
             vm.undoLastDelete()
 
             verify(repo).unDeleteReport(deleted.id)
-//            assertEquals(ERROR, vm.error.value)
+            verify(parent, times(2)).showLoading(false)
+            verify(parent).showError(ERROR)
             assertFalse(vm.showUndo.value ?: false)
-//            assertFalse(vm.loading.value!!)
         }
     }
 
@@ -209,9 +212,9 @@ class ReportListViewModelTest : AndroidKoinTest() {
             )
             whenever(repo.loadReport(id)).thenReturn(Response.success(report))
             vm.selectReport(id)
-//            assertEquals(false, vm.editMode.value)
-//            assertEquals(report, vm.report.value)
-//            assertFalse(vm.loading.value!!)
+
+            verify(parent).showLoading(false)
+            verify(parent, never()).showError(anyString())
         }
     }
 
@@ -229,9 +232,6 @@ class ReportListViewModelTest : AndroidKoinTest() {
             )
             whenever(repo.loadReport(id)).thenReturn(Response.success(report))
             vm.editReport(id)
-
-//            assertEquals(true, vm.editMode.value)
-//            assertEquals(report, vm.report.value)
         }
     }
 
@@ -240,12 +240,11 @@ class ReportListViewModelTest : AndroidKoinTest() {
         runBlockingTest {
             val id = UUID.randomUUID()
             whenever(repo.loadReport(id)).thenReturn(Response.failure(ERROR))
-            vm.selectReport(id)
 
-//            assertNull(vm.editMode.value)
-//            assertNull(vm.report.value)
-//            assertNull(vm.activityCommand.value)
-//            assertEquals(ERROR, vm.error.value)
+            vm.selectReport(id)
+            assertNull(vm.command.value)
+            verify(parent).showError(ERROR)
+            verify(parent).showLoading(false)
         }
     }
 
@@ -256,29 +255,34 @@ class ReportListViewModelTest : AndroidKoinTest() {
             whenever(repo.loadReport(id)).thenReturn(Response.failure(ERROR))
             vm.editReport(id)
 
-//            assertNull(vm.editMode.value)
-//            assertNull(vm.report.value)
-//            assertNull(vm.activityCommand.value)
-//            assertEquals(ERROR, vm.error.value)
+            verify(parent).showLoading(false)
+            assertNull(vm.command.value)
+            verify(parent).showError(ERROR)
         }
     }
 
     @Test
     fun `new report shows correctly`() {
         runBlockingTest {
+            val now = Date().time
+
             vm.newReport()
 
-//            val report = vm.report.value!!
-//            val timeDiff = System.currentTimeMillis() - report.created.time
-
-//            assertTrue(vm.editMode.value!!)
-//            assertTrue(timeDiff in 0..100) //this may fail if the test takes too much but 100 ms is long enough
-//            assertEquals(EmptyUUID, report.id)
-//            assertNull(report.brandName)
-//            assertNull(report.modelName)
-//            assertEquals("", report.description)
-//            assertEquals("", report.name)
-//            assertFalse((report as ReportData).changed)
+            val command = vm.command.value!!
+            assertTrue(command is ReportListCommand.ShowReport)
+            val showCommand = command as ReportListCommand.ShowReport
+            val report = showCommand.report as ReportData
+            assertTrue(showCommand.inEditMode)
+            assertEquals(EmptyUUID, report.id)
+            assertTrue(report.created.time - now in 0..100) //this may fail if the test takes too much but 100 ms is long enough
+            assertEquals(EmptyUUID, report.id)
+            assertNull(report.brandName)
+            assertNull(report.modelName)
+            assertNull(report.brand)
+            assertNull(report.model)
+            assertEquals("", report.description)
+            assertEquals("", report.name)
+            assertFalse(report.changed)
         }
     }
 

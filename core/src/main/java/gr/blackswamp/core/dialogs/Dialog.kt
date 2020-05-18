@@ -148,7 +148,8 @@ class Dialog : DialogFragment(), IDialog {
     private fun act(which: Int) {
         var dismiss = true
         try {
-            val listener = activity as? DialogFinishedListener ?: return
+            val parent = (parentFragment ?: activity) as? DialogFinishedListener
+            val listener = parent ?: return
             dismiss = listener.onDialogFinished(dialogId, which, dialogView, payload)
         } finally {
             if (dismiss)

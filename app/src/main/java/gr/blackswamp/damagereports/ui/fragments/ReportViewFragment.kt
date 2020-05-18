@@ -1,5 +1,6 @@
 package gr.blackswamp.damagereports.ui.fragments
 
+import android.os.Bundle
 import android.text.Editable
 import android.view.Menu
 import android.view.MenuInflater
@@ -8,15 +9,16 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import gr.blackswamp.core.dialogs.Dialog
+import gr.blackswamp.core.dialogs.DialogBuilders
+import gr.blackswamp.core.dialogs.DialogFinishedListener
 import gr.blackswamp.core.ui.CoreFragment
-import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.widget.TextChangeListener
 import gr.blackswamp.core.widget.updateText
 import gr.blackswamp.damagereports.R
@@ -32,9 +34,10 @@ import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 @Suppress("UNUSED_PARAMETER")
-class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewBinding>() {
+class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewBinding>(), DialogFinishedListener {
     companion object {
         const val TAG = "ReportViewFragment"
+        private const val DISCARD_DIALOG_ID = 9320
     }
 
     private val nameListener = TextChangeListener(after = this::nameChanged)
@@ -78,6 +81,16 @@ class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewB
         vm.command.observe(this::executeCommand)
     }
 
+    override fun onDialogFinished(id: Int, which: Int, dialog: View, payload: Bundle?): Boolean {
+        when (id) {
+            DISCARD_DIALOG_ID -> {
+                if (which == Dialog.BUTTON_POSITIVE)
+                    vm.confirmDiscardChanges()
+            }
+        }
+        return true
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         name.removeTextChangedListener(nameListener)
@@ -88,16 +101,11 @@ class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewB
     //region observers
     private fun updateReport(report: Report?) {
         showReport(report)
-        backPressedCallback.isEnabled = vm.editMode.value == true
-//        updateNavigationIcon(report, vm.editMode.value)
         requireActivity().invalidateOptionsMenu()
-
     }
 
     private fun updateEditable(editable: Boolean?) {
         setEditable(editable == true)
-        backPressedCallback.isEnabled = editable == true
-//        updateNavigationIcon(vm.report.value, editable)
         requireActivity().invalidateOptionsMenu()
     }
 
@@ -111,6 +119,14 @@ class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewB
                 val action = ReportViewFragmentDirections.selectModel(command.brand)
                 findNavController().navigate(action)
             }
+            is ReportViewCommand.ConfirmDiscard -> {
+                DialogBuilders.messageDialogBuilder(DISCARD_DIALOG_ID, getString(R.string.confirm_discard_changes))
+                    .setButtons(positive = true, negative = true, neutral = false)
+                    .show(this.childFragmentManager)
+            }
+            is ReportViewCommand.MoveBack -> {
+                findNavController().popBackStack()
+            }
         }
     }
 
@@ -118,7 +134,7 @@ class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewB
     //region listeners
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            Toast.makeText(context, "exit pressed", Toast.LENGTH_SHORT).show()
+            vm.exitReport()
         }
     }
 
@@ -130,6 +146,10 @@ class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewB
             }
             R.id.edit -> {
                 vm.editReport()
+                true
+            }
+            android.R.id.home -> {
+                vm.exitReport()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -148,25 +168,10 @@ class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewB
         vm.nameChanged(editable?.toString() ?: "")
     }
 
-    private fun saveReport(item: MenuItem): Boolean {
-        vm.saveReport()
-        return true
-    }
-
-    private fun editReport(item: MenuItem): Boolean {
-        vm.editReport()
-        return true
-    }
-
-    private fun exit(v: View) = vm.exitReport()
-
     //endregion
 
     //region private methods
     private fun setEditable(editable: Boolean) {
-//        save.isVisible = editable
-//        edit.isVisible = !editable
-
         model.isEnabled = editable
         brand.isEnabled = editable
         description.isEnabled = editable
@@ -193,17 +198,6 @@ class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewB
         } finally {
             nameListener.resume()
             descriptionListener.resume()
-        }
-    }
-
-    private fun updateNavigationIcon(report: Report?, editMode: Boolean?) {
-        val changed = report?.changed == true
-        val new = report?.id == EmptyUUID
-        val edit = editMode == true
-        if (new || (edit && !changed)) {
-//            toolbar.setNavigationIcon(R.drawable.ic_nav_back)
-        } else {
-//            toolbar.setNavigationIcon(R.drawable.ic_undo)
         }
     }
     //endregion

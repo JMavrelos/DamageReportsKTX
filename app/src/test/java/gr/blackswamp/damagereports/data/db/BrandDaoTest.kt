@@ -2,14 +2,12 @@ package gr.blackswamp.damagereports.data.db
 
 import android.database.sqlite.SQLiteConstraintException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.paging.toLiveData
 import androidx.room.Room
 import androidx.room.paging.LimitOffsetDataSource
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import gr.blackswamp.core.db.count
 import gr.blackswamp.core.db.countWhere
-import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.damagereports.TestApp
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.db.dao.BrandDao
@@ -196,7 +194,7 @@ class BrandDaoTest {
         runBlockingTest {
             initBrands()
             UnitTestData.MODELS.forEach {
-                db.modelDao.saveModel(it)
+                db.modelDao.insertModel(it)
             }
             val deleted = UnitTestData.BRANDS[3].id
 
@@ -212,7 +210,7 @@ class BrandDaoTest {
             initBrands()
             val toDelete = UnitTestData.BRANDS[0]
             val model = UnitTestData.MODELS.first { it.brand == toDelete.id }
-            db.modelDao.saveModel(model)
+            db.modelDao.insertModel(model)
             db.reportDao.saveReport(ReportEntity(UUID.randomUUID(), "123", "123", toDelete.id, model.id))
             var error: Throwable? = null
             val expected = db.count("brands")
@@ -236,30 +234,6 @@ class BrandDaoTest {
             val brand = dao.loadBrandById(expected.id)
 
             assertEquals(expected, brand)
-        }
-    }
-
-    @Test
-    fun `load brand by id as factory`() {
-        runBlockingTest {
-            initBrands()
-            val expected = UnitTestData.BRANDS.random()
-
-            val source = dao.loadBrandFactoryById(expected.id)
-
-            assertEquals(listOf(expected), source.toLiveData(1000).getOrAwait())
-        }
-    }
-
-    @Test
-    fun `load brand by id as factory even if deleted`() {
-        runBlockingTest {
-            initBrands()
-            val expected = UnitTestData.DELETED_BRANDS.random()
-
-            val source = dao.loadBrandFactoryById(expected.id)
-
-            assertEquals(listOf(expected), source.toLiveData(1000).getOrAwait())
         }
     }
 
