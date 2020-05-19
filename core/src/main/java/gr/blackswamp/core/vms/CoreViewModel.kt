@@ -15,7 +15,7 @@ import org.koin.core.inject
 import kotlin.coroutines.CoroutineContext
 
 abstract class CoreViewModel(app: Application) : AndroidViewModel(app), ICoreViewModel, KoinComponent, CoroutineScope {
-    protected val supervisor = SupervisorJob()
+    private val supervisor = SupervisorJob()
     override val hideKeyboard = LiveEvent<Unit>()
     override val back = LiveEvent<Unit>()
     private val dispatchers: Dispatcher by inject()

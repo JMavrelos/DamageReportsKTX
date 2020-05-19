@@ -103,18 +103,11 @@ class BrandFragment : CoreFragment<BrandViewModel, FragmentBrandBinding>(), List
         }
     }
 
+    override fun delete(id: UUID) = vm.delete(id)
 
-    override fun delete(id: UUID) {
-        vm.delete(id)
-    }
+    override fun select(id: UUID) = vm.select(id)
 
-    override fun select(id: UUID) {
-        vm.select(id)
-    }
-
-    override fun edit(id: UUID) {
-        vm.edit(id)
-    }
+    override fun edit(id: UUID) = vm.edit(id)
 
     private fun toggleByUse() {
 
@@ -132,9 +125,7 @@ class BrandFragment : CoreFragment<BrandViewModel, FragmentBrandBinding>(), List
         }
     }
 
-    private fun refresh() {
-
-    }
+    private fun refresh() = vm.refresh()
 
     private val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onSlide(bottomSheet: View, slideOffset: Float) {

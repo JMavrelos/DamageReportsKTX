@@ -10,7 +10,11 @@ import java.util.*
 interface ReportListRepository : BaseRepository {
     val themeSetting: ThemeSetting
 
-    suspend fun newReport(name: String, description: String, brandId: UUID, modelId: UUID): Throwable?
+
+    /**
+     * deletes all deleted entries that are no longer used
+     */
+    suspend fun clearDeleted(): Response<Unit>
 
     /**
      * gets a make_list of report headers according to a filter
@@ -28,7 +32,7 @@ interface ReportListRepository : BaseRepository {
      * unflags a report with a specific id as deleted
      * @return null if there was no error otherwise a message
      */
-    suspend fun unDeleteReport(id: UUID): Response<Unit>
+    suspend fun restoreReport(id: UUID): Response<Unit>
 
     /**
      * loads all data needed to display a report

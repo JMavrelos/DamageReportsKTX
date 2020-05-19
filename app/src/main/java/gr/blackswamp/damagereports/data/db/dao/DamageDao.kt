@@ -17,5 +17,4 @@ interface DamageDao {
 
     @Query("SELECT * FROM damages WHERE report = :id")
     suspend fun loadDamagesForReport(id: UUID): List<DamageEntity>
-
 }

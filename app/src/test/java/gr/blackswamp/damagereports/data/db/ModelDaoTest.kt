@@ -2,13 +2,15 @@ package gr.blackswamp.damagereports.data.db
 
 import android.database.sqlite.SQLiteConstraintException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.paging.toLiveData
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.paging.LimitOffsetDataSource
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import gr.blackswamp.core.db.count
 import gr.blackswamp.core.db.countWhere
+import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.damagereports.TestApp
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.db.dao.ModelDao
@@ -38,7 +40,7 @@ class ModelDaoTest {
     @Before
     fun setUp() {
         db = Room.inMemoryDatabaseBuilder(
-            InstrumentationRegistry.getInstrumentation().targetContext,
+            ApplicationProvider.getApplicationContext(),
             AppDatabaseImpl::class.java
         ).allowMainThreadQueries()
             .build()
@@ -97,9 +99,9 @@ class ModelDaoTest {
         runBlockingTest {
             initModels()
 
-            val loaded = (dao.loadModels(UnitTestData.BRANDS[2].id, "").create() as LimitOffsetDataSource).loadRange(0, 1000)
+            val loaded = (dao.loadModels(UnitTestData.MODELS[2].id, "").create() as LimitOffsetDataSource).loadRange(0, 1000)
 
-            assertEquals(UnitTestData.MODELS.count { it.brand == UnitTestData.BRANDS[2].id }, loaded.count { l -> UnitTestData.MODELS.any { it == l } })
+            assertEquals(UnitTestData.MODELS.count { it.brand == UnitTestData.MODELS[2].id }, loaded.count { l -> UnitTestData.MODELS.any { it == l } })
         }
     }
 
@@ -173,6 +175,91 @@ class ModelDaoTest {
             val model = dao.loadModelById(UUID.randomUUID())
 
             assertNull(model)
+        }
+    }
+
+    @Test
+    fun `flagging model as deleted works`() {
+        runBlockingTest {
+            initModels()
+            val toDelete = UnitTestData.MODELS.random()
+
+            val response = dao.flagModelDeleted(toDelete.id)
+
+            assertEquals(1, response)
+            val count = db.countWhere("models", " id = '${toDelete.id}' and deleted = 1")
+            assertEquals(1, count)
+        }
+    }
+
+    @Test
+    fun `flagging an already deleted model returns that nothing is affected`() {
+        runBlockingTest {
+            initModels()
+            val brand = UnitTestData.MODELS.random()
+
+            dao.flagModelDeleted(brand.id)
+
+            var count = db.countWhere("models", " id = '${brand.id}' and deleted = 1")
+            assertEquals(1, count)
+
+            val response = dao.flagModelDeleted(brand.id)
+            assertEquals(0, response)
+            count = db.countWhere("models", " id = '${brand.id}' and deleted = 1")
+            assertEquals(1, count)
+        }
+    }
+
+    @Test
+    fun `unDeleting a model works`() {
+        runBlockingTest {
+            initModels()
+
+            val model = UnitTestData.MODELS.random()
+
+            dao.flagModelDeleted(model.id)
+
+            var count = db.countWhere("models", " id = '${model.id}' and deleted = 1")
+            assertEquals(1, count)
+
+            val response = dao.unFlagModelDeleted(model.id)
+            assertEquals(1, response)
+            count = db.countWhere("models", " id = '${model.id}' and deleted = 0")
+            assertEquals(1, count)
+        }
+    }
+
+    @Test
+    fun `unDeleting a model that is not deleted returns that nothing is affected`() {
+        runBlockingTest {
+
+            initModels()
+            val toDelete = UnitTestData.MODELS.random()
+
+            val response = dao.unFlagModelDeleted(toDelete.id)
+
+            assertEquals(0, response)
+        }
+    }
+
+    @Test
+    fun `flagging a model as deleted re-triggers the paging query source`() {
+        runBlockingTest {
+            initModels()
+            val brandId = UnitTestData.BRANDS.random().id
+            val models = UnitTestData.MODELS.filter { it.brand == brandId }
+
+            val source = dao.loadModels(brandId, "").toLiveData(1000)
+            var value = source.getOrAwait()
+
+            assertEquals(models.size, value.size)
+
+            val toDelete = UnitTestData.MODELS.filter { it.brand == brandId }.random()
+
+            dao.flagModelDeleted(toDelete.id)
+
+            value = source.getOrAwait()
+            assertEquals(models.size - 1, value.size)
         }
     }
 

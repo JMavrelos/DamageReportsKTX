@@ -8,6 +8,7 @@ import com.nhaarman.mockitokotlin2.*
 import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.testing.*
+import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.dao.BrandDao
@@ -26,6 +27,10 @@ import java.util.*
 
 @ExperimentalCoroutinesApi
 class BrandRepositoryImplTest : AndroidKoinTest() {
+    companion object {
+        private const val ERROR = "this is a brand error"
+    }
+
     override val modules = module {
         single { db }
         single { prefs }
@@ -147,5 +152,46 @@ class BrandRepositoryImplTest : AndroidKoinTest() {
         }
     }
 
-    //I may have to change the strategy of insert/update , if the name already exists the app has to ask the user to insert it again or not
+    @Test
+    fun `calling flag brand as deleted calls the dao`() {
+        runBlocking {
+            val id = UUID.randomUUID()
+            whenever(bDao.flagBrandDeleted(id)).thenReturn(1)
+
+            val response = repo.deleteBrand(id)
+
+            assertFalse(response.hasError)
+        }
+    }
+
+    @Test
+    fun `calling flag brand as deleted with no affected rows`() {
+        runBlocking {
+            val id = UUID.randomUUID()
+            whenever(bDao.flagBrandDeleted(id)).thenReturn(0)
+            whenever(app.getString(R.string.error_brand_not_found, id)).thenReturn(ERROR)
+
+            val response = repo.deleteBrand(id)
+
+            assertTrue(response.hasError)
+            assertEquals(ERROR, response.errorMessage)
+        }
+    }
+
+    @Test
+    fun `calling flag brand as deleted with a dao error`() {
+        runBlocking {
+            val id = UUID.randomUUID()
+            val error = SQLiteException("error with SQLite")
+            whenever(bDao.flagBrandDeleted(id)).thenThrow(error)
+            whenever(app.getString(R.string.error_deleting, error.message ?: error::class.java.name)).thenReturn(ERROR)
+
+            val response = repo.deleteBrand(id)
+
+            assertTrue(response.hasError)
+            assertEquals(ERROR, response.errorMessage)
+            assertEquals(error, response.error.cause)
+        }
+    }
+
 }

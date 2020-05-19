@@ -10,12 +10,16 @@ interface BrandViewModel {
     val command: LiveData<BrandCommand>
     val brandList: LiveData<PagedList<Brand>>
     val brand: LiveData<Brand>
+    val showUndo: LiveData<Boolean>
 
     fun newFilter(filter: String, submitted: Boolean): Boolean
+    fun refresh()
     fun create()
     fun edit(id: UUID)
     fun save(name: String)
-    fun delete(id: UUID)
-    fun select(id: UUID)
     fun cancel()
+    fun delete(id: UUID)
+    fun undoLastDelete()
+    fun select(id: UUID)
+
 }

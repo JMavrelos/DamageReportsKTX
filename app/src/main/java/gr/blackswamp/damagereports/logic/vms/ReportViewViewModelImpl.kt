@@ -7,7 +7,6 @@ import gr.blackswamp.core.lifecycle.LiveEvent
 import gr.blackswamp.core.lifecycle.call
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.util.toThrowable
-import gr.blackswamp.core.vms.CoreViewModel
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.repos.ReportViewRepository
 import gr.blackswamp.damagereports.logic.commands.ReportViewCommand
@@ -18,9 +17,8 @@ import gr.blackswamp.damagereports.ui.model.Report
 import kotlinx.coroutines.launch
 import org.koin.core.inject
 
-class ReportViewViewModelImpl(application: Application, private val parent: FragmentParent, report: Report, inEditMode: Boolean, runInit: Boolean = true) :
-    CoreViewModel(application),
-    ReportViewViewModel {
+class ReportViewViewModelImpl(application: Application, parent: FragmentParent, report: Report, inEditMode: Boolean, runInit: Boolean = true) :
+    BaseViewModel(application, parent), ReportViewViewModel {
     companion object {
         const val TAG = "ReportViewViewModel"
     }
@@ -50,7 +48,7 @@ class ReportViewViewModelImpl(application: Application, private val parent: Frag
             editMode.postValue(inEditMode)
             this.report.postValue(report)
         } catch (t: Throwable) {
-            parent.showError(t.message!!)
+            showError(t.message!!)
         }
     }
 
@@ -63,7 +61,7 @@ class ReportViewViewModelImpl(application: Application, private val parent: Frag
     override fun pickModel() {
         val current = reportData ?: return
         if (current.brand == null) {
-            parent.showError(getString(R.string.error_no_brand_selected))
+            showError(getString(R.string.error_no_brand_selected))
             return
         }
         command.postValue(ReportViewCommand.ShowModelSelect(current.brand))
@@ -104,7 +102,7 @@ class ReportViewViewModelImpl(application: Application, private val parent: Frag
     }
 
     override fun confirmDiscardChanges() {
-        parent.showLoading(true)
+        showLoading(true)
         launch {
             try {
                 val report = report.value as? ReportData ?: return@launch
@@ -116,9 +114,9 @@ class ReportViewViewModelImpl(application: Application, private val parent: Frag
                     editMode.postValue(false)
                 }
             } catch (t: Throwable) {
-                parent.showError(t.message ?: t::class.java.name)
+                showError(t.message ?: t::class.java.name)
             } finally {
-                parent.showLoading(false)
+                showLoading(false)
             }
         }
 

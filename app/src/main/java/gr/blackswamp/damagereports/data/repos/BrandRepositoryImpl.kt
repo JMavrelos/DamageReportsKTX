@@ -57,4 +57,26 @@ class BrandRepositoryImpl : BaseRepositoryImpl(), BrandRepository {
             Response.failure("Brand entity with $name already exists", t)
         }
     }
+
+    override suspend fun deleteBrand(id: UUID): Response<Unit> {
+        return try {
+            val affected = db.brandDao.flagBrandDeleted(id)
+            if (affected == 0)
+                return Response.failure(getString(R.string.error_brand_not_found, id))
+            Response.success()
+        } catch (t: Throwable) {
+            return Response.failure(getString(R.string.error_deleting, (t.message ?: t::class.java.name)), t)
+        }
+    }
+
+    override suspend fun restoreBrand(id: UUID): Response<Unit> {
+        return try {
+            val affected = db.brandDao.unFlagBrandDeleted(id)
+            if (affected == 0)
+                return Response.failure(getString(R.string.error_no_deleted_brand, id))
+            Response.success()
+        } catch (t: Throwable) {
+            return Response.failure(getString(R.string.error_un_deleting, (t.message ?: t::class.java.name)), t)
+        }
+    }
 }

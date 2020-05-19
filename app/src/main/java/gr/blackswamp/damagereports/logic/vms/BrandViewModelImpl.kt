@@ -11,8 +11,8 @@ import androidx.paging.toLiveData
 import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.lifecycle.LiveEvent
 import gr.blackswamp.core.util.EmptyUUID
+import gr.blackswamp.core.util.refresh
 import gr.blackswamp.core.util.toThrowable
-import gr.blackswamp.core.vms.CoreViewModel
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.repos.BrandRepository
 import gr.blackswamp.damagereports.logic.commands.BrandCommand
@@ -24,8 +24,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.inject
 import java.util.*
 
-class BrandViewModelImpl(application: Application, private val parent: FragmentParent, runInit: Boolean = true) :
-    CoreViewModel(application), BrandViewModel {
+class BrandViewModelImpl(application: Application, parent: FragmentParent, runInit: Boolean = true) :
+    BaseViewModel(application, parent), BrandViewModel {
     companion object {
         const val TAG = "MakeViewModel"
 
@@ -37,8 +37,16 @@ class BrandViewModelImpl(application: Application, private val parent: FragmentP
 
     //region live data
     override val command = LiveEvent<BrandCommand>()
+
+    @VisibleForTesting
+    internal val lastDeleted = MutableLiveData<UUID>()
+    override val showUndo: LiveData<Boolean> = Transformations.map(lastDeleted) { it != null }
+
+    @VisibleForTesting
     internal val brandFilter = MutableLiveData<String>()
-    private val brandData = MutableLiveData<BrandData>()
+
+    @VisibleForTesting
+    internal val brandData = MutableLiveData<BrandData>()
     override val brand: LiveData<Brand> = Transformations.map(brandData) { it }
     override val brandList: LiveData<PagedList<Brand>> = brandFilter.switchMap(this::brandDbToUi)
     //endregion
@@ -55,21 +63,33 @@ class BrandViewModelImpl(application: Application, private val parent: FragmentP
     override fun newFilter(filter: String, submitted: Boolean): Boolean {
         brandFilter.postValue(filter)
         if (submitted)
-            parent.hideKeyboard()
+            hideKeyboard()
         return true
     }
+
+    override fun refresh() = brandFilter.refresh()
 
     override fun create() {
         brandData.postValue(BrandData(EmptyUUID, ""))
     }
 
     override fun edit(id: UUID) {
-        brandData.postValue(BrandData(id, "test brand"))
+        showLoading(true)
+        launch {
+            try {
+                val brand = repo.getBrand(id).getOrThrow
+                brandData.postValue(brand)
+            } catch (t: Throwable) {
+                showError(t.message ?: getString(R.string.error_loading_brand, id))
+            } finally {
+                showLoading(false)
+            }
+        }
     }
 
     override fun save(name: String) {
+        showLoading(true)
         launch {
-            parent.showLoading(true)
             try {
                 val current = brandData.value ?: throw getString(R.string.error_new_brand_not_found).toThrowable()
                 if (name.isBlank()) throw getString(R.string.error_empty_brand_name).toThrowable()
@@ -81,27 +101,9 @@ class BrandViewModelImpl(application: Application, private val parent: FragmentP
                 }.getOrThrow(getString(R.string.error_saving_brand))
                 brandData.postValue(null)
             } catch (t: Throwable) {
-                parent.showError(t.message ?: getString(R.string.error_saving_brand))
+                showError(t.message ?: getString(R.string.error_saving_brand))
             } finally {
-                parent.showLoading(false)
-            }
-        }
-    }
-
-    override fun delete(id: UUID) {
-        TODO("Not yet implemented")
-    }
-
-    override fun select(id: UUID) {
-        launch {
-            parent.showLoading(true)
-            try {
-                val brand = repo.getBrand(id).getOrThrow
-                command.postValue(BrandCommand.ShowModelSelect(brand))
-            } catch (t: Throwable) {
-                parent.showError(t.message ?: getString(R.string.error_loading_brand, id))
-            } finally {
-                parent.showLoading(false)
+                showLoading(false)
             }
         }
     }
@@ -110,10 +112,55 @@ class BrandViewModelImpl(application: Application, private val parent: FragmentP
         brandData.postValue(null)
     }
 
+    override fun delete(id: UUID) {
+        showLoading(true)
+        launch {
+            try {
+                repo.deleteBrand(id).getOrThrow
+                lastDeleted.postValue(id)
+            } catch (t: Throwable) {
+                showError(t.message ?: getString(R.string.error_deleting, id.toString()))
+            } finally {
+                showLoading(false)
+            }
+        }
+    }
+
+    override fun undoLastDelete() {
+        showLoading(true)
+        launch {
+            val id = lastDeleted.value
+            try {
+                if (id == null)
+                    throw getString(R.string.error_un_deleting_no_saved_value).toThrowable()
+                repo.restoreBrand(id).getOrThrow
+                lastDeleted.postValue(null)
+            } catch (t: Throwable) {
+                showError(t.message ?: getString(R.string.error_un_deleting, id))
+            } finally {
+                showLoading(false)
+            }
+        }
+    }
+
+    override fun select(id: UUID) {
+        launch {
+            showLoading(true)
+            try {
+                val brand = repo.getBrand(id).getOrThrow
+                command.postValue(BrandCommand.ShowModelSelect(brand))
+            } catch (t: Throwable) {
+                showError(t.message ?: getString(R.string.error_loading_brand, id))
+            } finally {
+                showLoading(false)
+            }
+        }
+    }
+
     private fun brandDbToUi(filter: String): LiveData<PagedList<Brand>> {
         return repo.getBrands(filter).let { response ->
             if (response.hasError) {
-                parent.showError(response.errorMessage)
+                showError(response.errorMessage)
                 StaticDataSource.factory(listOf<Brand>())
             } else {
                 response.get.map { it as Brand }

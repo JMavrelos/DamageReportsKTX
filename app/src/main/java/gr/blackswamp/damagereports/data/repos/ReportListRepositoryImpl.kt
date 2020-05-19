@@ -4,7 +4,6 @@ import androidx.paging.DataSource
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.db.AppDatabase
-import gr.blackswamp.damagereports.data.db.entities.ReportEntity
 import gr.blackswamp.damagereports.data.db.entities.ReportHeaderEntity
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.toData
@@ -13,28 +12,19 @@ import gr.blackswamp.damagereports.logic.model.ReportHeaderData
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.util.*
-import kotlin.random.Random
 
 class ReportListRepositoryImpl : BaseRepositoryImpl(), ReportListRepository, KoinComponent {
     private val db: AppDatabase by inject()
     override val themeSetting: ThemeSetting
         get() = prefs.themeSetting
 
-    override suspend fun newReport(
-        name: String,
-        description: String,
-        brandId: UUID,
-        modelId: UUID
-    ): Throwable? {
+
+    override suspend fun clearDeleted(): Response<Unit> {
         return try {
-            val date =
-                Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, Random.nextInt(8) - 4) }
-            val entity =
-                ReportEntity(UUID.randomUUID(), name, description, brandId, modelId, date.time)
-            db.reportDao.saveReport(entity)
-            null
+            db.globalDao.clearUnused()
+            Response.success()
         } catch (t: Throwable) {
-            t
+            Response.failure(t)
         }
     }
 
@@ -69,7 +59,7 @@ class ReportListRepositoryImpl : BaseRepositoryImpl(), ReportListRepository, Koi
         }
     }
 
-    override suspend fun unDeleteReport(id: UUID): Response<Unit> {
+    override suspend fun restoreReport(id: UUID): Response<Unit> {
         return try {
             val affected = db.reportDao.unFlagReportDeleted(id)
             if (affected == 0)

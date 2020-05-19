@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +26,7 @@ import gr.blackswamp.core.widget.onClick
 import gr.blackswamp.core.widget.visible
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.databinding.FragmentModelBinding
+import gr.blackswamp.damagereports.logic.commands.ModelCommand
 import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
 import gr.blackswamp.damagereports.logic.interfaces.ModelViewModel
 import gr.blackswamp.damagereports.logic.vms.MainViewModelImpl
@@ -85,6 +87,7 @@ class ModelFragment : CoreFragment<ModelViewModel, FragmentModelBinding>(), List
 
     override fun setUpObservers(vm: ModelViewModel) {
         vm.model.observe(this::showModel)
+        vm.command.observe(this::executeCommand)
     }
 
     //endregion
@@ -104,20 +107,14 @@ class ModelFragment : CoreFragment<ModelViewModel, FragmentModelBinding>(), List
         }
     }
 
-    override fun delete(id: UUID) {
+    override fun delete(id: UUID) = vm.delete(id)
 
-    }
+    override fun select(id: UUID) = vm.select(id)
 
-    override fun select(id: UUID) {
-
-    }
-
-    override fun edit(id: UUID) {
-
-    }
+    override fun edit(id: UUID) = vm.edit(id)
 
     private fun toggleByUse() {
-        vm.edit(UUID.randomUUID())
+
     }
 
     private fun toggleByName() {
@@ -128,13 +125,11 @@ class ModelFragment : CoreFragment<ModelViewModel, FragmentModelBinding>(), List
         if (sheetBehavior.state == STATE_EXPANDED) {
             vm.save(name.text.toString())
         } else {
-            vm.newModel()
+            vm.create()
         }
     }
 
-    private fun refresh() {
-
-    }
+    private fun refresh() = vm.refresh()
 
     private val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
@@ -177,6 +172,17 @@ class ModelFragment : CoreFragment<ModelViewModel, FragmentModelBinding>(), List
             name.setText(model.name)
             name.selectAll()
             sheetBehavior.state = STATE_EXPANDED
+        }
+    }
+
+    private fun executeCommand(command: ModelCommand?) {
+        when (command) {
+            is ModelCommand.ModelSelected -> {
+                val selected = command.model
+                val action = ModelFragmentDirections.finishModel()
+                action.arguments.putParcelable("RESULT", selected)
+                findNavController().navigate(action)
+            }
         }
     }
     //endregion

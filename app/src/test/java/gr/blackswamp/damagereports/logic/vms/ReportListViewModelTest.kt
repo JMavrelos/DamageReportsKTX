@@ -1,4 +1,4 @@
-package gr.blackswamp.damagereports.logic.reports
+package gr.blackswamp.damagereports.logic.vms
 
 import android.database.sqlite.SQLiteException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -21,9 +21,9 @@ import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
 import gr.blackswamp.damagereports.logic.model.BrandData
 import gr.blackswamp.damagereports.logic.model.ModelData
 import gr.blackswamp.damagereports.logic.model.ReportData
-import gr.blackswamp.damagereports.logic.vms.ReportListViewModelImpl
 import gr.blackswamp.damagereports.logic.vms.ReportListViewModelImpl.Companion.LIST_PAGE_SIZE
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -65,18 +65,23 @@ class ReportListViewModelTest : AndroidKoinTest() {
         reset(repo)
     }
 
+    //todo:add clear unused tests
+
     @Test
     fun `load reports with no filter from the start`() {
-        assertNull(vm.filter.value)
-        assertNull(vm.reportHeaderList.value)
+        runBlocking {
+            assertNull(vm.filter.value)
+            assertNull(vm.reportHeaderList.value)
 
-        whenever(repo.getReportHeaders("")).thenReturn(Response.success(StaticDataSource.factory(listOf())))
+            whenever(repo.getReportHeaders("")).thenReturn(Response.success(StaticDataSource.factory(listOf())))
+            whenever(repo.clearDeleted()).thenReturn(Response.success())
 
-        vm.initialize()
+            vm.initialize()
 
-        assertEquals(0, vm.reportHeaderList.getOrAwait().count())
-        assertEquals("", vm.filter.value)
-        verify(repo).getReportHeaders("")
+            assertEquals(0, vm.reportHeaderList.getOrAwait().count())
+            assertEquals("", vm.filter.value)
+            verify(repo).getReportHeaders("")
+        }
     }
 
     @Test
@@ -145,12 +150,12 @@ class ReportListViewModelTest : AndroidKoinTest() {
         runBlockingTest {
             val deleted = UnitTestData.REPORT_HEADERS.random()
             whenever(repo.deleteReport(deleted.id)).thenReturn(Response.success())
-            whenever(repo.unDeleteReport(deleted.id)).thenReturn(Response.success())
+            whenever(repo.restoreReport(deleted.id)).thenReturn(Response.success())
 
             vm.deleteReport(deleted.id)
             vm.undoLastDelete()
 
-            verify(repo).unDeleteReport(deleted.id)
+            verify(repo).restoreReport(deleted.id)
             verify(parent, times(2)).showLoading(false)
             verify(parent, never()).showError(anyString())
             assertFalse(vm.showUndo.value ?: false)
@@ -162,7 +167,7 @@ class ReportListViewModelTest : AndroidKoinTest() {
         runBlockingTest {
             vm.undoLastDelete()
 
-            verifyZeroInteractions(repo)
+            verifyNoMoreInteractions(repo)
 
             verify(parent).showLoading(false)
             verify(parent).showError(APP_STRING)
@@ -176,12 +181,12 @@ class ReportListViewModelTest : AndroidKoinTest() {
         runBlockingTest {
             val deleted = UnitTestData.REPORT_HEADERS.random()
             whenever(repo.deleteReport(deleted.id)).thenReturn(Response.success())
-            whenever(repo.unDeleteReport(deleted.id)).thenReturn(Response.failure(ERROR))
+            whenever(repo.restoreReport(deleted.id)).thenReturn(Response.failure(ERROR))
 
             vm.deleteReport(deleted.id)
             vm.undoLastDelete()
 
-            verify(repo).unDeleteReport(deleted.id)
+            verify(repo).restoreReport(deleted.id)
             verify(parent, times(2)).showLoading(false)
             verify(parent).showError(ERROR)
             assertFalse(vm.showUndo.value ?: false)

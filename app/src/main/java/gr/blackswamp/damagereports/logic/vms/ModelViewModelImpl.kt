@@ -9,11 +9,13 @@ import androidx.lifecycle.switchMap
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import gr.blackswamp.core.db.paging.StaticDataSource
+import gr.blackswamp.core.lifecycle.LiveEvent
 import gr.blackswamp.core.util.EmptyUUID
+import gr.blackswamp.core.util.refresh
 import gr.blackswamp.core.util.toThrowable
-import gr.blackswamp.core.vms.CoreViewModel
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.repos.ModelRepository
+import gr.blackswamp.damagereports.logic.commands.ModelCommand
 import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
 import gr.blackswamp.damagereports.logic.interfaces.ModelViewModel
 import gr.blackswamp.damagereports.logic.model.ModelData
@@ -23,8 +25,8 @@ import org.koin.core.inject
 import timber.log.Timber
 import java.util.*
 
-class ModelViewModelImpl(application: Application, val parent: FragmentParent, private val brandId: UUID, runInit: Boolean = true) :
-    CoreViewModel(application), ModelViewModel {
+class ModelViewModelImpl(application: Application, parent: FragmentParent, private val brandId: UUID, runInit: Boolean = true) :
+    BaseViewModel(application, parent), ModelViewModel {
     companion object {
         const val TAG = "ModelViewModel"
 
@@ -35,6 +37,13 @@ class ModelViewModelImpl(application: Application, val parent: FragmentParent, p
     private val repo: ModelRepository by inject()
 
     //region live data
+    override val command = LiveEvent<ModelCommand>()
+
+    @VisibleForTesting
+    internal val lastDeleted = MutableLiveData<UUID>()
+    override val showUndo: LiveData<Boolean> = Transformations.map(lastDeleted) { it != null }
+
+    @VisibleForTesting
     internal val modelFilter = MutableLiveData<String>()
     private val modelData = MutableLiveData<ModelData>()
     override val model: LiveData<Model> = Transformations.map(modelData) { it }
@@ -54,17 +63,34 @@ class ModelViewModelImpl(application: Application, val parent: FragmentParent, p
     override fun newFilter(filter: String, submitted: Boolean): Boolean {
         modelFilter.postValue(filter)
         if (submitted)
-            parent.hideKeyboard()
+            hideKeyboard()
         return true
     }
 
+    override fun refresh() = modelFilter.refresh()
+
+    override fun create() {
+        modelData.postValue(ModelData(EmptyUUID, "", EmptyUUID))
+    }
+
     override fun edit(id: UUID) {
-        modelData.postValue(ModelData(id, "test model", EmptyUUID))
+        showLoading(true)
+        launch {
+            try {
+                val brand = repo.getModel(id).getOrThrow
+                modelData.postValue(brand)
+            } catch (t: Throwable) {
+                showError(t.message ?: getString(R.string.error_loading_model, id))
+            } finally {
+                showLoading(false)
+            }
+
+        }
     }
 
     override fun save(name: String) {
         launch {
-            parent.showLoading(true)
+            showLoading(true)
             try {
                 val current = modelData.value ?: throw getString(R.string.error_new_model_not_found).toThrowable()
                 if (name.isBlank()) throw getString(R.string.error_empty_model_name).toThrowable()
@@ -73,28 +99,69 @@ class ModelViewModelImpl(application: Application, val parent: FragmentParent, p
                     repo.newModel(name, brandId)
                 } else {
                     repo.updateModel(current.id, brandId, name)
-                }.getOrThrow(getString(R.string.error_saving_brand))
+                }.getOrThrow(getString(R.string.error_saving_model))
                 modelData.postValue(null)
             } catch (t: Throwable) {
-                parent.showError(t.message ?: getString(R.string.error_saving_brand))
+                showError(t.message ?: getString(R.string.error_saving_model))
             } finally {
-                parent.showLoading(false)
+                showLoading(false)
             }
         }
-    }
-
-    override fun newModel() {
-        modelData.postValue(ModelData(EmptyUUID, "", EmptyUUID))
     }
 
     override fun cancel() {
         modelData.postValue(null)
     }
 
+    override fun delete(id: UUID) {
+        showLoading(true)
+        launch {
+            try {
+                repo.deleteModel(id).getOrThrow
+                lastDeleted.postValue(id)
+            } catch (t: Throwable) {
+                showError(t.message ?: getString(R.string.error_deleting, id.toString()))
+            } finally {
+                showLoading(false)
+            }
+        }
+    }
+
+    override fun undoLastDelete() {
+        showLoading(true)
+        launch {
+            val id = lastDeleted.value
+            try {
+                if (id == null)
+                    throw getString(R.string.error_un_deleting_no_saved_value).toThrowable()
+                repo.restoreModel(id).getOrThrow
+                lastDeleted.postValue(null)
+            } catch (t: Throwable) {
+                showError(t.message ?: getString(R.string.error_un_deleting, id))
+            } finally {
+                showLoading(false)
+            }
+        }
+    }
+
+    override fun select(id: UUID) {
+        launch {
+            showLoading(true)
+            try {
+                val brand = repo.getModel(id).getOrThrow
+                command.postValue(ModelCommand.ModelSelected(brand))
+            } catch (t: Throwable) {
+                showError(t.message ?: getString(R.string.error_loading_brand, id))
+            } finally {
+                showLoading(false)
+            }
+        }
+    }
+
     private fun modelDbToUi(filter: String): LiveData<PagedList<Model>> {
         return repo.getModels(brandId, filter).let { response ->
             if (response.hasError) {
-                parent.showError(response.errorMessage)
+                showError(response.errorMessage)
                 StaticDataSource.factory(listOf<Model>())
             } else {
                 response.get.map { it as Model }

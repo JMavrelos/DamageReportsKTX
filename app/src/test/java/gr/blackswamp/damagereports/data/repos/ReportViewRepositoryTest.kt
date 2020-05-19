@@ -1,6 +1,5 @@
 package gr.blackswamp.damagereports.data.repos
 
-import android.database.sqlite.SQLiteException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.*
 import gr.blackswamp.core.coroutines.Dispatcher
@@ -24,18 +23,17 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.koin.dsl.module
-import java.util.*
 
 
 @ExperimentalCoroutinesApi
-class ReportListRepositoryTest : AndroidKoinTest() {
+class ReportViewRepositoryTest : AndroidKoinTest() {
     companion object {
         const val FILTER = "12j3kj1lk23mm.,asd"
     }
 
     private val db = mock<AppDatabase>()
     private val prefs = mock<Preferences>()
-    private lateinit var repo: ReportListRepository
+    private lateinit var repo: ReportViewRepository
     private val dao = mock<ReportDao>()
     private val mDao = mock<ModelDao>()
     private val bDao = mock<BrandDao>()
@@ -59,116 +57,7 @@ class ReportListRepositoryTest : AndroidKoinTest() {
         whenever(db.reportDao).thenReturn(dao)
         whenever(db.brandDao).thenReturn(bDao)
         whenever(db.modelDao).thenReturn(mDao)
-        repo = ReportListRepositoryImpl()
-    }
-
-    //todo:test clearUnused
-
-    @Test
-    fun `calling get report headers creates new livedata from db`() {
-        runBlockingTest {
-            whenever(dao.loadReportHeaders(FILTER)).thenReturn(mock())
-            repo.getReportHeaders(FILTER)
-            verify(dao).loadReportHeaders(FILTER)
-        }
-    }
-
-    @Test
-    fun `calling get report headers with an error propagates the error`() {
-        val error = SQLiteException("error with sqlite")
-        whenever(dao.loadReportHeaders(FILTER)).thenThrow(error)
-        val response = repo.getReportHeaders(FILTER)
-        assertTrue(response.hasError)
-        assertEquals(error, response.error)
-    }
-
-    @Test
-    fun `delete report calls repo`() {
-        runBlockingTest {
-            val id = UUID.randomUUID()
-            whenever(dao.flagReportDeleted(id)).thenReturn(1)
-
-            val result = repo.deleteReport(id)
-
-            verify(dao).flagReportDeleted(id)
-            assertFalse(result.hasError)
-        }
-    }
-
-    @Test
-    fun `delete report with error`() {
-        runBlockingTest {
-            val id = UUID.randomUUID()
-            val error = SQLiteException("error with sqlite")
-            whenever(dao.flagReportDeleted(id)).thenThrow(error)
-
-            val response = repo.deleteReport(id)
-
-            verify(dao).flagReportDeleted(id)
-            assertEquals(APP_STRING, response.errorMessage)
-            verify(app).getString(R.string.error_deleting, error.message ?: error::class.java.name)
-            verifyNoMoreInteractions(app)
-        }
-    }
-
-    @Test
-    fun `delete report with no affected values shows error`() {
-        runBlockingTest {
-            val id = UUID.randomUUID()
-            whenever(dao.flagReportDeleted(id)).thenReturn(0)
-
-            val response = repo.deleteReport(id)
-
-            verify(dao).flagReportDeleted(id)
-            assertEquals(APP_STRING, response.errorMessage)
-            verify(app).getString(R.string.error_report_not_found, id)
-            verifyNoMoreInteractions(app)
-        }
-    }
-
-
-    @Test
-    fun `un-delete report calls repo`() {
-        runBlockingTest {
-            val id = UUID.randomUUID()
-            whenever(dao.unFlagReportDeleted(id)).thenReturn(1)
-
-            val result = repo.restoreReport(id)
-
-            verify(dao).unFlagReportDeleted(id)
-            assertFalse(result.hasError)
-        }
-    }
-
-    @Test
-    fun `un-delete report with error`() {
-        runBlockingTest {
-            val id = UUID.randomUUID()
-            val error = SQLiteException("error with sqlite")
-            whenever(dao.unFlagReportDeleted(id)).thenThrow(error)
-
-            val response = repo.restoreReport(id)
-
-            verify(dao).unFlagReportDeleted(id)
-            assertEquals(APP_STRING, response.errorMessage)
-            verify(app).getString(R.string.error_un_deleting, error.message ?: error::class.java.name)
-            verifyNoMoreInteractions(app)
-        }
-    }
-
-    @Test
-    fun `un-delete report with no affected values shows error`() {
-        runBlockingTest {
-            val id = UUID.randomUUID()
-            whenever(dao.unFlagReportDeleted(id)).thenReturn(0)
-
-            val response = repo.restoreReport(id)
-
-            verify(dao).unFlagReportDeleted(id)
-            assertEquals(APP_STRING, response.errorMessage)
-            verify(app).getString(R.string.error_no_deleted_report, id)
-            verifyNoMoreInteractions(app)
-        }
+        repo = ReportViewRepositoryImpl()
     }
 
     @Test

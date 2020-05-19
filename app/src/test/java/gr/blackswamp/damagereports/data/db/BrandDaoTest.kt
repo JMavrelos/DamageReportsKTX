@@ -2,12 +2,14 @@ package gr.blackswamp.damagereports.data.db
 
 import android.database.sqlite.SQLiteConstraintException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.paging.toLiveData
 import androidx.room.Room
 import androidx.room.paging.LimitOffsetDataSource
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import gr.blackswamp.core.db.count
 import gr.blackswamp.core.db.countWhere
+import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.damagereports.TestApp
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.db.dao.BrandDao
@@ -35,8 +37,10 @@ class BrandDaoTest {
 
     @Before
     fun setUp() {
-        db = Room.inMemoryDatabaseBuilder(InstrumentationRegistry.getInstrumentation().targetContext, AppDatabaseImpl::class.java)
-            .allowMainThreadQueries()
+        db = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext()
+            , AppDatabaseImpl::class.java
+        ).allowMainThreadQueries()
             .build()
 
         dao = db.brandDao
@@ -248,6 +252,88 @@ class BrandDaoTest {
         }
     }
 
+    @Test
+    fun `flagging brand as deleted works`() {
+        runBlockingTest {
+            initBrands()
+            val toDelete = UnitTestData.BRANDS.random()
+
+            val response = dao.flagBrandDeleted(toDelete.id)
+
+            assertEquals(1, response)
+            val count = db.countWhere("brands", " id = '${toDelete.id}' and deleted = 1")
+            assertEquals(1, count)
+        }
+    }
+
+    @Test
+    fun `flagging an already deleted brand returns that nothing is affected`() {
+        runBlockingTest {
+            initBrands()
+            val brand = UnitTestData.BRANDS.random()
+
+            dao.flagBrandDeleted(brand.id)
+
+            var count = db.countWhere("brands", " id = '${brand.id}' and deleted = 1")
+            assertEquals(1, count)
+
+            val response = dao.flagBrandDeleted(brand.id)
+            assertEquals(0, response)
+            count = db.countWhere("brands", " id = '${brand.id}' and deleted = 1")
+            assertEquals(1, count)
+        }
+    }
+
+    @Test
+    fun `unDeleting a brand works`() {
+        runBlockingTest {
+            initBrands()
+            val brand = UnitTestData.BRANDS.random()
+
+            dao.flagBrandDeleted(brand.id)
+
+            var count = db.countWhere("brands", " id = '${brand.id}' and deleted = 1")
+            assertEquals(1, count)
+
+            val response = dao.unFlagBrandDeleted(brand.id)
+            assertEquals(1, response)
+            count = db.countWhere("brands", " id = '${brand.id}' and deleted = 0")
+            assertEquals(1, count)
+        }
+    }
+
+    @Test
+    fun `unDeleting a brand that is not deleted returns that nothing is affected`() {
+        runBlockingTest {
+
+            initBrands()
+            val toDelete = UnitTestData.BRANDS.random()
+
+            val response = dao.unFlagBrandDeleted(toDelete.id)
+
+            assertEquals(0, response)
+        }
+    }
+
+    @Test
+    fun `flagging a brand as deleted retriggers the paging query source`() {
+        runBlockingTest {
+            initBrands()
+            val source = dao.loadBrands("").toLiveData(1000)
+            var value = source.getOrAwait()
+
+            //+1 because of the separator
+            assertEquals(UnitTestData.BRANDS.size, value.size)
+
+            val toDelete = UnitTestData.BRANDS.random()
+
+            dao.flagBrandDeleted(toDelete.id)
+
+            value = source.getOrAwait()
+            //+1 because of the separator
+            assertEquals(UnitTestData.BRANDS.size - 1, value.size)
+        }
+    }
 
     private suspend fun initBrands() {
         UnitTestData.BRANDS.union(UnitTestData.DELETED_BRANDS).forEach {

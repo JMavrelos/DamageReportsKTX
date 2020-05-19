@@ -12,7 +12,6 @@ import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.lifecycle.LiveEvent
 import gr.blackswamp.core.lifecycle.call
 import gr.blackswamp.core.util.EmptyUUID
-import gr.blackswamp.core.vms.CoreViewModel
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.repos.ReportListRepository
@@ -26,7 +25,7 @@ import org.koin.core.inject
 import timber.log.Timber
 import java.util.*
 
-class ReportListViewModelImpl(application: Application, val parent: FragmentParent, runInit: Boolean = true) : CoreViewModel(application),
+class ReportListViewModelImpl(application: Application, parent: FragmentParent, runInit: Boolean = true) : BaseViewModel(application, parent),
     ReportListViewModel {
     companion object {
         const val TAG = "ReportViewModel"
@@ -41,6 +40,7 @@ class ReportListViewModelImpl(application: Application, val parent: FragmentPare
     @VisibleForTesting
     internal val filter = MutableLiveData<String>()
     override val themeSelection = MutableLiveData<ThemeSetting>(null)
+
     @VisibleForTesting
     internal val lastDeleted = MutableLiveData<UUID>()
     override val command = LiveEvent<ReportListCommand>()
@@ -57,7 +57,18 @@ class ReportListViewModelImpl(application: Application, val parent: FragmentPare
 
     @VisibleForTesting
     internal fun initialize() {
-        filter.postValue("")
+        launch {
+            try {
+                showLoading(true)
+                val cleared = repo.clearDeleted()
+                if (cleared.hasError) {
+                    showError(cleared.errorMessage)
+                }
+                filter.postValue("")
+            } finally {
+                showLoading(false)
+            }
+        }
     }
 
     //region IReportActivityViewModel implementation
@@ -71,7 +82,7 @@ class ReportListViewModelImpl(application: Application, val parent: FragmentPare
         Timber.d("transforming for \"$filter\"")
         val response = repo.getReportHeaders(filter ?: "")
         return if (response.hasError) {
-            parent.showError(response.errorMessage)
+            showError(response.errorMessage)
             StaticDataSource.factory(listOf<ReportHeader>())
         } else {
             response.get.map {
@@ -84,14 +95,14 @@ class ReportListViewModelImpl(application: Application, val parent: FragmentPare
     override fun deleteReport(id: UUID) {
         launch {
             try {
-                parent.showLoading(true)
+                showLoading(true)
                 repo.deleteReport(id).getOrThrow
                 lastDeleted.postValue(id)
             } catch (t: Throwable) {
-                parent.showError(t.message ?: getString(R.string.error_deleting, id))
+                showError(t.message ?: getString(R.string.error_deleting, id))
                 lastDeleted.postValue(null)
             } finally {
-                parent.showLoading(false)
+                showLoading(false)
             }
         }
     }
@@ -104,16 +115,16 @@ class ReportListViewModelImpl(application: Application, val parent: FragmentPare
         launch {
             val last = lastDeleted.value
             try {
+                showLoading(true)
                 if (last == null) {
                     throw Throwable(getString(R.string.error_un_deleting_no_saved_value))
                 }
-                parent.showLoading(true)
-                repo.unDeleteReport(last).getOrThrow
+                repo.restoreReport(last).getOrThrow
             } catch (t: Throwable) {
-                parent.showError(t.message ?: getString(R.string.error_un_deleting, last))
+                showError(t.message ?: getString(R.string.error_un_deleting, last))
             } finally {
                 lastDeleted.postValue(null)
-                parent.showLoading(false)
+                showLoading(false)
             }
         }
     }
@@ -124,14 +135,14 @@ class ReportListViewModelImpl(application: Application, val parent: FragmentPare
 
     private fun showReport(id: UUID, inEditMode: Boolean) {
         launch {
-            parent.showLoading(true)
+            showLoading(true)
             try {
                 val data = repo.loadReport(id).getOrThrow
                 command.postValue(ReportListCommand.ShowReport(data, inEditMode))
             } catch (t: Throwable) {
-                parent.showError(t.message ?: t::class.java.name)
+                showError(t.message ?: t::class.java.name)
             } finally {
-                parent.showLoading(false)
+                showLoading(false)
             }
         }
     }

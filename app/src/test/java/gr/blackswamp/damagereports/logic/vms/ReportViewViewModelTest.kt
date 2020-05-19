@@ -1,4 +1,4 @@
-package gr.blackswamp.damagereports.logic.reports
+package gr.blackswamp.damagereports.logic.vms
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.never
@@ -17,7 +17,6 @@ import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
 import gr.blackswamp.damagereports.logic.model.BrandData
 import gr.blackswamp.damagereports.logic.model.ModelData
 import gr.blackswamp.damagereports.logic.model.ReportData
-import gr.blackswamp.damagereports.logic.vms.ReportViewViewModelImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest

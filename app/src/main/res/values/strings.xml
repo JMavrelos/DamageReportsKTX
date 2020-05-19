@@ -26,6 +26,8 @@
     <string name="save">Αποθήκευση</string>
     <string name="error_deleting">Υπήρξε πρόβλημα κατά την διαγραφή (%1$s)</string>
     <string name="error_no_deleted_report">Δεν βρέθηκε διαγεγραμμένη παραγγελία με κωδικό %1$s</string>
+    <string name="error_no_deleted_brand">Δεν βρέθηκε διαγεγραμμένη μάρκα με κωδικό %1$s</string>
+    <string name="error_no_deleted_model">Δεν βρέθηκε διαγεγραμμένο μοντέλο με κωδικό %1$s</string>
     <string name="undo_delete">Πιέστε το κουμπί για αναίρεση διαγραφής</string>
     <string name="undo">Αναίρεση</string>
     <string name="error_loading_report">Υπήρξε πρόβλημα κατά την εύρεση της αναφοράς %1$s</string>

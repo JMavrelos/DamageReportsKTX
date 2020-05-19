@@ -5,10 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import gr.blackswamp.damagereports.data.db.converters.StringDateConverter
 import gr.blackswamp.damagereports.data.db.converters.UUIDConverter
-import gr.blackswamp.damagereports.data.db.dao.BrandDao
-import gr.blackswamp.damagereports.data.db.dao.DamageDao
-import gr.blackswamp.damagereports.data.db.dao.ModelDao
-import gr.blackswamp.damagereports.data.db.dao.ReportDao
+import gr.blackswamp.damagereports.data.db.dao.*
 import gr.blackswamp.damagereports.data.db.entities.*
 
 
@@ -22,10 +19,9 @@ abstract class AppDatabaseImpl : RoomDatabase(), AppDatabase {
         const val DATABASE = "data.db"
     }
 
+    abstract override val globalDao: GlobalDao
     abstract override val reportDao: ReportDao
     abstract override val modelDao: ModelDao
     abstract override val brandDao: BrandDao
     abstract override val damageDao: DamageDao
-
-
 }

@@ -4,14 +4,18 @@ import gr.blackswamp.core.testing.randomDate
 import gr.blackswamp.core.testing.randomString
 import gr.blackswamp.damagereports.data.db.entities.*
 import java.util.*
+import kotlin.random.Random
 
 object UnitTestData {
-    //The first 50 brands have models, the others do not
+
     val BRANDS = (0 until 100)
         .map { BrandEntity(UUID.randomUUID(), "${randomString(10)} Brand ", false) }
 
-    val MODELS = (0 until 200)
-        .map { ModelEntity(UUID.randomUUID(), "${randomString(10)} Model", BRANDS[it / 2].id, false) }
+    val MODELS: List<ModelEntity> = BRANDS.flatMap { brand ->
+        (1 until Random.nextInt(2, 10)).map {
+            ModelEntity(UUID.randomUUID(), "${randomString(10)} Model", brand.id, false)
+        }
+    }
 
     val DELETED_BRANDS = listOf(
         BrandEntity(UUID.randomUUID(), "${randomString(10)} Deleted Brand 1", true)
@@ -26,10 +30,15 @@ object UnitTestData {
 
     val REPORTS = (0 until 30)
         .map {
+//            try {
             ReportEntity(
                 UUID.randomUUID(), "${randomString(10)} Report", "${randomString(10)} description",
                 BRANDS[40 - it].id, MODELS.first { model -> model.brand == BRANDS[40 - it].id }.id, Date(System.currentTimeMillis() + (it * 100))
             )
+//            }catch (t:Throwable) {
+//                t.printStackTrace()
+//                ReportEntity(RandomUUID,"","",RandomUUID,RandomUUID,Date(),Date(),false)
+//            }
         }
 
     val REPORT_HEADERS = (0 until 100)

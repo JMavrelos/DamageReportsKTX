@@ -5,8 +5,8 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.paging.toLiveData
 import androidx.room.Room
 import androidx.room.paging.LimitOffsetDataSource
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import gr.blackswamp.core.db.countWhere
 import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.damagereports.TestApp
@@ -37,7 +37,7 @@ class ReportDaoTest {
     @Before
     fun setUp() {
         db = Room.inMemoryDatabaseBuilder(
-            InstrumentationRegistry.getInstrumentation().targetContext,
+            ApplicationProvider.getApplicationContext(),
             AppDatabaseImpl::class.java
         ).allowMainThreadQueries()
             .build()
@@ -139,36 +139,6 @@ class ReportDaoTest {
 
         }
     }
-
-    // not needed for now, I'll keep them for a few versions in case they are
-//    @Test
-//    fun `delete a report`() {
-//        runBlockingTest {
-//            initData()
-//            val deleted = UnitTestData.REPORTS[3]
-//            val expected = db.count("reports") - 1
-//
-//            dao.deleteReportById(deleted.id)
-//
-//            val count = db.count("reports")
-//
-//            assertEquals(expected, count)
-//        }
-//    }
-//
-//    @Test
-//    fun `delete a report that doesn't exist`() {
-//        runBlockingTest {
-//            initData()
-//            val expected = db.count("reports")
-//
-//            dao.deleteReportById(UUID.randomUUID())
-//
-//            val count = db.count("reports")
-//
-//            assertEquals(expected, count)
-//        }
-//    }
 
     @Test
     fun `search a report with no arguments`() {

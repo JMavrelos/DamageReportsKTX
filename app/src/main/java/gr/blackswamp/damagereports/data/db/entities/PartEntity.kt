@@ -12,6 +12,7 @@ import java.util.*
         , Index(value = ["brand"])
         , Index(value = ["model"])
         , Index(value = ["brand", "model"])
+        , Index(value = ["deleted"])
     ]
 , foreignKeys = [
         ForeignKey(entity = BrandEntity::class, parentColumns = ["id"], childColumns = ["brand"], onDelete = ForeignKey.RESTRICT)
@@ -24,5 +25,5 @@ data class PartEntity(
     , val brand: UUID?
     , val model: UUID?
     , val price: Double
-
+    , val deleted: Boolean
 )

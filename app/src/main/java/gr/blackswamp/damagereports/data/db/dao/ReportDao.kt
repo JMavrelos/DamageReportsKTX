@@ -38,13 +38,13 @@ interface ReportDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun saveReport(report: ReportEntity)
 
-    @Query("UPDATE reports set deleted = 1 where id = :id and deleted = 0")
+    @Query("UPDATE reports SET deleted = 1 WHERE id = :id AND deleted = 0")
     suspend fun flagReportDeleted(id: UUID): Int
 
-    @Query("UPDATE reports set deleted = 0 where id = :id and deleted = 1")
+    @Query("UPDATE reports SET deleted = 0 WHERE id = :id AND deleted = 1")
     suspend fun unFlagReportDeleted(id: UUID): Int
 
-
-    @Query("SELECT count(*) FROM reports ")
+    @Query("SELECT count(*) FROM reports order by created")
     suspend fun count(): Int
+
 }

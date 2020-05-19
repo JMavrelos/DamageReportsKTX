@@ -26,6 +26,12 @@ interface BrandDao {
     @Query("SELECT count(*) FROM brands WHERE NOT deleted")
     suspend fun count(): Int
 
+    @Query("UPDATE brands set deleted = 1 where id = :id and deleted = 0")
+    suspend fun flagBrandDeleted(id: UUID): Int
+
+    @Query("UPDATE brands set deleted = 0 where id = :id and deleted = 1")
+    suspend fun unFlagBrandDeleted(id: UUID): Int
+
     @Query("SELECT * FROM brands WHERE NOT deleted AND (:filter = '' OR lower(name) LIKE '%' || lower(:filter) || '%') ORDER BY name ")
     fun loadBrands(filter: String = ""): DataSource.Factory<Int, BrandEntity>
 }
