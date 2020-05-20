@@ -69,7 +69,7 @@ class ReportDaoTest {
         runBlockingTest {
             var error: Throwable? = null
             try {
-                dao.saveReport(report)
+                dao.insertReport(report)
             } catch (e: Throwable) {
                 error = e
             }
@@ -88,7 +88,7 @@ class ReportDaoTest {
 
             var error: Throwable? = null
             try {
-                dao.saveReport(report)
+                dao.insertReport(report)
             } catch (e: Throwable) {
                 error = e
             }
@@ -109,7 +109,7 @@ class ReportDaoTest {
 
             var error: Throwable? = null
             try {
-                dao.saveReport(report)
+                dao.insertReport(report)
             } catch (e: Throwable) {
                 error = e
             }
@@ -129,7 +129,7 @@ class ReportDaoTest {
             db.modelDao.insertModel(model)
             val report = ReportEntity(UUID.randomUUID(), "hello", "world", model.brand, model.id)
 
-            dao.saveReport(report)
+            dao.insertReport(report)
 
             val count = db.countWhere(
                 "reports",
@@ -147,7 +147,7 @@ class ReportDaoTest {
 
             val result = (dao.loadReportHeaders("").create() as LimitOffsetDataSource).loadRange(0, 1000)
 
-            assertEquals(UnitTestData.REPORTS.size, UnitTestData.REPORTS.count { result.map { it.id }.contains(it.id) })
+            assertEquals(UnitTestData.REPORTS.size, UnitTestData.REPORTS.count { report -> result.map { it.id }.contains(report.id) })
         }
     }
 
@@ -164,7 +164,7 @@ class ReportDaoTest {
                 , ReportEntity(UUID.randomUUID(), "1${filter}4", "", UnitTestData.BRANDS[7].id, UnitTestData.MODELS.first { it.brand == UnitTestData.BRANDS[7].id }.id)
             )
             expected.forEach {
-                dao.saveReport(it)
+                dao.insertReport(it)
             }
 
             val result = (dao.loadReportHeaders(filter).create() as LimitOffsetDataSource).loadRange(0, 1000)
@@ -186,7 +186,7 @@ class ReportDaoTest {
             )
 
             expected.forEach {
-                dao.saveReport(it)
+                dao.insertReport(it)
             }
 
             val result = (dao.loadReportHeaders(filter).create() as LimitOffsetDataSource).loadRange(0, 1000)
@@ -259,7 +259,7 @@ class ReportDaoTest {
     }
 
     @Test
-    fun `flagging a report as deleted retriggers the paging query source`() {
+    fun `flagging a report as deleted re-triggers the paging query source`() {
         runBlockingTest {
             initData()
             val source = dao.loadReportHeaders("").toLiveData(1000)
@@ -302,14 +302,14 @@ class ReportDaoTest {
     }
 
     private suspend fun initData() {
-        UnitTestData.BRANDS.union(UnitTestData.DELETED_BRANDS).forEach {
+        UnitTestData.BRANDS.forEach {
             db.brandDao.insertBrand(it)
         }
-        UnitTestData.MODELS.union(UnitTestData.DELETED_MODELS).forEach {
+        UnitTestData.MODELS.forEach {
             db.modelDao.insertModel(it)
         }
         UnitTestData.REPORTS.forEach {
-            dao.saveReport(it)
+            dao.insertReport(it)
         }
     }
 }

@@ -107,7 +107,7 @@ class BrandDaoTest {
             initBrands()
             val updated = UnitTestData.BRANDS[2].copy(name = "this is the new thang")
             val affected = dao.updateBrand(updated)
-            assertEquals(UnitTestData.BRANDS.size + UnitTestData.DELETED_BRANDS.size, db.count("brands"))
+            assertEquals(UnitTestData.BRANDS.size, db.count("brands"))
             assertEquals(1, db.countWhere("brands", " name = '${updated.name}'"))
             assertEquals(1, affected)
         }
@@ -215,7 +215,7 @@ class BrandDaoTest {
             val toDelete = UnitTestData.BRANDS[0]
             val model = UnitTestData.MODELS.first { it.brand == toDelete.id }
             db.modelDao.insertModel(model)
-            db.reportDao.saveReport(ReportEntity(UUID.randomUUID(), "123", "123", toDelete.id, model.id))
+            db.reportDao.insertReport(ReportEntity(UUID.randomUUID(), "123", "123", toDelete.id, model.id))
             var error: Throwable? = null
             val expected = db.count("brands")
             try {
@@ -336,9 +336,7 @@ class BrandDaoTest {
     }
 
     private suspend fun initBrands() {
-        UnitTestData.BRANDS.union(UnitTestData.DELETED_BRANDS).forEach {
-            dao.insertBrand(it)
-        }
+        UnitTestData.BRANDS.forEach { dao.insertBrand(it) }
 
     }
 }

@@ -16,31 +16,22 @@ abstract class GlobalDao {
             StringDateConverter.toText(it)
         }
 
-        clearUnusedReports(lastWeek)
-        clearUnusedDamages()
-        clearUnusedDamageParts()
+        clearUnusedReports(lastWeek) //this will cascade to damages and damage parts
         clearUnusedParts()
         clearUnusedBrands()
         clearUnusedModels()
     }
 
     @Query("DELETE FROM reports WHERE deleted = 1 AND updated < :before")
-    abstract suspend fun clearUnusedReports(before: String)
+    abstract suspend fun clearUnusedReports(before: String): Int
 
-    @Query("DELETE FROM damages WHERE report NOT IN (SELECT id FROM reports)")
-    abstract suspend fun clearUnusedDamages()
+    @Query("DELETE FROM brands WHERE deleted AND id NOT IN (SELECT brand FROM reports) AND id NOT IN (SELECT brand FROM parts WHERE brand IS NOT NULL )")
+    abstract suspend fun clearUnusedBrands(): Int
 
-
-    @Query("DELETE FROM brands WHERE deleted AND id not in (SELECT brand FROM reports) AND id NOT IN (SELECT brand FROM parts)")
-    abstract suspend fun clearUnusedBrands()
-
-    @Query("DELETE FROM models WHERE deleted AND id NOT IN (SELECT model FROM reports) AND id NOT IN (SELECT model FROM parts)")
-    abstract suspend fun clearUnusedModels()
-
-    @Query("DELETE FROM damage_parts WHERE damage NOT IN (SELECT id FROM damages)")
-    abstract suspend fun clearUnusedDamageParts()
+    @Query("DELETE FROM models WHERE deleted AND id NOT IN (SELECT model FROM reports) AND id NOT IN (SELECT model FROM parts WHERE model IS NOT NULL)")
+    abstract suspend fun clearUnusedModels(): Int
 
     @Query("DELETE FROM parts WHERE deleted AND id NOT IN (SELECT part FROM damage_parts) ")
-    abstract suspend fun clearUnusedParts()
+    abstract suspend fun clearUnusedParts(): Int
 
 }

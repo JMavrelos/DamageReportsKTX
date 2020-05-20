@@ -87,9 +87,9 @@ class ModelDaoTest {
     fun `update model`() {
         runBlockingTest {
             initModels()
-            val updated = UnitTestData.MODELS.random().copy(name = "this is the new thang")
+            val updated = UnitTestData.MODELS.random().copy(name = "this is the new thing")
             dao.updateModel(updated)
-            assertEquals(UnitTestData.MODELS.size + UnitTestData.DELETED_MODELS.size, db.count("models"))
+            assertEquals(UnitTestData.MODELS.size, db.count("models"))
             assertEquals(1, db.countWhere("models", " name = '${updated.name}'"))
         }
     }
@@ -140,7 +140,7 @@ class ModelDaoTest {
         runBlockingTest {
             initModels()
             val toDelete = UnitTestData.MODELS.random()
-            db.reportDao.saveReport(ReportEntity(UUID.randomUUID(), "123", "123", toDelete.brand, toDelete.id))
+            db.reportDao.insertReport(ReportEntity(UUID.randomUUID(), "123", "123", toDelete.brand, toDelete.id))
             val expected = db.count("models")
 
             var error: Throwable? = null
@@ -264,10 +264,10 @@ class ModelDaoTest {
     }
 
     private suspend fun initModels() {
-        UnitTestData.BRANDS.union(UnitTestData.DELETED_BRANDS).forEach {
+        UnitTestData.BRANDS.forEach {
             db.brandDao.insertBrand(it)
         }
-        UnitTestData.MODELS.union(UnitTestData.DELETED_MODELS).forEach {
+        UnitTestData.MODELS.forEach {
             dao.insertModel(it)
         }
     }

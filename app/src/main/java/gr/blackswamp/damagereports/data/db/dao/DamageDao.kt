@@ -10,7 +10,7 @@ import java.util.*
 @Dao
 interface DamageDao {
     @Insert
-    suspend fun saveDamage(damage: DamageEntity)
+    suspend fun insertDamage(damage: DamageEntity)
 
     @Query("DELETE FROM damages WHERE id = :id")
     suspend fun deleteDamageById(id: UUID)

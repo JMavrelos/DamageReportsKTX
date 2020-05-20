@@ -7,6 +7,7 @@ import java.util.*
 class StringDateConverter {
     companion object {
         @JvmStatic
+        @Suppress("SpellCheckingInspection")
         val formatter by lazy { SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.ENGLISH) }
 
         @TypeConverter

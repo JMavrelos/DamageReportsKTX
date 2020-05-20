@@ -21,7 +21,9 @@ abstract class AppDatabaseImpl : RoomDatabase(), AppDatabase {
 
     abstract override val globalDao: GlobalDao
     abstract override val reportDao: ReportDao
-    abstract override val modelDao: ModelDao
-    abstract override val brandDao: BrandDao
     abstract override val damageDao: DamageDao
+    abstract override val damagePartDao: DamagePartDao
+    abstract override val brandDao: BrandDao
+    abstract override val modelDao: ModelDao
+    abstract override val partDao: PartDao
 }

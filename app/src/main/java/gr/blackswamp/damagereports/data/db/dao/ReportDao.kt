@@ -1,10 +1,7 @@
 package gr.blackswamp.damagereports.data.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import gr.blackswamp.damagereports.data.db.entities.ReportEntity
 import gr.blackswamp.damagereports.data.db.entities.ReportHeaderEntity
 import java.util.*
@@ -36,7 +33,10 @@ interface ReportDao {
     fun loadReportHeaders(filter: String): DataSource.Factory<Int, ReportHeaderEntity>
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun saveReport(report: ReportEntity)
+    suspend fun insertReport(report: ReportEntity)
+
+    @Update
+    suspend fun updateReport(report: ReportEntity)
 
     @Query("UPDATE reports SET deleted = 1 WHERE id = :id AND deleted = 0")
     suspend fun flagReportDeleted(id: UUID): Int
