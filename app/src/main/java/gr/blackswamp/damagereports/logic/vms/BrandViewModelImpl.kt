@@ -41,7 +41,7 @@ class BrandViewModelImpl(application: Application, parent: FragmentParent, runIn
     @VisibleForTesting
     internal val lastDeleted = MutableLiveData<UUID>()
     override val showUndo: LiveData<Boolean> = Transformations.map(lastDeleted) { it != null }
-
+    override val refreshing = MutableLiveData<Boolean>()
     @VisibleForTesting
     internal val brandFilter = MutableLiveData<String>()
 
@@ -67,7 +67,10 @@ class BrandViewModelImpl(application: Application, parent: FragmentParent, runIn
         return true
     }
 
-    override fun refresh() = brandFilter.refresh()
+    override fun refresh() {
+        brandFilter.refresh()
+//        refreshing.postValue(true)
+    }
 
     override fun create() {
         brandData.postValue(BrandData(EmptyUUID, ""))
@@ -100,6 +103,7 @@ class BrandViewModelImpl(application: Application, parent: FragmentParent, runIn
                     repo.updateBrand(current.id, name)
                 }.getOrThrow(getString(R.string.error_saving_brand))
                 brandData.postValue(null)
+                hideKeyboard()
             } catch (t: Throwable) {
                 showError(t.message ?: getString(R.string.error_saving_brand))
             } finally {

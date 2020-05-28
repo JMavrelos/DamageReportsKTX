@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
+import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
@@ -32,6 +33,7 @@ import gr.blackswamp.damagereports.ui.model.Report
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import timber.log.Timber
 
 @Suppress("UNUSED_PARAMETER")
 class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewBinding>(), DialogFinishedListener {
@@ -73,6 +75,7 @@ class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewB
         name.addTextChangedListener(nameListener)
         requireActivity().onBackPressedDispatcher.addCallback(this, backPressedCallback)
         description.addTextChangedListener(descriptionListener)
+        setFragmentResultListener(ModelFragment.RESULT, this::selectedModel)
     }
 
     override fun setUpObservers(vm: ReportViewViewModel) {
@@ -136,6 +139,10 @@ class ReportViewFragment : CoreFragment<ReportViewViewModel, FragmentReportViewB
         override fun handleOnBackPressed() {
             vm.exitReport()
         }
+    }
+
+    private fun selectedModel(resultKey: String, bundle: Bundle) {
+        Timber.d("$resultKey to ${bundle.keySet()} to $bundle")
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

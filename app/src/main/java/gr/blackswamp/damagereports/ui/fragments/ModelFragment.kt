@@ -9,7 +9,8 @@ import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.appcompat.widget.SearchView
-import androidx.fragment.app.Fragment
+import androidx.core.os.bundleOf
+import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -44,7 +45,8 @@ import kotlin.math.abs
 class ModelFragment : CoreFragment<ModelViewModel, FragmentModelBinding>(), ListAction {
     companion object {
         const val TAG = "ModelFragment"
-        fun newInstance(): Fragment = ModelFragment()
+        const val MODEL = "$TAG.MODEL"
+        const val RESULT = "$TAG.RESULT"
     }
 
     //region  bindings
@@ -88,6 +90,7 @@ class ModelFragment : CoreFragment<ModelViewModel, FragmentModelBinding>(), List
     override fun setUpObservers(vm: ModelViewModel) {
         vm.model.observe(this::showModel)
         vm.command.observe(this::executeCommand)
+        vm.modelList.observe(adapter::submitList)
     }
 
     //endregion
@@ -178,9 +181,8 @@ class ModelFragment : CoreFragment<ModelViewModel, FragmentModelBinding>(), List
     private fun executeCommand(command: ModelCommand?) {
         when (command) {
             is ModelCommand.ModelSelected -> {
-                val selected = command.model
+                setFragmentResult(RESULT, bundleOf(MODEL to command.model))
                 val action = ModelFragmentDirections.finishModel()
-                action.arguments.putParcelable("RESULT", selected)
                 findNavController().navigate(action)
             }
         }

@@ -17,6 +17,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import gr.blackswamp.core.ui.CoreFragment
 import gr.blackswamp.core.widget.CItemTouchHelperCallback
 import gr.blackswamp.core.widget.SearchListener
@@ -76,14 +77,18 @@ class BrandFragment : CoreFragment<BrandViewModel, FragmentBrandBinding>(), List
     override fun setUpListeners() {
         adapter.setListener(this)
         action.onClick(this::actionClick)
-        refresh.onClick(this::refresh)
+        refresh.setOnRefreshListener { vm.refresh() }
         cancel.onClick(vm::cancel)
         sheetBehavior.addBottomSheetCallback(bottomSheetCallback)
     }
 
     override fun setUpObservers(vm: BrandViewModel) {
-        vm.brand.observe(this::showBrand)
+        vm.brandList.observe(adapter::submitList)
+        vm.refreshing.observe { refresh.isRefreshing = it == true }
         vm.command.observe(this::executeCommand)
+        vm.brand.observe(this::showBrand)
+        vm.showUndo.observe(this::showUndo)
+
     }
 
     //endregion
@@ -124,8 +129,6 @@ class BrandFragment : CoreFragment<BrandViewModel, FragmentBrandBinding>(), List
             vm.create()
         }
     }
-
-    private fun refresh() = vm.refresh()
 
     private val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
@@ -168,6 +171,18 @@ class BrandFragment : CoreFragment<BrandViewModel, FragmentBrandBinding>(), List
             name.setText(brand.name)
             name.selectAll()
             sheetBehavior.state = STATE_EXPANDED
+        }
+    }
+
+    private fun showUndo(show: Boolean?) {
+        if (show == true) {
+            Snackbar.make(binding.root, "Undo", Snackbar.LENGTH_INDEFINITE).let { sb ->
+                sb.setAction(R.string.undo) {
+                    vm.undoLastDelete()
+                    sb.dismiss()
+                }
+                sb.show()
+            }
         }
     }
 

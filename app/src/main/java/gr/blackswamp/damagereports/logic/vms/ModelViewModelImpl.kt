@@ -101,6 +101,7 @@ class ModelViewModelImpl(application: Application, parent: FragmentParent, priva
                     repo.updateModel(current.id, brandId, name)
                 }.getOrThrow(getString(R.string.error_saving_model))
                 modelData.postValue(null)
+                hideKeyboard()
             } catch (t: Throwable) {
                 showError(t.message ?: getString(R.string.error_saving_model))
             } finally {

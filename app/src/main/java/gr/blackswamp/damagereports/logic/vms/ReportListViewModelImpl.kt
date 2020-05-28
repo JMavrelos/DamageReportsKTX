@@ -79,17 +79,23 @@ class ReportListViewModelImpl(application: Application, parent: FragmentParent, 
 
     //region IReportListViewModel implementation
     private fun dbHeaderToUi(filter: String?): LiveData<PagedList<ReportHeader>> {
+        showLoading(true)
         Timber.d("transforming for \"$filter\"")
         val response = repo.getReportHeaders(filter ?: "")
-        return if (response.hasError) {
-            showError(response.errorMessage)
-            StaticDataSource.factory(listOf<ReportHeader>())
-        } else {
-            response.get.map {
-                Timber.d("Loaded $it")
-                it as ReportHeader
-            }
-        }.toLiveData(pageSize = LIST_PAGE_SIZE)
+        try {
+            return if (response.hasError) {
+                showError(response.errorMessage)
+                StaticDataSource.factory(listOf<ReportHeader>())
+            } else {
+                response.get.map {
+                    Timber.d("Loaded $it")
+                    it as ReportHeader
+                }
+            }.toLiveData(pageSize = LIST_PAGE_SIZE)
+        } finally {
+            showLoading(false)
+            refreshing.postValue(false)
+        }
     }
 
     override fun deleteReport(id: UUID) {
@@ -163,7 +169,6 @@ class ReportListViewModelImpl(application: Application, parent: FragmentParent, 
         refreshing.postValue(true)
         this.filter.postValue(null)
         this.filter.postValue(this.filter.value)
-        refreshing.postValue(false)
     }
 
     override fun changeTheme(theme: ThemeSetting) {

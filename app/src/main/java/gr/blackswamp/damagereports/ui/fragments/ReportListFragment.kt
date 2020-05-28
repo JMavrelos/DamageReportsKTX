@@ -85,10 +85,7 @@ class ReportListFragment : CoreFragment<ReportListViewModel, FragmentReportListB
 
     override fun setUpObservers(vm: ReportListViewModel) {
         vm.reportHeaderList.observe(adapter::submitList)
-        vm.refreshing.observe {
-            if (it == false)
-                refresh.isRefreshing = false
-        }
+        vm.refreshing.observe { refresh.isRefreshing = it == true }
         vm.command.observe(this::executeCommand)
         vm.themeSelection.observe(this::updateBottomSheet)
     }
