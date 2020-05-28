@@ -65,8 +65,6 @@ class ReportListViewModelTest : AndroidKoinTest() {
         reset(repo)
     }
 
-    //todo:add clear unused tests
-
     @Test
     fun `load reports with no filter from the start`() {
         runBlocking {
@@ -81,6 +79,33 @@ class ReportListViewModelTest : AndroidKoinTest() {
             assertEquals(0, vm.reportHeaderList.getOrAwait().count())
             assertEquals("", vm.filter.value)
             verify(repo).getReportHeaders("")
+        }
+    }
+
+    @Test
+    fun `on initialization call clearing all unused entities`() {
+        runBlocking {
+            whenever(repo.clearDeleted()).thenReturn(Response.success())
+
+            vm.initialize()
+
+            verify(repo).clearDeleted()
+            verify(parent).showLoading(false)
+            verify(parent, never()).showError(anyString())
+        }
+    }
+
+    @Test
+    fun `when clearing fails an error is shown but the filter is still updated`() {
+        runBlocking {
+            whenever(repo.clearDeleted()).thenReturn(Response.failure(ERROR))
+
+            vm.initialize()
+
+            verify(repo).clearDeleted()
+            verify(parent).showLoading(false)
+            verify(parent).showError(ERROR)
+            assertEquals("", vm.filter.value)
         }
     }
 
@@ -321,7 +346,7 @@ class ReportListViewModelTest : AndroidKoinTest() {
     }
 
     @Test
-    fun `verify the interaction of opening and closing the theme`() {
+    fun `check the interaction of opening and closing the theme`() {
         whenever(repo.themeSetting).thenReturn(ThemeSetting.System)
         vm.showThemeSettings()
 
