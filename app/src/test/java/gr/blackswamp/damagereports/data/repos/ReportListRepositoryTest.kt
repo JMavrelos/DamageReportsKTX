@@ -62,8 +62,6 @@ class ReportListRepositoryTest : AndroidKoinTest() {
         repo = ReportListRepositoryImpl()
     }
 
-    //todo:test clearUnused
-
     @Test
     fun `calling get report headers creates new livedata from db`() {
         runBlockingTest {

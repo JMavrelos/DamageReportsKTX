@@ -8,11 +8,12 @@ import com.nhaarman.mockitokotlin2.*
 import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.testing.*
+import gr.blackswamp.core.util.RandomUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.UnitTestData
 import gr.blackswamp.damagereports.data.db.AppDatabase
-import gr.blackswamp.damagereports.data.db.dao.BrandDao
-import gr.blackswamp.damagereports.data.db.entities.BrandEntity
+import gr.blackswamp.damagereports.data.db.dao.ModelDao
+import gr.blackswamp.damagereports.data.db.entities.ModelEntity
 import gr.blackswamp.damagereports.data.prefs.Preferences
 import gr.blackswamp.damagereports.data.toData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,9 +26,9 @@ import org.koin.dsl.module
 import java.util.*
 
 @ExperimentalCoroutinesApi
-class BrandRepositoryImplTest : AndroidKoinTest() {
+class ModelRepositoryImplTest : AndroidKoinTest() {
     companion object {
-        private const val ERROR = "this is a brand error"
+        private const val ERROR = "this is a model error"
     }
 
     override val modules = module {
@@ -38,8 +39,9 @@ class BrandRepositoryImplTest : AndroidKoinTest() {
 
     private val db = mock<AppDatabase>()
     private val prefs = mock<Preferences>()
-    private lateinit var repo: BrandRepository
-    private val bDao = mock<BrandDao>()
+    private lateinit var repo: ModelRepository
+    private val mDao = mock<ModelDao>()
+    private val brandId = RandomUUID
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -53,42 +55,42 @@ class BrandRepositoryImplTest : AndroidKoinTest() {
     override fun setUp() {
         super.setUp()
         reset(db, prefs)
-        whenever(db.brandDao).thenReturn(bDao)
-        repo = BrandRepositoryImpl()
+        whenever(db.modelDao).thenReturn(mDao)
+        repo = ModelRepositoryImpl()
     }
 
     @Test
-    fun `calling get brands calls the appropriate method`() {
+    fun `calling get models calls the appropriate method`() {
         val filter = randomString(19)
-        val brand = UnitTestData.BRANDS.random()
-        whenever(bDao.loadBrands(filter)).thenReturn(StaticDataSource.factory(listOf(brand)))
+        val model = UnitTestData.MODELS.random()
+        whenever(mDao.loadModels(brandId, filter)).thenReturn(StaticDataSource.factory(listOf(model)))
 
-        val response = repo.getBrands(filter)
+        val response = repo.getModels(brandId, filter)
 
         assertFalse(response.hasError)
-        verify(bDao).loadBrands(filter)
-        verifyNoMoreInteractions(bDao)
-        assertEquals(listOf(brand.toData()), response.get.toLiveData(100).getOrAwait())
+        verify(mDao).loadModels(brandId, filter)
+        verifyNoMoreInteractions(mDao)
+        assertEquals(listOf(model.toData()), response.get.toLiveData(100).getOrAwait())
     }
 
     @Test
-    fun `calling get brands and it causing an error returns the appropriate response`() {
+    fun `calling get models and it causing an error returns the appropriate response`() {
         val error = SQLiteException("error with SQLite")
-        whenever(bDao.loadBrands(any())).thenThrow(error)
+        whenever(mDao.loadModels(eq(brandId), any())).thenThrow(error)
 
-        val response = repo.getBrands("")
+        val response = repo.getModels(brandId, "")
 
         assertTrue(response.hasError)
         assertEquals(error, response.error)
     }
 
     @Test
-    fun `calling new brand calls repository to add brand`() {
+    fun `calling new model calls repository to add model`() {
         runBlocking {
             val name = "hello world"
-            whenever(bDao.insertBrand(any())).thenReturn(Unit)
+            whenever(mDao.insertModel(any())).thenReturn(Unit)
 
-            val response = repo.newBrand(name)
+            val response = repo.newModel(name, brandId)
 
             assertFalse(response.hasError)
         }
@@ -96,80 +98,80 @@ class BrandRepositoryImplTest : AndroidKoinTest() {
 
 
     @Test
-    fun `calling new brand that already exists returns a failure`() {
+    fun `calling new model that already exists returns a failure`() {
         runBlocking {
             val name = "hello world"
             val error = "this is the error I will return"
-            whenever(bDao.insertBrand(any())).thenThrow(SQLiteConstraintException(error))
+            whenever(mDao.insertModel(any())).thenThrow(SQLiteConstraintException(error))
 
-            val response = repo.newBrand(name)
+            val response = repo.newModel(name, brandId)
 
             assertTrue(response.hasError)
-            assertEquals("Brand entity with name $name already exists", response.errorMessage)
+            assertEquals("Model entity with name $name already exists", response.errorMessage)
         }
     }
 
     @Test
-    fun `calling update brand calls repository to update the brand`() {
+    fun `calling update model calls repository to update the model`() {
         runBlocking {
             val id = UUID.randomUUID()
             val name = "hello world"
-            whenever(bDao.updateBrand(BrandEntity(id, name, false))).thenReturn(1)
+            whenever(mDao.updateModel(ModelEntity(id, name, brandId, false))).thenReturn(1)
 
-            val response = repo.updateBrand(id, name)
+            val response = repo.updateModel(id, brandId, name)
 
             assertFalse(response.hasError)
         }
     }
 
     @Test
-    fun `calling update brand that does not exist returns an error`() {
+    fun `calling update model that does not exist returns an error`() {
         runBlocking {
             val id = UUID.randomUUID()
             val name = "hello world"
-            whenever(bDao.updateBrand(BrandEntity(id, name, false))).thenReturn(0)
+            whenever(mDao.updateModel(ModelEntity(id, name, brandId, false))).thenReturn(0)
 
-            val response = repo.updateBrand(id, name)
+            val response = repo.updateModel(id, brandId, name)
 
             assertTrue(response.hasError)
-            assertEquals("Brand entity $id could not be found", response.errorMessage)
+            assertEquals("Model entity $id could not be found", response.errorMessage)
         }
     }
 
     @Test
-    fun `calling update brand that has the same name as another one returns an error`() {
+    fun `calling update model that has the same name as another one returns an error`() {
         runBlocking {
             val id = UUID.randomUUID()
             val name = "hello world"
-            whenever(bDao.updateBrand(BrandEntity(id, name, false))).thenThrow(SQLiteConstraintException("there is a problem"))
+            whenever(mDao.updateModel(ModelEntity(id, name, brandId, false))).thenThrow(SQLiteConstraintException("there is a problem"))
 
-            val response = repo.updateBrand(id, name)
+            val response = repo.updateModel(id, brandId, name)
 
             assertTrue(response.hasError)
-            assertEquals("Brand entity with $name already exists", response.errorMessage)
+            assertEquals("Model entity with $name already exists", response.errorMessage)
         }
     }
 
     @Test
-    fun `calling flag brand as deleted calls the dao`() {
+    fun `calling flag model as deleted calls the dao`() {
         runBlocking {
             val id = UUID.randomUUID()
-            whenever(bDao.flagBrandDeleted(id)).thenReturn(1)
+            whenever(mDao.flagModelDeleted(id)).thenReturn(1)
 
-            val response = repo.deleteBrand(id)
+            val response = repo.deleteModel(id)
 
             assertFalse(response.hasError)
         }
     }
 
     @Test
-    fun `calling flag brand as deleted with no affected rows`() {
+    fun `calling flag model as deleted with no affected rows`() {
         runBlocking {
             val id = UUID.randomUUID()
-            whenever(bDao.flagBrandDeleted(id)).thenReturn(0)
-            whenever(app.getString(R.string.error_brand_not_found, id)).thenReturn(ERROR)
+            whenever(mDao.flagModelDeleted(id)).thenReturn(0)
+            whenever(app.getString(R.string.error_model_not_found, id)).thenReturn(ERROR)
 
-            val response = repo.deleteBrand(id)
+            val response = repo.deleteModel(id)
 
             assertTrue(response.hasError)
             assertEquals(ERROR, response.errorMessage)
@@ -177,14 +179,14 @@ class BrandRepositoryImplTest : AndroidKoinTest() {
     }
 
     @Test
-    fun `calling flag brand as deleted with a dao error`() {
+    fun `calling flag model as deleted with a dao error`() {
         runBlocking {
             val id = UUID.randomUUID()
             val error = SQLiteException("error with SQLite")
-            whenever(bDao.flagBrandDeleted(id)).thenThrow(error)
+            whenever(mDao.flagModelDeleted(id)).thenThrow(error)
             whenever(app.getString(R.string.error_deleting, error.message ?: error::class.java.name)).thenReturn(ERROR)
 
-            val response = repo.deleteBrand(id)
+            val response = repo.deleteModel(id)
 
             assertTrue(response.hasError)
             assertEquals(ERROR, response.errorMessage)
