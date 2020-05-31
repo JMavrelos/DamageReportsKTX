@@ -81,7 +81,7 @@ dependencies {
     debugImplementation deps.atsl.fragment
     testImplementation deps.atsl.core
     testImplementation deps.atsl.extensions
-    testImplementation deps.espresso.core
+
     testImplementation deps.junit // Junit
     testImplementation deps.robolectric // Robolectric
     testImplementation deps.mockito.kotlin // Mockito
@@ -90,4 +90,10 @@ dependencies {
     testImplementation deps.room.testing
     testImplementation deps.koin.test //koin
     testImplementation deps.arch_core.testing
+
+    // ui tests
+    androidTestImplementation deps.espresso.core
+    androidTestImplementation deps.atsl.core
+    androidTestImplementation deps.atsl.runner
+    androidTestImplementation deps.atsl.extensions
 }
