@@ -3,7 +3,7 @@ package gr.blackswamp.damagereports.data.repos
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.*
 import gr.blackswamp.core.coroutines.Dispatcher
-import gr.blackswamp.core.testing.AndroidKoinTest
+import gr.blackswamp.core.testing.KoinUnitTest
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatcher
 import gr.blackswamp.damagereports.R
@@ -26,7 +26,7 @@ import org.koin.dsl.module
 
 
 @ExperimentalCoroutinesApi
-class ReportViewRepositoryTest : AndroidKoinTest() {
+class ReportViewRepositoryTest : KoinUnitTest() {
     companion object {
         const val FILTER = "12j3kj1lk23mm.,asd"
     }

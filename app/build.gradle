@@ -50,6 +50,7 @@ dependencies {
     implementation project(path: ':core')
     implementation project(path: ':db')
     testImplementation project(path: ':testing')
+    androidTestImplementation project(path: ':testing')
 
     implementation deps.koin.core //koin
     implementation deps.koin.core_ext
@@ -96,4 +97,6 @@ dependencies {
     androidTestImplementation deps.atsl.core
     androidTestImplementation deps.atsl.runner
     androidTestImplementation deps.atsl.extensions
+    androidTestImplementation deps.mockito.kotlin // Mockito
+    androidTestImplementation deps.koin.test //koin
 }

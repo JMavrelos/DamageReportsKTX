@@ -1,12 +1,12 @@
 package gr.blackswamp.core.testing
 
-import android.app.Application
+import android.content.Context
 import androidx.annotation.CallSuper
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.reset
-import com.nhaarman.mockitokotlin2.whenever
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import org.junit.After
 import org.junit.Before
+import org.junit.runner.RunWith
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
@@ -14,32 +14,19 @@ import org.koin.core.context.stopKoin
 import org.koin.core.context.unloadKoinModules
 import org.koin.core.module.Module
 import org.koin.test.KoinTest
-import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Mockito.mock
 
-
-abstract class AndroidKoinTest : KoinTest {
-    companion object {
-        const val APP_STRING = "message"
-    }
-
+@RunWith(AndroidJUnit4ClassRunner::class)
+abstract class KoinAndroidTest : KoinTest {
     protected abstract val modules: Module
-    protected val app = mock(Application::class.java)
+    protected val context: Context = ApplicationProvider.getApplicationContext()
 
     @Before
     @CallSuper
     open fun setUp() {
         startKoin {
-            androidContext(app)
+            androidContext(context)
             loadKoinModules(modules)
         }
-        reset(app)
-        setUpApplicationMocks()
-    }
-
-    private fun setUpApplicationMocks() {
-        whenever(app.getString(anyInt())).thenReturn(APP_STRING)
-        whenever(app.getString(anyInt(), any())).thenReturn(APP_STRING)
     }
 
     @After
@@ -48,5 +35,4 @@ abstract class AndroidKoinTest : KoinTest {
         unloadKoinModules(modules)
         stopKoin()
     }
-
 }

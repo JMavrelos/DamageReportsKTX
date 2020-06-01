@@ -6,7 +6,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.data.Response
-import gr.blackswamp.core.testing.AndroidKoinTest
+import gr.blackswamp.core.testing.KoinUnitTest
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatcher
 import gr.blackswamp.core.util.EmptyUUID
@@ -33,7 +33,7 @@ import java.util.*
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalCoroutinesApi
-class ReportViewViewModelTest : AndroidKoinTest() {
+class ReportViewViewModelTest : KoinUnitTest() {
     companion object {
         private const val ERROR = " there was an error"
     }

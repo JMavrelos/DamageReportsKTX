@@ -4,7 +4,7 @@ import android.database.sqlite.SQLiteException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.*
 import gr.blackswamp.core.coroutines.Dispatcher
-import gr.blackswamp.core.testing.AndroidKoinTest
+import gr.blackswamp.core.testing.KoinUnitTest
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatcher
 import gr.blackswamp.damagereports.R
@@ -28,7 +28,7 @@ import java.util.*
 
 
 @ExperimentalCoroutinesApi
-class ReportListRepositoryTest : AndroidKoinTest() {
+class ReportListRepositoryTest : KoinUnitTest() {
     companion object {
         const val FILTER = "12j3kj1lk23mm.,asd"
     }

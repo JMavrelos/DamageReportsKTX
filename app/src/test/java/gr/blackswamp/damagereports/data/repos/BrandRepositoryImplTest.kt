@@ -25,7 +25,7 @@ import org.koin.dsl.module
 import java.util.*
 
 @ExperimentalCoroutinesApi
-class BrandRepositoryImplTest : AndroidKoinTest() {
+class BrandRepositoryImplTest : KoinUnitTest() {
     companion object {
         private const val ERROR = "this is a brand error"
     }

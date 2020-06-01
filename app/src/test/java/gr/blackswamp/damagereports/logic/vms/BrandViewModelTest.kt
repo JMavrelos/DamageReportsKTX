@@ -5,7 +5,7 @@ import com.nhaarman.mockitokotlin2.*
 import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.core.db.paging.StaticDataSource
-import gr.blackswamp.core.testing.AndroidKoinTest
+import gr.blackswamp.core.testing.KoinUnitTest
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatcher
 import gr.blackswamp.core.testing.getOrAwait
@@ -28,7 +28,7 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 
 @ExperimentalCoroutinesApi
-class BrandViewModelTest : AndroidKoinTest() {
+class BrandViewModelTest : KoinUnitTest() {
     companion object {
         const val FILTER = "12j3kj1lk23mm.,asd"
         const val ERROR = "this is an error"

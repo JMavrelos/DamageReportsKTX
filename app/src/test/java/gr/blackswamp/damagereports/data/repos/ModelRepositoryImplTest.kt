@@ -26,7 +26,7 @@ import org.koin.dsl.module
 import java.util.*
 
 @ExperimentalCoroutinesApi
-class ModelRepositoryImplTest : AndroidKoinTest() {
+class ModelRepositoryImplTest : KoinUnitTest() {
     companion object {
         private const val ERROR = "this is a model error"
     }
