@@ -1,0 +1,9 @@
+[submodule "testing"]
+	path = testing
+	url = https://github.com/JMavrelos/testing.git
+[submodule "db"]
+	path = db
+	url = https://github.com/JMavrelos/db.git
+[submodule "core"]
+	path = core
+	url = https://github.com/JMavrelos/core.git
