@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <style name="OverflowMenu" parent="Widget.MaterialComponents.PopupMenu.Overflow">
-        <item name="overlapAnchor">false</item>
-    </style>
-</resources>
