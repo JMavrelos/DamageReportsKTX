@@ -17,6 +17,7 @@ class MainViewModelImpl(val app: Application) : CoreViewModel(app), MainViewMode
     override val themeSetting: LiveData<ThemeSetting> = repo.themeSettingLive
     override val error = LiveEvent<String>()
     override val loading = MutableLiveData(false)
+    override val hideKeyboard = LiveEvent<Unit>()
 
     //region fragment parent
     override fun showError(message: String) = error.postValue(message)

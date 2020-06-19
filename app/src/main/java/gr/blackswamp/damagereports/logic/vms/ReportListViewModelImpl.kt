@@ -10,7 +10,6 @@ import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.lifecycle.LiveEvent
-import gr.blackswamp.core.lifecycle.call
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
@@ -26,7 +25,7 @@ import timber.log.Timber
 import java.util.*
 
 class ReportListViewModelImpl(application: Application, parent: FragmentParent, runInit: Boolean = true) : BaseViewModel(application, parent),
-    ReportListViewModel {
+        ReportListViewModel {
     companion object {
         const val TAG = "ReportViewModel"
 
@@ -161,7 +160,7 @@ class ReportListViewModelImpl(application: Application, parent: FragmentParent, 
     override fun newReportFilter(filter: String, submitted: Boolean): Boolean {
         this.filter.postValue(filter)
         if (submitted)
-            hideKeyboard.call()
+            parent.hideKeyboard()
         return true
     }
 

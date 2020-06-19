@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.MutableLiveData
 import gr.blackswamp.core.lifecycle.LiveEvent
-import gr.blackswamp.core.lifecycle.call
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.core.util.toThrowable
 import gr.blackswamp.damagereports.R
@@ -80,7 +79,7 @@ class ReportViewViewModelImpl(application: Application, parent: FragmentParent, 
     override fun saveReport() {
         this.editMode.postValue(false)
         //todo:validations
-        hideKeyboard.call()
+        parent.hideKeyboard()
         launch {
             repo
         }

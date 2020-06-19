@@ -63,7 +63,7 @@ class ModelViewModelImpl(application: Application, parent: FragmentParent, priva
     override fun newFilter(filter: String, submitted: Boolean): Boolean {
         modelFilter.postValue(filter)
         if (submitted)
-            hideKeyboard()
+            parent.hideKeyboard()
         return true
     }
 

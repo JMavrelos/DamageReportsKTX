@@ -63,7 +63,7 @@ class BrandViewModelImpl(application: Application, parent: FragmentParent, runIn
     override fun newFilter(filter: String, submitted: Boolean): Boolean {
         brandFilter.postValue(filter)
         if (submitted)
-            hideKeyboard()
+            parent.hideKeyboard()
         return true
     }
 
