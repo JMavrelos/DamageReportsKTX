@@ -9,7 +9,7 @@ import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.testing.*
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.UnitTestData
+import gr.blackswamp.damagereports.TestData
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.dao.BrandDao
 import gr.blackswamp.damagereports.data.db.entities.BrandEntity
@@ -60,7 +60,7 @@ class BrandRepositoryImplTest : KoinUnitTest() {
     @Test
     fun `calling get brands calls the appropriate method`() {
         val filter = randomString(19)
-        val brand = UnitTestData.BRANDS.random()
+        val brand = TestData.BRANDS.random()
         whenever(bDao.loadBrands(filter)).thenReturn(StaticDataSource.factory(listOf(brand)))
 
         val response = repo.getBrands(filter)

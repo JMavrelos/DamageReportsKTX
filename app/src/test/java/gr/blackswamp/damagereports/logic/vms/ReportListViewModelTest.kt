@@ -12,7 +12,7 @@ import gr.blackswamp.core.testing.TestDispatcher
 import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.UnitTestData
+import gr.blackswamp.damagereports.TestData
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.data.repos.ReportListRepository
 import gr.blackswamp.damagereports.data.toData
@@ -128,7 +128,7 @@ class ReportListViewModelTest : KoinUnitTest() {
     fun `when the filter changes the results change`() {
         assertNull(vm.filter.value)
         assertNull(vm.reportHeaderList.value)
-        val expected = UnitTestData.REPORT_HEADERS.map { it.toData() }
+        val expected = TestData.REPORT_HEADERS.map { it.toData() }
         whenever(repo.getReportHeaders(FILTER)).thenReturn(Response.success(StaticDataSource.factory(expected, false)))
 
         vm.newReportFilter(FILTER, true)
@@ -136,15 +136,15 @@ class ReportListViewModelTest : KoinUnitTest() {
         val values = vm.reportHeaderList.getOrAwait().toList()
         assertEquals(FILTER, vm.filter.value)
         verify(repo).getReportHeaders(FILTER)
-        assertEquals(LIST_PAGE_SIZE * 3, values.size)
-        assertEquals(LIST_PAGE_SIZE * 3, expected.map { it.id }.intersect(values.map { it.id }).size)
+        assertEquals(LIST_PAGE_SIZE, values.size)
+        assertEquals(LIST_PAGE_SIZE, expected.map { it.id }.intersect(values.map { it.id }).size)
 
     }
 
     @Test
     fun `when the report is deleted an undo message shows and its id is temporarily saved in memory in case of un-delete`() {
         runBlockingTest {
-            val deleted = UnitTestData.REPORT_HEADERS.random()
+            val deleted = TestData.REPORT_HEADERS.random()
             whenever(repo.deleteReport(deleted.id)).thenReturn(Response.success())
 
             vm.deleteReport(deleted.id)
@@ -158,7 +158,7 @@ class ReportListViewModelTest : KoinUnitTest() {
     @Test
     fun `when the report is deleted and there was a problem then the error shows`() {
         runBlockingTest {
-            val deleted = UnitTestData.REPORT_HEADERS.random()
+            val deleted = TestData.REPORT_HEADERS.random()
             whenever(repo.deleteReport(deleted.id)).thenReturn(Response.failure(ERROR))
 
             vm.deleteReport(deleted.id)
@@ -171,9 +171,9 @@ class ReportListViewModelTest : KoinUnitTest() {
     }
 
     @Test
-    fun `when the report is undeleted then the last deleted value is cleared`() {
+    fun `when the report is un-deleted then the last deleted value is cleared`() {
         runBlockingTest {
-            val deleted = UnitTestData.REPORT_HEADERS.random()
+            val deleted = TestData.REPORT_HEADERS.random()
             whenever(repo.deleteReport(deleted.id)).thenReturn(Response.success())
             whenever(repo.restoreReport(deleted.id)).thenReturn(Response.success())
 
@@ -188,7 +188,7 @@ class ReportListViewModelTest : KoinUnitTest() {
     }
 
     @Test
-    fun `when we try to undelete with no last deleted id an error shows`() {
+    fun `when we try to un-delete with no last deleted id an error shows`() {
         runBlockingTest {
             vm.undoLastDelete()
 
@@ -196,7 +196,7 @@ class ReportListViewModelTest : KoinUnitTest() {
 
             verify(parent).showLoading(false)
             verify(parent).showError(APP_STRING)
-            verify(app).getString(R.string.error_un_deleting_no_saved_value)
+
             assertFalse(vm.showUndo.value ?: false)
         }
     }
@@ -204,13 +204,13 @@ class ReportListViewModelTest : KoinUnitTest() {
     @Test
     fun `when the report is un-deleted and there is a problem the error shows and last value is cleared`() {
         runBlockingTest {
-            val deleted = UnitTestData.REPORT_HEADERS.random()
+            val deleted = TestData.REPORT_HEADERS.random()
             whenever(repo.deleteReport(deleted.id)).thenReturn(Response.success())
             whenever(repo.restoreReport(deleted.id)).thenReturn(Response.failure(ERROR))
 
             vm.deleteReport(deleted.id)
             vm.undoLastDelete()
-
+            verify(app).getString(R.string.error_un_deleting_no_saved_value)
             verify(repo).restoreReport(deleted.id)
             verify(parent, times(2)).showLoading(false)
             verify(parent).showError(ERROR)
@@ -221,7 +221,7 @@ class ReportListViewModelTest : KoinUnitTest() {
     @Test
     fun `dismissing un-delete clears last deleted value`() {
 
-        vm.deleteReport(UnitTestData.REPORT_HEADERS.random().id)
+        vm.deleteReport(TestData.REPORT_HEADERS.random().id)
         vm.dismissedUndo()
 
         assertFalse(vm.showUndo.value ?: false)

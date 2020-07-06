@@ -1,4 +1,4 @@
-package gr.blackswamp.damagereports.ui
+package gr.blackswamp.damagereports
 
 import android.content.Context
 import androidx.room.Room
@@ -40,6 +40,13 @@ object TestData {
                     , Date(System.currentTimeMillis() + Random.nextLong(-100_000, +100_000))
                 )
             }
+    }
+
+    val REPORT_HEADERS by lazy {
+        REPORTS.map {
+            ReportHeaderEntity(it.id, it.name, it.description, it.updated)
+        }
+
     }
 
     val PARTS by lazy {

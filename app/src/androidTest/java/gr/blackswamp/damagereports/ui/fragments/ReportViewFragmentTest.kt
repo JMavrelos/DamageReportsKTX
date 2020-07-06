@@ -10,9 +10,9 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.TestData
 import gr.blackswamp.damagereports.data.repos.ReportViewRepositoryImpl
 import gr.blackswamp.damagereports.logic.vms.MainViewModelImpl
-import gr.blackswamp.damagereports.ui.TestData
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

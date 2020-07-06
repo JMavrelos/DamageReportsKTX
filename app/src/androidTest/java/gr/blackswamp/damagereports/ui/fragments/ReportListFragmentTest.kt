@@ -10,7 +10,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.ui.TestData
+import gr.blackswamp.damagereports.TestData
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

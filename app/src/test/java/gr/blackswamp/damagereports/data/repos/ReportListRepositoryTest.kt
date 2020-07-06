@@ -8,7 +8,7 @@ import gr.blackswamp.core.testing.KoinUnitTest
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatcher
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.UnitTestData
+import gr.blackswamp.damagereports.TestData
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.dao.BrandDao
 import gr.blackswamp.damagereports.data.db.dao.ModelDao
@@ -172,7 +172,7 @@ class ReportListRepositoryTest : KoinUnitTest() {
     @Test
     fun `load report that does not exist`() {
         runBlockingTest {
-            val report = UnitTestData.REPORTS.random()
+            val report = TestData.REPORTS.random()
             whenever(dao.loadReportById(report.id)).thenReturn(null)
 
             val response = repo.loadReport(report.id)
@@ -188,7 +188,7 @@ class ReportListRepositoryTest : KoinUnitTest() {
     @Test
     fun `load report whose brand does not exist`() {
         runBlockingTest {
-            val report = UnitTestData.REPORTS.random()
+            val report = TestData.REPORTS.random()
             whenever(dao.loadReportById(report.id)).thenReturn(report)
             whenever(bDao.loadBrandById(report.brand)).thenReturn(null)
 
@@ -207,9 +207,9 @@ class ReportListRepositoryTest : KoinUnitTest() {
     @Test
     fun `load report whose model does not exist`() {
         runBlockingTest {
-            val report = UnitTestData.REPORTS.random()
+            val report = TestData.REPORTS.random()
             whenever(dao.loadReportById(report.id)).thenReturn(report)
-            whenever(bDao.loadBrandById(report.brand)).thenReturn(UnitTestData.BRANDS.first { it.id == report.brand })
+            whenever(bDao.loadBrandById(report.brand)).thenReturn(TestData.BRANDS.first { it.id == report.brand })
             whenever(mDao.loadModelById(report.model)).thenReturn(null)
 
 
@@ -228,11 +228,11 @@ class ReportListRepositoryTest : KoinUnitTest() {
     @Test
     fun `load a report incorrect model-brand association`() {
         runBlockingTest {
-            val report = UnitTestData.REPORTS.random()
+            val report = TestData.REPORTS.random()
 
             whenever(dao.loadReportById(report.id)).thenReturn(report)
-            whenever(bDao.loadBrandById(report.brand)).thenReturn(UnitTestData.BRANDS.first { it.id == report.brand })
-            whenever(mDao.loadModelById(report.model)).thenReturn(UnitTestData.MODELS.filter { it.id != report.model }.random())
+            whenever(bDao.loadBrandById(report.brand)).thenReturn(TestData.BRANDS.first { it.id == report.brand })
+            whenever(mDao.loadModelById(report.model)).thenReturn(TestData.MODELS.filter { it.id != report.model }.random())
 
             val response = repo.loadReport(report.id)
 
@@ -248,9 +248,9 @@ class ReportListRepositoryTest : KoinUnitTest() {
     @Test
     fun `load a report with no problems`() {
         runBlockingTest {
-            val report = UnitTestData.REPORTS.random()
-            val brand = UnitTestData.BRANDS.first { it.id == report.brand }
-            val model = UnitTestData.MODELS.first { it.id == report.model }
+            val report = TestData.REPORTS.random()
+            val brand = TestData.BRANDS.first { it.id == report.brand }
+            val model = TestData.MODELS.first { it.id == report.model }
 
             whenever(dao.loadReportById(report.id)).thenReturn(report)
             whenever(bDao.loadBrandById(report.brand)).thenReturn(brand)

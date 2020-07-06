@@ -11,7 +11,7 @@ import gr.blackswamp.core.db.count
 import gr.blackswamp.core.db.countWhere
 import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.damagereports.TestApp
-import gr.blackswamp.damagereports.UnitTestData
+import gr.blackswamp.damagereports.TestData
 import gr.blackswamp.damagereports.data.db.dao.BrandDao
 import gr.blackswamp.damagereports.data.db.entities.BrandEntity
 import gr.blackswamp.damagereports.data.db.entities.ReportEntity
@@ -59,7 +59,7 @@ class BrandDaoTest {
 
     @Test
     fun `insert new brand`() {
-        val brand = UnitTestData.BRANDS[0]
+        val brand = TestData.BRANDS[0]
         runBlocking { dao.insertBrand(brand) }
         assertEquals(1, db.count("brands"))
     }
@@ -68,7 +68,7 @@ class BrandDaoTest {
     fun `insert new brand that already exists`() {
         runBlocking {
             initBrands()
-            val brand = UnitTestData.BRANDS[0]
+            val brand = TestData.BRANDS[0]
             dao.insertBrand(brand)
         }
     }
@@ -77,7 +77,7 @@ class BrandDaoTest {
     fun `insert brand with the same name as existing one`() {
         runBlocking {
             initBrands()
-            val brand = UnitTestData.BRANDS[0].copy(UUID.randomUUID())
+            val brand = TestData.BRANDS[0].copy(UUID.randomUUID())
             dao.insertBrand(brand)
         }
     }
@@ -86,8 +86,8 @@ class BrandDaoTest {
     fun `insert brand with the same name as existing one but different case`() {
         runBlocking {
             initBrands()
-            val name = UnitTestData.BRANDS[0].name.toUpperCase()
-            val brand = UnitTestData.BRANDS[0].copy(UUID.randomUUID(), name = name)
+            val name = TestData.BRANDS[0].name.toUpperCase()
+            val brand = TestData.BRANDS[0].copy(UUID.randomUUID(), name = name)
             dao.insertBrand(brand)
         }
     }
@@ -97,7 +97,7 @@ class BrandDaoTest {
         runBlockingTest {
             initBrands()
             val count = dao.count()
-            assertEquals(UnitTestData.BRANDS.size, count)
+            assertEquals(TestData.BRANDS.size, count)
         }
     }
 
@@ -105,9 +105,9 @@ class BrandDaoTest {
     fun `update brand`() {
         runBlockingTest {
             initBrands()
-            val updated = UnitTestData.BRANDS[2].copy(name = "this is the new thang")
+            val updated = TestData.BRANDS[2].copy(name = "this is the new thang")
             val affected = dao.updateBrand(updated)
-            assertEquals(UnitTestData.BRANDS.size, db.count("brands"))
+            assertEquals(TestData.BRANDS.size, db.count("brands"))
             assertEquals(1, db.countWhere("brands", " name = '${updated.name}'"))
             assertEquals(1, affected)
         }
@@ -127,7 +127,7 @@ class BrandDaoTest {
     fun `update brand with the same name as another brand`() {
         runBlocking {
             initBrands()
-            val brand = BrandEntity(UnitTestData.BRANDS[0].id, UnitTestData.BRANDS[1].name, false)
+            val brand = BrandEntity(TestData.BRANDS[0].id, TestData.BRANDS[1].name, false)
             dao.updateBrand(brand)
         }
     }
@@ -137,8 +137,8 @@ class BrandDaoTest {
         runBlockingTest {
             initBrands()
             val entities = (dao.loadBrands("").create() as LimitOffsetDataSource).loadRange(0, 1000)
-            assertEquals(UnitTestData.BRANDS.size, entities.size)
-            assertEquals(UnitTestData.BRANDS.size, entities.count { l -> UnitTestData.BRANDS.any { it == l } })
+            assertEquals(TestData.BRANDS.size, entities.size)
+            assertEquals(TestData.BRANDS.size, entities.count { l -> TestData.BRANDS.any { it == l } })
         }
     }
 
@@ -187,7 +187,7 @@ class BrandDaoTest {
     fun `delete brand with no models under`() {
         runBlockingTest {
             initBrands()
-            val deleted = UnitTestData.BRANDS[3].id
+            val deleted = TestData.BRANDS[3].id
             dao.deleteBrandById(deleted)
             assertEquals(0, db.countWhere("brands", " id = '$deleted'"))
         }
@@ -197,10 +197,10 @@ class BrandDaoTest {
     fun `delete brand with models under propagates`() {
         runBlockingTest {
             initBrands()
-            UnitTestData.MODELS.forEach {
+            TestData.MODELS.forEach {
                 db.modelDao.insertModel(it)
             }
-            val deleted = UnitTestData.BRANDS[3].id
+            val deleted = TestData.BRANDS[3].id
 
             dao.deleteBrandById(deleted)
 
@@ -212,8 +212,8 @@ class BrandDaoTest {
     fun `delete brand being used fails`() {
         runBlockingTest {
             initBrands()
-            val toDelete = UnitTestData.BRANDS[0]
-            val model = UnitTestData.MODELS.first { it.brand == toDelete.id }
+            val toDelete = TestData.BRANDS[0]
+            val model = TestData.MODELS.first { it.brand == toDelete.id }
             db.modelDao.insertModel(model)
             db.reportDao.insertReport(ReportEntity(UUID.randomUUID(), "123", "123", toDelete.id, model.id))
             var error: Throwable? = null
@@ -233,7 +233,7 @@ class BrandDaoTest {
     fun `load brand by id successfully`() {
         runBlockingTest {
             initBrands()
-            val expected = UnitTestData.BRANDS.random()
+            val expected = TestData.BRANDS.random()
 
             val brand = dao.loadBrandById(expected.id)
 
@@ -256,7 +256,7 @@ class BrandDaoTest {
     fun `flagging brand as deleted works`() {
         runBlockingTest {
             initBrands()
-            val toDelete = UnitTestData.BRANDS.random()
+            val toDelete = TestData.BRANDS.random()
 
             val response = dao.flagBrandDeleted(toDelete.id)
 
@@ -270,7 +270,7 @@ class BrandDaoTest {
     fun `flagging an already deleted brand returns that nothing is affected`() {
         runBlockingTest {
             initBrands()
-            val brand = UnitTestData.BRANDS.random()
+            val brand = TestData.BRANDS.random()
 
             dao.flagBrandDeleted(brand.id)
 
@@ -288,7 +288,7 @@ class BrandDaoTest {
     fun `unDeleting a brand works`() {
         runBlockingTest {
             initBrands()
-            val brand = UnitTestData.BRANDS.random()
+            val brand = TestData.BRANDS.random()
 
             dao.flagBrandDeleted(brand.id)
 
@@ -307,7 +307,7 @@ class BrandDaoTest {
         runBlockingTest {
 
             initBrands()
-            val toDelete = UnitTestData.BRANDS.random()
+            val toDelete = TestData.BRANDS.random()
 
             val response = dao.unFlagBrandDeleted(toDelete.id)
 
@@ -323,20 +323,20 @@ class BrandDaoTest {
             var value = source.getOrAwait()
 
             //+1 because of the separator
-            assertEquals(UnitTestData.BRANDS.size, value.size)
+            assertEquals(TestData.BRANDS.size, value.size)
 
-            val toDelete = UnitTestData.BRANDS.random()
+            val toDelete = TestData.BRANDS.random()
 
             dao.flagBrandDeleted(toDelete.id)
 
             value = source.getOrAwait()
             //+1 because of the separator
-            assertEquals(UnitTestData.BRANDS.size - 1, value.size)
+            assertEquals(TestData.BRANDS.size - 1, value.size)
         }
     }
 
     private suspend fun initBrands() {
-        UnitTestData.BRANDS.forEach { dao.insertBrand(it) }
+        TestData.BRANDS.forEach { dao.insertBrand(it) }
 
     }
 }

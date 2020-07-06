@@ -11,7 +11,7 @@ import gr.blackswamp.core.testing.TestDispatcher
 import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.UnitTestData
+import gr.blackswamp.damagereports.TestData
 import gr.blackswamp.damagereports.data.repos.ModelRepository
 import gr.blackswamp.damagereports.data.toData
 import gr.blackswamp.damagereports.logic.commands.ModelCommand
@@ -51,7 +51,7 @@ class ModelViewModelTest : KoinUnitTest() {
 
     private lateinit var vm: ModelViewModel
     private val vmImpl get() = vm as ModelViewModelImpl
-    private val brandId = UnitTestData.BRANDS.random().id
+    private val brandId = TestData.BRANDS.random().id
 
     @Before
     override fun setUp() {
@@ -63,7 +63,7 @@ class ModelViewModelTest : KoinUnitTest() {
 
     @Test
     fun `initialization works`() {
-        val model = UnitTestData.MODELS.random()
+        val model = TestData.MODELS.random()
         assertNull(vmImpl.modelFilter.value)
         assertNull(vm.modelList.value)
         whenever(repo.getModels(brandId, "")).thenReturn(Response.success(StaticDataSource.factory(listOf(model).map { it.toData() })))
@@ -92,7 +92,7 @@ class ModelViewModelTest : KoinUnitTest() {
     fun `when the filter changes the results change`() {
         assertNull(vmImpl.modelFilter.value)
         assertNull(vm.modelList.value)
-        val expected = UnitTestData.MODELS.shuffled().take(30).map { it.toData() }
+        val expected = TestData.MODELS.shuffled().take(30).map { it.toData() }
         whenever(repo.getModels(brandId, FILTER)).thenReturn(Response.success(StaticDataSource.factory(expected, false)))
 
         vm.newFilter(FILTER, true)
@@ -202,7 +202,7 @@ class ModelViewModelTest : KoinUnitTest() {
     fun `pressing edit loads the edited model to memory and displays it for editing`() {
         runBlocking {
 
-            val model = UnitTestData.MODELS.random()
+            val model = TestData.MODELS.random()
             val id = model.id
             whenever(repo.getModel(id)).thenReturn(Response.success(model.toData()))
 
@@ -218,7 +218,7 @@ class ModelViewModelTest : KoinUnitTest() {
     @Test
     fun `pressing edit loads the edited model to memory but there is an error while loading`() {
         runBlocking {
-            val model = UnitTestData.MODELS.random()
+            val model = TestData.MODELS.random()
             val id = model.id
             whenever(repo.getModel(id)).thenReturn(Response.failure(ERROR))
 
@@ -246,7 +246,7 @@ class ModelViewModelTest : KoinUnitTest() {
     @Test
     fun `pressing cancel with an edited model clears everything`() {
         runBlocking {
-            val model = UnitTestData.MODELS.random()
+            val model = TestData.MODELS.random()
             val id = model.id
             whenever(repo.getModel(id)).thenReturn(Response.success(model.toData()))
             vm.edit(id)
@@ -263,7 +263,7 @@ class ModelViewModelTest : KoinUnitTest() {
     @Test
     fun `deleting a model already shows an undo message`() {
         runBlocking {
-            val deleted = UnitTestData.MODELS.random()
+            val deleted = TestData.MODELS.random()
             whenever(repo.deleteModel(deleted.id)).thenReturn(Response.success())
 
             vm.delete(deleted.id)
@@ -279,7 +279,7 @@ class ModelViewModelTest : KoinUnitTest() {
     @Test
     fun `deleting a model with an error`() {
         runBlocking {
-            val id = UnitTestData.MODELS.random()
+            val id = TestData.MODELS.random()
             whenever(repo.deleteModel(id.id)).thenReturn(Response.failure(ERROR))
 
             vm.delete(id.id)
@@ -295,7 +295,7 @@ class ModelViewModelTest : KoinUnitTest() {
     @Test
     fun `un-deleting a model shows it again`() {
         runBlocking {
-            val id = UnitTestData.MODELS.random().id
+            val id = TestData.MODELS.random().id
             vmImpl.lastDeleted.postValue(id)
             vm.showUndo.getOrAwait()
             whenever(repo.restoreModel(id)).thenReturn(Response.success())
@@ -312,7 +312,7 @@ class ModelViewModelTest : KoinUnitTest() {
     @Test
     fun `un-deleting a model with an error`() {
         runBlocking {
-            val id = UnitTestData.MODELS.random().id
+            val id = TestData.MODELS.random().id
             vmImpl.lastDeleted.postValue(id)
             vm.showUndo.getOrAwait()
             whenever(repo.restoreModel(id)).thenReturn(Response.failure(ERROR))
@@ -329,7 +329,7 @@ class ModelViewModelTest : KoinUnitTest() {
     @Test
     fun `select a model`() {
         runBlocking {
-            val model = UnitTestData.MODELS.random()
+            val model = TestData.MODELS.random()
             val id = model.id
             whenever(repo.getModel(id)).thenReturn(Response.success(model.toData()))
 
@@ -346,7 +346,7 @@ class ModelViewModelTest : KoinUnitTest() {
     @Test
     fun `select a model that cannot be loaded`() {
         runBlocking {
-            val brand = UnitTestData.BRANDS.random()
+            val brand = TestData.BRANDS.random()
             val id = brand.id
             whenever(repo.getModel(id)).thenReturn(Response.failure(ERROR))
 
@@ -361,7 +361,7 @@ class ModelViewModelTest : KoinUnitTest() {
 
     @Test
     fun `refreshing triggers the load again`() {
-        val expected = UnitTestData.MODELS.shuffled().take(30).map { it.toData() }
+        val expected = TestData.MODELS.shuffled().take(30).map { it.toData() }
         whenever(repo.getModels(brandId, FILTER)).thenReturn(Response.success(StaticDataSource.factory(expected, false)))
         vm.newFilter(FILTER, true)
         vm.modelList.getOrAwait() //to trigger the change

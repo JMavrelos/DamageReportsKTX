@@ -11,7 +11,7 @@ import gr.blackswamp.core.testing.TestDispatcher
 import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.UnitTestData
+import gr.blackswamp.damagereports.TestData
 import gr.blackswamp.damagereports.data.repos.BrandRepository
 import gr.blackswamp.damagereports.data.toData
 import gr.blackswamp.damagereports.logic.commands.BrandCommand
@@ -62,7 +62,7 @@ class BrandViewModelTest : KoinUnitTest() {
 
     @Test
     fun `initialization works`() {
-        val brand = UnitTestData.BRANDS.random()
+        val brand = TestData.BRANDS.random()
         assertNull(vmImpl.brandFilter.value)
         assertNull(vm.brandList.value)
         whenever(repo.getBrands("")).thenReturn(Response.success(StaticDataSource.factory(listOf(brand).map { it.toData() })))
@@ -91,7 +91,7 @@ class BrandViewModelTest : KoinUnitTest() {
     fun `when the filter changes the results change`() {
         assertNull(vmImpl.brandFilter.value)
         assertNull(vm.brandList.value)
-        val expected = UnitTestData.BRANDS.shuffled().take(30).map { it.toData() }
+        val expected = TestData.BRANDS.shuffled().take(30).map { it.toData() }
         whenever(repo.getBrands(FILTER)).thenReturn(Response.success(StaticDataSource.factory(expected, false)))
 
         vm.newFilter(FILTER, true)
@@ -201,7 +201,7 @@ class BrandViewModelTest : KoinUnitTest() {
     fun `pressing edit loads the edited brand to memory and displays it for editing`() {
         runBlocking {
 
-            val brand = UnitTestData.BRANDS.random()
+            val brand = TestData.BRANDS.random()
             val id = brand.id
             whenever(repo.getBrand(id)).thenReturn(Response.success(brand.toData()))
 
@@ -217,7 +217,7 @@ class BrandViewModelTest : KoinUnitTest() {
     @Test
     fun `pressing edit loads the edited brand to memory but there is an error while loading`() {
         runBlocking {
-            val brand = UnitTestData.BRANDS.random()
+            val brand = TestData.BRANDS.random()
             val id = brand.id
             whenever(repo.getBrand(id)).thenReturn(Response.failure(ERROR))
 
@@ -245,7 +245,7 @@ class BrandViewModelTest : KoinUnitTest() {
     @Test
     fun `pressing cancel with an edited brand clears everything`() {
         runBlocking {
-            val brand = UnitTestData.BRANDS.random()
+            val brand = TestData.BRANDS.random()
             val id = brand.id
             whenever(repo.getBrand(id)).thenReturn(Response.success(brand.toData()))
             vm.edit(id)
@@ -262,7 +262,7 @@ class BrandViewModelTest : KoinUnitTest() {
     @Test
     fun `deleting a brand already shows an undo message`() {
         runBlocking {
-            val deleted = UnitTestData.BRANDS.random()
+            val deleted = TestData.BRANDS.random()
             whenever(repo.deleteBrand(deleted.id)).thenReturn(Response.success())
 
             vm.delete(deleted.id)
@@ -278,7 +278,7 @@ class BrandViewModelTest : KoinUnitTest() {
     @Test
     fun `deleting a brand with an error`() {
         runBlocking {
-            val id = UnitTestData.BRANDS.random()
+            val id = TestData.BRANDS.random()
             whenever(repo.deleteBrand(id.id)).thenReturn(Response.failure(ERROR))
 
             vm.delete(id.id)
@@ -294,7 +294,7 @@ class BrandViewModelTest : KoinUnitTest() {
     @Test
     fun `un-deleting a brand shows it again`() {
         runBlocking {
-            val id = UnitTestData.BRANDS.random().id
+            val id = TestData.BRANDS.random().id
             vmImpl.lastDeleted.postValue(id)
             vm.showUndo.getOrAwait()
             whenever(repo.restoreBrand(id)).thenReturn(Response.success())
@@ -311,7 +311,7 @@ class BrandViewModelTest : KoinUnitTest() {
     @Test
     fun `un-deleting a brand with an error`() {
         runBlocking {
-            val id = UnitTestData.BRANDS.random().id
+            val id = TestData.BRANDS.random().id
             vmImpl.lastDeleted.postValue(id)
             vm.showUndo.getOrAwait()
             whenever(repo.restoreBrand(id)).thenReturn(Response.failure(ERROR))
@@ -328,7 +328,7 @@ class BrandViewModelTest : KoinUnitTest() {
     @Test
     fun `select a brand`() {
         runBlocking {
-            val brand = UnitTestData.BRANDS.random()
+            val brand = TestData.BRANDS.random()
             val id = brand.id
             whenever(repo.getBrand(id)).thenReturn(Response.success(brand.toData()))
 
@@ -345,7 +345,7 @@ class BrandViewModelTest : KoinUnitTest() {
     @Test
     fun `select a brand that cannot be loaded`() {
         runBlocking {
-            val brand = UnitTestData.BRANDS.random()
+            val brand = TestData.BRANDS.random()
             val id = brand.id
             whenever(repo.getBrand(id)).thenReturn(Response.failure(ERROR))
 
@@ -360,7 +360,7 @@ class BrandViewModelTest : KoinUnitTest() {
 
     @Test
     fun `refreshing triggers the load again`() {
-        val expected = UnitTestData.BRANDS.shuffled().take(30).map { it.toData() }
+        val expected = TestData.BRANDS.shuffled().take(30).map { it.toData() }
         whenever(repo.getBrands(FILTER)).thenReturn(Response.success(StaticDataSource.factory(expected, false)))
         vm.newFilter(FILTER, true)
         vm.brandList.getOrAwait() //to trigger the change

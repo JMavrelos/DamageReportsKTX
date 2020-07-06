@@ -10,7 +10,7 @@ import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.testing.*
 import gr.blackswamp.core.util.RandomUUID
 import gr.blackswamp.damagereports.R
-import gr.blackswamp.damagereports.UnitTestData
+import gr.blackswamp.damagereports.TestData
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.dao.ModelDao
 import gr.blackswamp.damagereports.data.db.entities.ModelEntity
@@ -62,7 +62,7 @@ class ModelRepositoryImplTest : KoinUnitTest() {
     @Test
     fun `calling get models calls the appropriate method`() {
         val filter = randomString(19)
-        val model = UnitTestData.MODELS.random()
+        val model = TestData.MODELS.random()
         whenever(mDao.loadModels(brandId, filter)).thenReturn(StaticDataSource.factory(listOf(model)))
 
         val response = repo.getModels(brandId, filter)

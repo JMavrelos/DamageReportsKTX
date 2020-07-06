@@ -10,7 +10,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import gr.blackswamp.core.db.countWhere
 import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.damagereports.TestApp
-import gr.blackswamp.damagereports.UnitTestData
+import gr.blackswamp.damagereports.TestData
 import gr.blackswamp.damagereports.data.db.dao.ReportDao
 import gr.blackswamp.damagereports.data.db.entities.ReportEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -63,8 +63,8 @@ class ReportDaoTest {
             UUID.randomUUID(),
             "hello",
             "world",
-            UnitTestData.MODELS[0].brand,
-            UnitTestData.MODELS[0].id
+            TestData.MODELS[0].brand,
+            TestData.MODELS[0].id
         )
         runBlockingTest {
             var error: Throwable? = null
@@ -81,8 +81,8 @@ class ReportDaoTest {
     @Test
     fun `insert report with valid brand but no model`() {
         runBlockingTest {
-            val model = UnitTestData.MODELS.random()
-            val brand = UnitTestData.BRANDS.filter { it.id == model.brand }.random()
+            val model = TestData.MODELS.random()
+            val brand = TestData.BRANDS.filter { it.id == model.brand }.random()
             db.brandDao.insertBrand(brand)
             val report = ReportEntity(UUID.randomUUID(), "hello", "world", model.brand, model.id)
 
@@ -101,8 +101,8 @@ class ReportDaoTest {
     @Test
     fun `insert report with valid model but no brand`() {
         runBlockingTest {
-            val model = UnitTestData.MODELS.random()
-            val brand = UnitTestData.BRANDS.filter { it.id == model.brand }.random()
+            val model = TestData.MODELS.random()
+            val brand = TestData.BRANDS.filter { it.id == model.brand }.random()
             db.brandDao.insertBrand(brand)
             db.modelDao.insertModel(model)
             val report = ReportEntity(UUID.randomUUID(), "hello", "world", UUID.randomUUID(), model.id)
@@ -123,8 +123,8 @@ class ReportDaoTest {
     @Test
     fun `insert report with no constraint problem`() {
         runBlockingTest {
-            val model = UnitTestData.MODELS.random()
-            val brand = UnitTestData.BRANDS.filter { it.id == model.brand }.random()
+            val model = TestData.MODELS.random()
+            val brand = TestData.BRANDS.filter { it.id == model.brand }.random()
             db.brandDao.insertBrand(brand)
             db.modelDao.insertModel(model)
             val report = ReportEntity(UUID.randomUUID(), "hello", "world", model.brand, model.id)
@@ -147,7 +147,7 @@ class ReportDaoTest {
 
             val result = (dao.loadReportHeaders("").create() as LimitOffsetDataSource).loadRange(0, 1000)
 
-            assertEquals(UnitTestData.REPORTS.size, UnitTestData.REPORTS.count { report -> result.map { it.id }.contains(report.id) })
+            assertEquals(TestData.REPORTS.size, TestData.REPORTS.count { report -> result.map { it.id }.contains(report.id) })
         }
     }
 
@@ -158,10 +158,10 @@ class ReportDaoTest {
             initData()
             val filter = "Hello World" //this is on purpose 11 characters so that the random models cannot possibly contain it in their name
             val expected = listOf(
-                ReportEntity(UUID.randomUUID(), "5${filter}1", "", UnitTestData.BRANDS[7].id, UnitTestData.MODELS.first { it.brand == UnitTestData.BRANDS[7].id }.id)
-                , ReportEntity(UUID.randomUUID(), "2${filter}2", "", UnitTestData.BRANDS[7].id, UnitTestData.MODELS.first { it.brand == UnitTestData.BRANDS[7].id }.id)
-                , ReportEntity(UUID.randomUUID(), "3${filter}3", "", UnitTestData.BRANDS[7].id, UnitTestData.MODELS.first { it.brand == UnitTestData.BRANDS[7].id }.id)
-                , ReportEntity(UUID.randomUUID(), "1${filter}4", "", UnitTestData.BRANDS[7].id, UnitTestData.MODELS.first { it.brand == UnitTestData.BRANDS[7].id }.id)
+                ReportEntity(UUID.randomUUID(), "5${filter}1", "", TestData.BRANDS[7].id, TestData.MODELS.first { it.brand == TestData.BRANDS[7].id }.id)
+                , ReportEntity(UUID.randomUUID(), "2${filter}2", "", TestData.BRANDS[7].id, TestData.MODELS.first { it.brand == TestData.BRANDS[7].id }.id)
+                , ReportEntity(UUID.randomUUID(), "3${filter}3", "", TestData.BRANDS[7].id, TestData.MODELS.first { it.brand == TestData.BRANDS[7].id }.id)
+                , ReportEntity(UUID.randomUUID(), "1${filter}4", "", TestData.BRANDS[7].id, TestData.MODELS.first { it.brand == TestData.BRANDS[7].id }.id)
             )
             expected.forEach {
                 dao.insertReport(it)
@@ -179,10 +179,10 @@ class ReportDaoTest {
             initData()
             val filter = "Hello World" //this is on purpose 11 characters so that the random models cannot possibly contain it in their name
             val expected = listOf(
-                ReportEntity(UUID.randomUUID(), "", "5${filter}1", UnitTestData.BRANDS[5].id, UnitTestData.MODELS.first { it.brand == UnitTestData.BRANDS[5].id }.id)
-                , ReportEntity(UUID.randomUUID(), "", "2${filter}2", UnitTestData.BRANDS[5].id, UnitTestData.MODELS.first { it.brand == UnitTestData.BRANDS[5].id }.id)
-                , ReportEntity(UUID.randomUUID(), "", "3${filter}3", UnitTestData.BRANDS[5].id, UnitTestData.MODELS.first { it.brand == UnitTestData.BRANDS[5].id }.id)
-                , ReportEntity(UUID.randomUUID(), "", "1${filter}4", UnitTestData.BRANDS[5].id, UnitTestData.MODELS.first { it.brand == UnitTestData.BRANDS[5].id }.id)
+                ReportEntity(UUID.randomUUID(), "", "5${filter}1", TestData.BRANDS[5].id, TestData.MODELS.first { it.brand == TestData.BRANDS[5].id }.id)
+                , ReportEntity(UUID.randomUUID(), "", "2${filter}2", TestData.BRANDS[5].id, TestData.MODELS.first { it.brand == TestData.BRANDS[5].id }.id)
+                , ReportEntity(UUID.randomUUID(), "", "3${filter}3", TestData.BRANDS[5].id, TestData.MODELS.first { it.brand == TestData.BRANDS[5].id }.id)
+                , ReportEntity(UUID.randomUUID(), "", "1${filter}4", TestData.BRANDS[5].id, TestData.MODELS.first { it.brand == TestData.BRANDS[5].id }.id)
             )
 
             expected.forEach {
@@ -199,7 +199,7 @@ class ReportDaoTest {
     fun `flagging report as deleted works`() {
         runBlockingTest {
             initData()
-            val toDelete = UnitTestData.REPORTS.random()
+            val toDelete = TestData.REPORTS.random()
 
             val response = dao.flagReportDeleted(toDelete.id)
 
@@ -213,7 +213,7 @@ class ReportDaoTest {
     fun `flagging an already deleted report returns that nothing is affected`() {
         runBlockingTest {
             initData()
-            val report = UnitTestData.REPORTS.random()
+            val report = TestData.REPORTS.random()
 
             dao.flagReportDeleted(report.id)
 
@@ -231,7 +231,7 @@ class ReportDaoTest {
     fun `unDeleting a report works`() {
         runBlockingTest {
             initData()
-            val report = UnitTestData.REPORTS.random()
+            val report = TestData.REPORTS.random()
 
             dao.flagReportDeleted(report.id)
 
@@ -250,7 +250,7 @@ class ReportDaoTest {
         runBlockingTest {
 
             initData()
-            val toDelete = UnitTestData.REPORTS.random()
+            val toDelete = TestData.REPORTS.random()
 
             val response = dao.unFlagReportDeleted(toDelete.id)
 
@@ -266,15 +266,15 @@ class ReportDaoTest {
             var value = source.getOrAwait()
 
             //+1 because of the separator
-            assertEquals(UnitTestData.REPORTS.size + 1, value.size)
+            assertEquals(TestData.REPORTS.size + 1, value.size)
 
-            val toDelete = UnitTestData.REPORTS.random()
+            val toDelete = TestData.REPORTS.random()
 
             dao.flagReportDeleted(toDelete.id)
 
             value = source.getOrAwait()
             //+1 because of the separator
-            assertEquals(UnitTestData.REPORTS.size, value.size)
+            assertEquals(TestData.REPORTS.size, value.size)
         }
     }
 
@@ -283,7 +283,7 @@ class ReportDaoTest {
     fun `load report by id successfully`() {
         runBlockingTest {
             initData()
-            val expected = UnitTestData.REPORTS.random()
+            val expected = TestData.REPORTS.random()
 
             val report = dao.loadReportById(expected.id)
             assertEquals(expected, report)
@@ -302,13 +302,13 @@ class ReportDaoTest {
     }
 
     private suspend fun initData() {
-        UnitTestData.BRANDS.forEach {
+        TestData.BRANDS.forEach {
             db.brandDao.insertBrand(it)
         }
-        UnitTestData.MODELS.forEach {
+        TestData.MODELS.forEach {
             db.modelDao.insertModel(it)
         }
-        UnitTestData.REPORTS.forEach {
+        TestData.REPORTS.forEach {
             dao.insertReport(it)
         }
     }

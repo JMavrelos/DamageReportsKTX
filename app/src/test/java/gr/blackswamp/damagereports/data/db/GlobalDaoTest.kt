@@ -7,7 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import gr.blackswamp.core.db.count
 import gr.blackswamp.core.db.countWhere
 import gr.blackswamp.damagereports.TestApp
-import gr.blackswamp.damagereports.UnitTestData
+import gr.blackswamp.damagereports.TestData
 import gr.blackswamp.damagereports.data.db.dao.GlobalDao
 import gr.blackswamp.damagereports.data.db.entities.DamageEntity
 import gr.blackswamp.damagereports.data.db.entities.DamagePartEntity
@@ -59,9 +59,9 @@ class GlobalDaoTest {
     @Test
     fun `reports are cleared correctly`() {
         runBlocking {
-            val now = UnitTestData.REPORTS.sortedBy { it.created.time }[15].updated
+            val now = TestData.REPORTS.sortedBy { it.created.time }[15].updated
             val nowText = formatter.format(Date())
-            val eligible = UnitTestData.REPORTS.filter { it.updated.time < now.time }
+            val eligible = TestData.REPORTS.filter { it.updated.time < now.time }
             val reports = eligible.shuffled().take(5).map { it.id }
             reports.forEach {
                 db.reportDao.flagReportDeleted(it)
@@ -72,16 +72,16 @@ class GlobalDaoTest {
             //check reports are deleted
             assertEquals(reports.size, affected)
             assertEquals(0, db.countWhere("reports", " id in (${reports.joinToString("','", "'", "'")})"))
-            assertEquals(UnitTestData.REPORTS.size - reports.size, db.count("reports"))
+            assertEquals(TestData.REPORTS.size - reports.size, db.count("reports"))
 
             // check damages are deleted
-            val damages = UnitTestData.DAMAGES.filter { it.report in reports }.map(DamageEntity::id)
+            val damages = TestData.DAMAGES.filter { it.report in reports }.map(DamageEntity::id)
             assertEquals(0, db.countWhere("damages", " id in (${damages.joinToString("','", "'", "'")})"))
-            assertEquals(UnitTestData.DAMAGES.size - damages.size, db.count("damages"))
+            assertEquals(TestData.DAMAGES.size - damages.size, db.count("damages"))
 
-            val damageParts = UnitTestData.DAMAGE_PARTS.filter { it.damage in damages }.map(DamagePartEntity::id)
+            val damageParts = TestData.DAMAGE_PARTS.filter { it.damage in damages }.map(DamagePartEntity::id)
             assertEquals(0, db.countWhere("damage_parts", " id in (${damageParts.joinToString("','", "'", "'")})"))
-            assertEquals(UnitTestData.DAMAGE_PARTS.size - damageParts.size, db.count("damage_parts"))
+            assertEquals(TestData.DAMAGE_PARTS.size - damageParts.size, db.count("damage_parts"))
 
         }
     }
@@ -89,7 +89,7 @@ class GlobalDaoTest {
     @Test
     fun `parts are deleted correctly`() {
         runBlocking {
-            val eligible = UnitTestData.PARTS.filter { it.id !in UnitTestData.DAMAGE_PARTS.map(DamagePartEntity::part) }
+            val eligible = TestData.PARTS.filter { it.id !in TestData.DAMAGE_PARTS.map(DamagePartEntity::part) }
             val parts = eligible.shuffled().take(10).map { it.id }
             parts.forEach {
                 db.partDao.flagPartDeleted(it)
@@ -101,14 +101,14 @@ class GlobalDaoTest {
             //check reports are deleted
             assertEquals(parts.size, affected)
             assertEquals(0, db.countWhere("parts", " id in (${parts.joinToString("','", "'", "'")})"))
-            assertEquals(UnitTestData.PARTS.size - parts.size, db.count("parts"))
+            assertEquals(TestData.PARTS.size - parts.size, db.count("parts"))
         }
     }
 
     @Test
     fun `brands are deleted correctly`() {
         runBlocking {
-            val eligible = UnitTestData.BRANDS.filter { it.id !in UnitTestData.PARTS.map(PartEntity::brand) && it.id !in UnitTestData.REPORTS.map(ReportEntity::brand) }
+            val eligible = TestData.BRANDS.filter { it.id !in TestData.PARTS.map(PartEntity::brand) && it.id !in TestData.REPORTS.map(ReportEntity::brand) }
             assertNotEquals("RNG was not on your side, run the test again", 0, eligible)
 
             val brands = eligible.shuffled().take(5).map { it.id }
@@ -122,7 +122,7 @@ class GlobalDaoTest {
 
             //check reports are deleted
             assertEquals(0, db.countWhere("brands", " id in (${brands.joinToString("','", "'", "'")})"))
-            assertEquals(UnitTestData.BRANDS.size - brands.size, db.count("brands"))
+            assertEquals(TestData.BRANDS.size - brands.size, db.count("brands"))
             assertEquals(brands.size, affected)
             assertEquals(0, db.countWhere("models", " brand in (${brands.joinToString("','", "'", "'")})")) //make sure it cascades
         }
@@ -131,9 +131,9 @@ class GlobalDaoTest {
     @Test
     fun `models are deleted correctly`() {
         runBlocking {
-            val eligible = UnitTestData.MODELS.filter {
-                it.id !in UnitTestData.PARTS.map(PartEntity::model)
-                        && it.id !in UnitTestData.REPORTS.map(ReportEntity::model)
+            val eligible = TestData.MODELS.filter {
+                it.id !in TestData.PARTS.map(PartEntity::model)
+                        && it.id !in TestData.REPORTS.map(ReportEntity::model)
             }
             assertNotEquals("RNG was not on your side, run the test again", 0, eligible)
 
@@ -148,19 +148,19 @@ class GlobalDaoTest {
 
             //check reports are deleted
             assertEquals(0, db.countWhere("models", " id in (${models.joinToString("','", "'", "'")})"))
-            assertEquals(UnitTestData.MODELS.size - models.size, db.count("models"))
+            assertEquals(TestData.MODELS.size - models.size, db.count("models"))
             assertEquals(models.size, affected)
         }
     }
 
     private fun initDb() {
         runBlocking {
-            UnitTestData.BRANDS.forEach { db.brandDao.insertBrand(it) }
-            UnitTestData.MODELS.forEach { db.modelDao.insertModel(it) }
-            UnitTestData.REPORTS.forEach { db.reportDao.insertReport(it) }
-            UnitTestData.PARTS.forEach { db.partDao.insertPart(it) }
-            UnitTestData.DAMAGES.forEach { db.damageDao.insertDamage(it) }
-            UnitTestData.DAMAGE_PARTS.forEach { db.damagePartDao.insertDamagePart(it) }
+            TestData.BRANDS.forEach { db.brandDao.insertBrand(it) }
+            TestData.MODELS.forEach { db.modelDao.insertModel(it) }
+            TestData.REPORTS.forEach { db.reportDao.insertReport(it) }
+            TestData.PARTS.forEach { db.partDao.insertPart(it) }
+            TestData.DAMAGES.forEach { db.damageDao.insertDamage(it) }
+            TestData.DAMAGE_PARTS.forEach { db.damagePartDao.insertDamagePart(it) }
         }
     }
 
