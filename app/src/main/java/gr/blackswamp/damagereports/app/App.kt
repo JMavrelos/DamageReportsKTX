@@ -1,7 +1,7 @@
-package gr.blackswamp.damagereports
+package gr.blackswamp.damagereports.app
 
 import android.app.Application
-import gr.blackswamp.damagereports.di.applicationModule
+import gr.blackswamp.damagereports.BuildConfig
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin

@@ -21,6 +21,7 @@ import gr.blackswamp.core.widget.CItemTouchHelperCallback
 import gr.blackswamp.core.widget.SearchListener
 import gr.blackswamp.core.widget.onClick
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.app.moveBy
 import gr.blackswamp.damagereports.data.prefs.ThemeSetting
 import gr.blackswamp.damagereports.databinding.FragmentReportListBinding
 import gr.blackswamp.damagereports.logic.commands.ReportListCommand
@@ -30,7 +31,6 @@ import gr.blackswamp.damagereports.logic.vms.MainViewModelImpl
 import gr.blackswamp.damagereports.logic.vms.ReportListViewModelImpl
 import gr.blackswamp.damagereports.ui.adapters.ListAction
 import gr.blackswamp.damagereports.ui.adapters.ReportListAdapter
-import gr.blackswamp.damagereports.utils.moveBy
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf

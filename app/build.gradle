@@ -45,7 +45,10 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8
     }
-
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -67,7 +70,7 @@ dependencies {
     implementation deps.support.design //design
     implementation deps.support.annotations //design
     implementation deps.support.core_ktx //design
-    implementation "androidx.fragment:fragment-ktx:1.3.0-alpha05"
+    implementation "androidx.fragment:fragment-ktx:1.3.0-alpha06"
     implementation deps.constraint_layout //design
     implementation deps.swipe_refresh //design
     implementation deps.lifecycle.extensions //lifecycle
@@ -100,6 +103,6 @@ dependencies {
     androidTestImplementation deps.atsl.core
     androidTestImplementation deps.atsl.runner
     androidTestImplementation deps.atsl.extensions
-    androidTestImplementation deps.mockito.kotlin // Mockito
     androidTestImplementation deps.koin.test //koin
+    implementation deps.espresso.idling
 }

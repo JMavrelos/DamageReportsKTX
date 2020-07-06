@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import gr.blackswamp.core.testing.randomString
 import gr.blackswamp.core.util.RandomUUID
+import gr.blackswamp.core.util.withAdded
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.AppDatabaseImpl
 import gr.blackswamp.damagereports.data.db.entities.*
@@ -37,7 +38,8 @@ object TestData {
                     , "${randomString(10)} description"
                     , BRANDS[40 - it].id
                     , MODELS.filter { model -> model.brand == BRANDS[40 - it].id }.random().id
-                    , Date(System.currentTimeMillis() + Random.nextLong(-100_000, +100_000))
+                    , randomDate(10)
+                    , randomDate(5)
                 )
             }
     }
@@ -92,8 +94,13 @@ object TestData {
         }
     }
 
+    private fun randomDate(maxDaysBack: Int): Date =
+        Calendar.getInstance()
+            .withAdded(Calendar.DAY_OF_MONTH, Random.nextInt(-maxDaysBack, 0))
+            .withAdded(Calendar.MILLISECOND, Random.nextInt(-1_000_000, 0)).time
+
     fun initialize(context: Context) {
-        val testDb = Room.databaseBuilder(context, AppDatabaseImpl::class.java, "test.db").build()
+        val testDb = Room.inMemoryDatabaseBuilder(context, AppDatabaseImpl::class.java).build()
         loadKoinModules(module {
             single<AppDatabase>(override = true) { testDb }
         })

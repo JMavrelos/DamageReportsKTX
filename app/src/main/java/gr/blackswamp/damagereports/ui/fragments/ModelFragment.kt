@@ -26,6 +26,7 @@ import gr.blackswamp.core.widget.SearchListener
 import gr.blackswamp.core.widget.onClick
 import gr.blackswamp.core.widget.visible
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.app.moveBy
 import gr.blackswamp.damagereports.databinding.FragmentModelBinding
 import gr.blackswamp.damagereports.logic.commands.ModelCommand
 import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
@@ -35,7 +36,6 @@ import gr.blackswamp.damagereports.logic.vms.ModelViewModelImpl
 import gr.blackswamp.damagereports.ui.adapters.ListAction
 import gr.blackswamp.damagereports.ui.adapters.ModelAdapter
 import gr.blackswamp.damagereports.ui.model.Model
-import gr.blackswamp.damagereports.utils.moveBy
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf

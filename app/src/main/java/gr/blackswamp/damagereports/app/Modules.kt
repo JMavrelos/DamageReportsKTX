@@ -1,4 +1,4 @@
-package gr.blackswamp.damagereports.di
+package gr.blackswamp.damagereports.app
 
 import androidx.room.Room
 import gr.blackswamp.core.coroutines.Dispatcher
@@ -21,16 +21,21 @@ val applicationModule = module {
         Room.databaseBuilder(androidContext(), AppDatabaseImpl::class.java, AppDatabaseImpl.DATABASE)
             .build()
     }
+    single { IdlingResource() }
+    //region repositories
     single<MainRepository> { MainRepositoryImpl() }
     single<ReportListRepository> { ReportListRepositoryImpl() }
     single<ReportViewRepository> { ReportViewRepositoryImpl() }
     single<BrandRepository> { BrandRepositoryImpl() }
     single<ModelRepository> { ModelRepositoryImpl() }
     single<SettingsRepository> { SettingsRepositoryImpl() }
+    //endregion
 
+    //region view models
     viewModel { MainViewModelImpl(androidApplication()) }
     viewModel { paramList -> ReportListViewModelImpl(androidApplication(), paramList[0], true) }
     viewModel { paramList -> ReportViewViewModelImpl(androidApplication(), paramList[0], paramList[1], paramList[2], true) }
     viewModel { paramList -> BrandViewModelImpl(androidApplication(), paramList[0], true) }
     viewModel { paramList -> ModelViewModelImpl(androidApplication(), paramList[0], paramList[1], true) }
+    //endregion
 }

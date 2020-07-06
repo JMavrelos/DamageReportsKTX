@@ -4,10 +4,10 @@ package gr.blackswamp.damagereports.data.prefs
 import android.app.Application
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import gr.blackswamp.damagereports.App
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.app.App
+import timber.log.Timber
 
 @Suppress("PrivatePropertyName")
 class PreferencesImpl(app: Application) : Preferences, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -37,7 +37,7 @@ class PreferencesImpl(app: Application) : Preferences, SharedPreferences.OnShare
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
             KEY_THEME -> {
-                Log.d(TAG, themeSetting.toValue())
+                Timber.d(themeSetting.toValue())
                 themeSettingLive.postValue(themeSetting)
             }
         }

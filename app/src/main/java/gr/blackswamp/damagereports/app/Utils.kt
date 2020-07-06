@@ -1,4 +1,4 @@
-package gr.blackswamp.damagereports.utils
+package gr.blackswamp.damagereports.app
 
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton

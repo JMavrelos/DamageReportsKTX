@@ -125,6 +125,7 @@ def espresso = [:]
 espresso.core = "androidx.test.espresso:espresso-core:$versions.espresso"
 espresso.contrib = "androidx.test.espresso:espresso-contrib:$versions.espresso"
 espresso.intents = "androidx.test.espresso:espresso-intents:$versions.espresso"
+espresso.idling = "androidx.test.espresso:espresso-idling-resource:$versions.espresso"
 deps.espresso = espresso
 
 

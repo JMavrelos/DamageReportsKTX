@@ -21,7 +21,11 @@ interface ReportDao {
                 "                     or name like '%' || :filter || '%' " +
                 "                     or description like '%' || :filter || '%' )" +
                 "        union " +
-                "        select '00000000-0000-0000-0000-000000000000' as id, substr(created, 0, 9) as name, '' as description, Substr(created, 0, 9) || '000000000' as created, substr(created, 0, 9) || '256060999' AS sort " +
+                "        select '00000000-0000-0000-0000-000000000000' as id" +
+                "                     , substr(created, 1, 4) || '-' ||  substr(created, 5, 2) || '-' ||  substr(created, 7, 2) as name" +
+                "                     , '' as description" +
+                "                     , Substr(created, 1, 8) || '000000000' as created" +
+                "                     , substr(created, 1, 8) || '256060999' AS sort " +
                 "        from   reports " +
                 "        where  deleted = 0 " +
                 "               and (:filter = '' " +

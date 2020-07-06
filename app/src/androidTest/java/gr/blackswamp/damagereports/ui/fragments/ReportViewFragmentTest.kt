@@ -11,7 +11,6 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.TestData
-import gr.blackswamp.damagereports.data.repos.ReportViewRepositoryImpl
 import gr.blackswamp.damagereports.logic.vms.MainViewModelImpl
 import org.junit.Before
 import org.junit.Test
@@ -22,7 +21,7 @@ import org.mockito.Mockito.mock
 @RunWith(AndroidJUnit4ClassRunner::class)
 class ReportViewFragmentTest : KoinComponent {
     private val parent = mock(MainViewModelImpl::class.java)
-    private val repo = mock(ReportViewRepositoryImpl::class.java)
+
 
     @Before
     fun setUp() {

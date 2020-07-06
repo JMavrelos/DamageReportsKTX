@@ -24,6 +24,7 @@ import gr.blackswamp.core.widget.SearchListener
 import gr.blackswamp.core.widget.onClick
 import gr.blackswamp.core.widget.visible
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.app.moveBy
 import gr.blackswamp.damagereports.databinding.FragmentBrandBinding
 import gr.blackswamp.damagereports.logic.commands.BrandCommand
 import gr.blackswamp.damagereports.logic.interfaces.BrandViewModel
@@ -33,7 +34,6 @@ import gr.blackswamp.damagereports.logic.vms.MainViewModelImpl
 import gr.blackswamp.damagereports.ui.adapters.BrandAdapter
 import gr.blackswamp.damagereports.ui.adapters.ListAction
 import gr.blackswamp.damagereports.ui.model.Brand
-import gr.blackswamp.damagereports.utils.moveBy
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
