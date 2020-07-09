@@ -11,8 +11,11 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.TestData
+import gr.blackswamp.damagereports.logic.vms.MainViewModelImpl
 import gr.blackswamp.damagereports.ui.fragments.ReportListFragment
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,45 +24,54 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4ClassRunner::class)
 class MainActivityTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
+    private lateinit var vm: MainViewModelImpl
+    private lateinit var activity: MainActivity
 
     @get:Rule
-    val activity = ActivityScenarioRule(MainActivity::class.java)
+    val scenario = ActivityScenarioRule(MainActivity::class.java)
 
-
-    @Test
-    fun main_activity_loads() {
-        onView(withId(R.id.base)).check(matches(isDisplayed()))
-    }
-
-    @Test
-    fun toolbar_is_showing() {
-        onView(withId(R.id.toolbar)).check(matches(isDisplayed()))
-    }
-
-    @Test
-    fun container_is_showing() {
-        onView(withId(R.id.container)).check(matches(isDisplayed()))
-    }
-
-    @Test
-    fun progress_is_hidden() {
-        onView(withId(R.id.progress)).check(matches(withEffectiveVisibility(Visibility.GONE)))
-    }
-
-    @Test
-    fun title_is_correct() {
-        onView(withId(R.id.toolbar)).check { view, _ ->
-            val tb = view as Toolbar
-            assertEquals(context.getString(R.string.damage_reports), tb.title.toString())
+    @Before
+    fun setUp() {
+        TestData.initialize(ApplicationProvider.getApplicationContext())
+        scenario.scenario.onActivity {
+            vm = it.vm as MainViewModelImpl
+            activity = it
         }
     }
 
     @Test
-    fun base_container_has_the_list_of_reports_fragment() {
+    fun main_activity_initialization() {
+        onView(withId(R.id.base)).check(matches(isDisplayed()))
+        onView(withId(R.id.toolbar)).check(matches(isDisplayed()))
+        onView(withId(R.id.container)).check(matches(isDisplayed()))
+        onView(withId(R.id.progress)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withId(R.id.toolbar)).check { view, _ ->
+            val tb = view as Toolbar
+            assertEquals(context.getString(R.string.damage_reports), tb.title.toString())
+        }
         onView(withId(R.id.container)).check { view, _ ->
             val destination = view.findNavController().currentDestination as FragmentNavigator.Destination
             assertEquals(destination.className, ReportListFragment::class.java.name)
         }
         onView(withId(R.id.report_list)).check(matches(isDisplayed()))
     }
+
+
+    @Test
+    fun showErrorShowsASnackBar() {
+        vm.showError("this is an error")
+
+        onView(withId(com.google.android.material.R.id.snackbar_text))
+            .check(matches(isDisplayed()))
+            .check(matches(withText("this is an error")))
+    }
+
+    @Test
+    fun showLoadingDisplaysAFrameThatHidesTheOthersAndASpinner() {
+        vm.loading.postValue(true)
+
+        onView(withId(R.id.progress))
+            .check(matches(isDisplayed()))
+    }
+
 }

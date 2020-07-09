@@ -30,12 +30,12 @@
         android:id="@+id/damage_pictures_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:labelFor="@+id/damage_pictures"
+        android:labelFor="@id/damage_pictures"
         android:tint="?colorSecondary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias=".3"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/damage_name"
+        app:layout_constraintTop_toBottomOf="@id/damage_name"
         app:srcCompat="@drawable/ic_image"
         tools:ignore="ContentDescription" />
 
@@ -46,9 +46,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin"
         android:textColor="?colorOnSurface"
-        app:layout_constraintBottom_toBottomOf="@+id/damage_pictures_icon"
-        app:layout_constraintStart_toEndOf="@+id/damage_pictures_icon"
-        app:layout_constraintTop_toTopOf="@+id/damage_pictures_icon"
+        app:layout_constraintBottom_toBottomOf="@id/damage_pictures_icon"
+        app:layout_constraintStart_toEndOf="@id/damage_pictures_icon"
+        app:layout_constraintTop_toTopOf="@id/damage_pictures_icon"
         tools:text="133" />
 
     <ImageView
@@ -59,7 +59,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias=".5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/damage_name"
+        app:layout_constraintTop_toBottomOf="@id/damage_name"
         app:srcCompat="@drawable/ic_build"
         tools:ignore="ContentDescription" />
 
@@ -70,9 +70,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin"
         android:textColor="?colorOnSurface"
-        app:layout_constraintBottom_toBottomOf="@+id/damage_parts_icon"
-        app:layout_constraintStart_toEndOf="@+id/damage_parts_icon"
-        app:layout_constraintTop_toTopOf="@+id/damage_parts_icon"
+        app:layout_constraintBottom_toBottomOf="@id/damage_parts_icon"
+        app:layout_constraintStart_toEndOf="@id/damage_parts_icon"
+        app:layout_constraintTop_toTopOf="@id/damage_parts_icon"
         tools:text="332" />
 
     <ImageView
@@ -83,7 +83,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias=".7"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/damage_name"
+        app:layout_constraintTop_toBottomOf="@id/damage_name"
         app:srcCompat="@drawable/ic_money"
         tools:ignore="ContentDescription" />
 
@@ -94,8 +94,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin"
         android:textColor="?colorOnSurface"
-        app:layout_constraintBottom_toBottomOf="@+id/damage_cost_icon"
-        app:layout_constraintStart_toEndOf="@+id/damage_cost_icon"
-        app:layout_constraintTop_toTopOf="@+id/damage_cost_icon"
+        app:layout_constraintBottom_toBottomOf="@id/damage_cost_icon"
+        app:layout_constraintStart_toEndOf="@id/damage_cost_icon"
+        app:layout_constraintTop_toTopOf="@id/damage_cost_icon"
         tools:text="1533.22" />
 </androidx.constraintlayout.widget.ConstraintLayout>

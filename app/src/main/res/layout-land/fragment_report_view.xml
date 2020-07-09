@@ -33,9 +33,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin"
             android:hint="@string/name"
-            app:layout_constraintEnd_toEndOf="@+id/id"
-            app:layout_constraintStart_toStartOf="@+id/id"
-            app:layout_constraintTop_toBottomOf="@+id/id">
+            app:layout_constraintEnd_toEndOf="@id/id"
+            app:layout_constraintStart_toStartOf="@id/id"
+            app:layout_constraintTop_toBottomOf="@id/id">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/name"
@@ -55,9 +55,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin"
             android:hint="@string/description"
-            app:layout_constraintEnd_toEndOf="@+id/id"
-            app:layout_constraintStart_toStartOf="@+id/id"
-            app:layout_constraintTop_toBottomOf="@+id/name_til">
+            app:layout_constraintEnd_toEndOf="@id/id"
+            app:layout_constraintStart_toStartOf="@id/id"
+            app:layout_constraintTop_toBottomOf="@id/name_til">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/description"
@@ -76,8 +76,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin"
             android:text="@string/brand"
-            app:layout_constraintStart_toStartOf="@+id/id"
-            app:layout_constraintTop_toBottomOf="@+id/description_til" />
+            app:layout_constraintStart_toStartOf="@id/id"
+            app:layout_constraintTop_toBottomOf="@id/description_til" />
 
 
         <com.google.android.material.button.MaterialButton
@@ -88,9 +88,9 @@
             android:layout_marginStart="@dimen/margin"
             android:layout_marginEnd="@dimen/margin"
             android:text="@string/select_brand"
-            app:layout_constraintEnd_toEndOf="@+id/id"
-            app:layout_constraintStart_toStartOf="@+id/id"
-            app:layout_constraintTop_toBottomOf="@+id/brand_caption" />
+            app:layout_constraintEnd_toEndOf="@id/id"
+            app:layout_constraintStart_toStartOf="@id/id"
+            app:layout_constraintTop_toBottomOf="@id/brand_caption" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/model_caption"
@@ -99,8 +99,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin"
             android:text="@string/model"
-            app:layout_constraintStart_toStartOf="@+id/id"
-            app:layout_constraintTop_toBottomOf="@+id/brand" />
+            app:layout_constraintStart_toStartOf="@id/id"
+            app:layout_constraintTop_toBottomOf="@id/brand" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/model"
@@ -109,9 +109,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin"
             android:text="@string/select_model"
-            app:layout_constraintEnd_toEndOf="@+id/id"
-            app:layout_constraintStart_toStartOf="@+id/id"
-            app:layout_constraintTop_toBottomOf="@+id/model_caption" />
+            app:layout_constraintEnd_toEndOf="@id/id"
+            app:layout_constraintStart_toStartOf="@id/id"
+            app:layout_constraintTop_toBottomOf="@id/model_caption" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/refresh"
@@ -120,7 +120,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/id"
+            app:layout_constraintStart_toEndOf="@id/id"
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.recyclerview.widget.RecyclerView

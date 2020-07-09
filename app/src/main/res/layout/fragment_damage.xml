@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/damage_name">
+            app:layout_constraintTop_toBottomOf="@id/damage_name">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
@@ -50,10 +50,10 @@
             android:id="@+id/damage_part_group"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/damage_images"
+            app:layout_constraintBottom_toTopOf="@id/damage_images"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/damage_description"
+            app:layout_constraintTop_toBottomOf="@id/damage_description"
             app:layout_constraintVertical_weight="1">
 
             <androidx.recyclerview.widget.RecyclerView
@@ -65,7 +65,7 @@
                 android:paddingTop="@dimen/padding"
                 android:paddingEnd="@dimen/padding"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintBottom_toTopOf="@+id/damage_total_price"
+                app:layout_constraintBottom_toTopOf="@id/damage_total_price"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -105,7 +105,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/damage_part_group"
+            app:layout_constraintTop_toBottomOf="@id/damage_part_group"
             app:layout_constraintVertical_weight="1"
             app:spanCount="3"
             tools:listitem="@layout/list_item_image" />
@@ -118,7 +118,7 @@
         android:layout_marginEnd="@dimen/fab_margin"
         android:src="@drawable/ic_add"
         android:tint="?colorOnSecondary"
-        app:layout_anchor="@+id/damage_parts"
+        app:layout_anchor="@id/damage_parts"
         app:layout_anchorGravity="bottom|end" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

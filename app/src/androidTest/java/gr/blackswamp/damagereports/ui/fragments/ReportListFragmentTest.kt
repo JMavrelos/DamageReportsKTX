@@ -51,8 +51,9 @@ class ReportListFragmentTest : KoinComponent {
     fun fragment_shows_correctly() {
         scenario.moveToState(Lifecycle.State.RESUMED)
         onView(withId(R.id.report_list)).check(matches(isDisplayed()))
-        onView(withId(R.id.list)).check(matches(isDisplayed()))
-        onView(withId(R.id.list)).check { view, _ -> assertEquals(reportHeaderData.size, (view as RecyclerView).adapter!!.itemCount) }
+        onView(withId(R.id.list))
+            .check(matches(isDisplayed()))
+            .check { view, _ -> assertEquals(reportHeaderData.size, (view as RecyclerView).adapter!!.itemCount) }
 
         reportHeaderData.forEachIndexed { index, entity ->
             onView(withId(R.id.list)).perform(scrollToPosition(index))
@@ -67,7 +68,6 @@ class ReportListFragmentTest : KoinComponent {
         onView(withId(R.id.action)).check(matches(isDisplayed()))
 
         onView(withId(R.id.theme_selection)).check(matches(IsNot(isDisplayed())))
-
-
     }
+
 }

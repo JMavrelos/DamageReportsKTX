@@ -31,7 +31,7 @@
         android:layout_marginBottom="@dimen/fab_margin"
         android:tint="?colorOnSecondary"
 
-        app:layout_anchor="@+id/theme_selection"
+        app:layout_anchor="@id/theme_selection"
         app:layout_anchorGravity="top|end"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1"
