@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "17b41ad7a1a203c5ca4afc5da11c69d7",
+    "identityHash": "c08bc460624f369fdc739f5d230b6f84",
     "entities": [
       {
         "tableName": "brands",
@@ -287,7 +287,7 @@
       },
       {
         "tableName": "parts",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `brand` TEXT, `model` TEXT, `price` REAL NOT NULL, `deleted` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`brand`) REFERENCES `brands`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`model`) REFERENCES `models`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `brand` TEXT, `model` TEXT, `price` INTEGER NOT NULL, `deleted` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`brand`) REFERENCES `brands`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT , FOREIGN KEY(`model`) REFERENCES `models`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
         "fields": [
           {
             "fieldPath": "id",
@@ -316,7 +316,7 @@
           {
             "fieldPath": "price",
             "columnName": "price",
-            "affinity": "REAL",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -530,7 +530,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '17b41ad7a1a203c5ca4afc5da11c69d7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c08bc460624f369fdc739f5d230b6f84')"
     ]
   }
 }

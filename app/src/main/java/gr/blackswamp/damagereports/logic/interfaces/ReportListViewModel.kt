@@ -10,7 +10,7 @@ import java.util.*
 interface ReportListViewModel {
     val themeSelection: LiveData<ThemeSetting>
     val refreshing: LiveData<Boolean>
-    var reportHeaderList: LiveData<PagedList<ReportHeader>>
+    val reportHeaderList: LiveData<PagedList<ReportHeader>>
     val showUndo: LiveData<Boolean>
     val command: LiveData<ReportListCommand>
 

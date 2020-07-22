@@ -1,13 +1,7 @@
 package gr.blackswamp.damagereports.data
 
-import gr.blackswamp.damagereports.data.db.entities.BrandEntity
-import gr.blackswamp.damagereports.data.db.entities.ModelEntity
-import gr.blackswamp.damagereports.data.db.entities.ReportEntity
-import gr.blackswamp.damagereports.data.db.entities.ReportHeaderEntity
-import gr.blackswamp.damagereports.logic.model.BrandData
-import gr.blackswamp.damagereports.logic.model.ModelData
-import gr.blackswamp.damagereports.logic.model.ReportData
-import gr.blackswamp.damagereports.logic.model.ReportHeaderData
+import gr.blackswamp.damagereports.data.db.entities.*
+import gr.blackswamp.damagereports.logic.model.*
 
 internal fun ReportHeaderEntity.toData(): ReportHeaderData =
     ReportHeaderData(id, name, description, date)
@@ -21,3 +15,5 @@ internal fun ModelEntity.toData(): ModelData =
 internal fun BrandEntity.toData(): BrandData =
     BrandData(this.id, this.name)
 
+internal fun ReportDamageEntity.toData() =
+    ReportDamageData(id, name, pictures, parts, cost)

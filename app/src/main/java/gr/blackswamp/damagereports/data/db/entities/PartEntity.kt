@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.math.BigDecimal
 import java.util.*
 
 @Entity(tableName = "parts"
@@ -24,6 +25,6 @@ data class PartEntity(
     , val name: String
     , val brand: UUID?
     , val model: UUID?
-    , val price: Double
+    , val price: BigDecimal
     , val deleted: Boolean
 )

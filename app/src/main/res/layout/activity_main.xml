@@ -36,6 +36,7 @@
         android:layout_height="match_parent"
         android:background="#06000000"
         android:focusableInTouchMode="true"
+        android:translationZ="1dp"
         android:visibility="gone">
 
         <androidx.core.widget.ContentLoadingProgressBar

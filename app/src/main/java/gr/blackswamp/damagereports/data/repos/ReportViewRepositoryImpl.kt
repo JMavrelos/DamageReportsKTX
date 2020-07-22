@@ -1,9 +1,11 @@
 package gr.blackswamp.damagereports.data.repos
 
+import androidx.paging.DataSource
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.toData
+import gr.blackswamp.damagereports.logic.model.ReportDamageData
 import gr.blackswamp.damagereports.logic.model.ReportData
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -22,6 +24,10 @@ class ReportViewRepositoryImpl : BaseRepositoryImpl(), ReportViewRepository, Koi
         } catch (t: Throwable) {
             Response.failure(getString(R.string.error_loading_report, id), t)
         }
+    }
+
+    override fun getDamageHeadersList(id: UUID): Response<DataSource.Factory<Int, ReportDamageData>> {
+        TODO("Not yet implemented")
     }
 }
 

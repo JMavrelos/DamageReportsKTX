@@ -53,25 +53,25 @@ object TestData {
 
     val PARTS by lazy {
         (0 until 50).map {
-            PartEntity(RandomUUID, "part $it", null, null, Random.nextDouble(10.0, 100.0), false)
+            PartEntity(RandomUUID, "part $it", null, null, Random.nextDouble(10.0, 100.0).toBigDecimal(), false)
         }.union(
             (51 until 100).map {
-                PartEntity(RandomUUID, "part $it", BRANDS.random().id, null, Random.nextDouble(10.0, 100.0), false)
+                PartEntity(RandomUUID, "part $it", BRANDS.random().id, null, Random.nextDouble(10.0, 100.0).toBigDecimal(), false)
             }
         ).union(
             (101 until 200).map {
                 val brand = BRANDS.random().id
-                PartEntity(RandomUUID, "part $it", brand, MODELS.filter { it.brand == brand }.random().id, Random.nextDouble(10.0, 100.0), false)
+                PartEntity(RandomUUID, "part $it", brand, MODELS.filter { it.brand == brand }.random().id, Random.nextDouble(10.0, 100.0).toBigDecimal(), false)
             }
         ).union(
             REPORTS.mapIndexed { idx, r ->
-                PartEntity(RandomUUID, "report part $idx", r.brand, r.model, Random.nextDouble(10.0, 100.0), false)
+                PartEntity(RandomUUID, "report part $idx", r.brand, r.model, Random.nextDouble(10.0, 100.0).toBigDecimal(), false)
             }
         )
     }
 
     val DAMAGES: List<DamageEntity> by lazy {
-        REPORTS.shuffled().take(20).flatMap { r ->
+        REPORTS.flatMap { r ->
             (1 until Random.nextInt(1, 3)).map {
                 DamageEntity(UUID.randomUUID(), "${randomString(10)} Damage", "${randomString(10)} Damage Description", r.id)
             }

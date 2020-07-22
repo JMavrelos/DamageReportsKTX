@@ -6,16 +6,20 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import gr.blackswamp.core.coroutines.Dispatcher
 import gr.blackswamp.core.data.Response
+import gr.blackswamp.core.db.paging.StaticDataSource
 import gr.blackswamp.core.testing.KoinUnitTest
 import gr.blackswamp.core.testing.MainCoroutineScopeRule
 import gr.blackswamp.core.testing.TestDispatcher
+import gr.blackswamp.core.testing.getOrAwait
 import gr.blackswamp.core.util.EmptyUUID
 import gr.blackswamp.damagereports.R
+import gr.blackswamp.damagereports.TestData
 import gr.blackswamp.damagereports.data.repos.ReportViewRepository
+import gr.blackswamp.damagereports.data.toData
 import gr.blackswamp.damagereports.logic.commands.ReportViewCommand
 import gr.blackswamp.damagereports.logic.interfaces.FragmentParent
 import gr.blackswamp.damagereports.logic.model.BrandData
-import gr.blackswamp.damagereports.logic.model.ModelData
+import gr.blackswamp.damagereports.logic.model.ReportDamageData
 import gr.blackswamp.damagereports.logic.model.ReportData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -31,6 +35,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.reset
 import java.util.*
 import kotlin.contracts.ExperimentalContracts
+import kotlin.random.Random
 
 @ExperimentalCoroutinesApi
 class ReportViewViewModelTest : KoinUnitTest() {
@@ -53,15 +58,7 @@ class ReportViewViewModelTest : KoinUnitTest() {
         , created = Date()
         , changed = false
     )
-    private val report = ReportData(
-        UUID.randomUUID()
-        , name = "Hello world"
-        , model = ModelData(UUID.randomUUID(), "hello model", UUID.fromString("e40eeee0-2cb4-4fc5-a3c6-01934e176c4d"))
-        , brand = BrandData(UUID.fromString("e40eeee0-2cb4-4fc5-a3c6-01934e176c4d"), "hello brand")
-        , created = Date()
-        , changed = false
-        , description = "hello description"
-    )
+    lateinit var report: ReportData
 
     @get:Rule
     val coroutineScope = MainCoroutineScopeRule()
@@ -72,8 +69,14 @@ class ReportViewViewModelTest : KoinUnitTest() {
     @Before
     override fun setUp() {
         super.setUp()
+        val reportEntity = TestData.REPORTS.random()
+        val brand = TestData.BRANDS.first { it.id == reportEntity.brand }
+        val model = TestData.MODELS.first { it.id == reportEntity.model }
+        report = reportEntity.toData(brand, model)
+
         //initial values do not matter, we call initialize manually
         vm = ReportViewViewModelImpl(app, parent, report, inEditMode = false, runInit = false)
+
         reset(repo)
     }
 
@@ -110,7 +113,6 @@ class ReportViewViewModelTest : KoinUnitTest() {
             assertFalse(newReport.changed)
         }
     }
-
 
     @Test
     fun `when name changes then the selected report is updated`() {
@@ -179,7 +181,6 @@ class ReportViewViewModelTest : KoinUnitTest() {
         assertTrue(vm.command.value is ReportViewCommand.ConfirmDiscard)
     }
 
-
     @ExperimentalContracts
     @Test
     fun `when the user confirms discard on a new report back is pressed`() {
@@ -224,7 +225,6 @@ class ReportViewViewModelTest : KoinUnitTest() {
         }
     }
 
-
     @Test
     fun `when the user confirms discard on a new report we exit`() {
         vm.initialize(newReport.copy(changed = true), true)
@@ -264,5 +264,30 @@ class ReportViewViewModelTest : KoinUnitTest() {
         assertTrue(vm.command.value is ReportViewCommand.ShowModelSelect)
 
         assertEquals(brand, (vm.command.value as ReportViewCommand.ShowModelSelect).brand)
+    }
+
+    @Test
+    fun `when the view initializes damages are loaded`() {
+        val expected = TestData.DAMAGES.filter { it.report == report.id }.map { ReportDamageData(it.id, it.name, Random.nextInt(), Random.nextInt(), Random.nextDouble().toBigDecimal()) }
+        whenever(repo.getDamageHeadersList(report.id)).thenReturn(Response.success(StaticDataSource.factory(expected, false)))
+
+        vm.initialize(report, true)
+
+        val damages = vm.damages.getOrAwait().toList()
+
+        assertEquals(expected.size, damages.size)
+        assertEquals(expected.size, expected.map { it.id }.intersect(damages.map { it.id }).size)
+    }
+
+    @Test
+    fun `when the view initializes with an error in damages a message is shown`() {
+        whenever(repo.getDamageHeadersList(report.id)).thenReturn(Response.failure(ERROR))
+
+        vm.initialize(report, true)
+
+        val damages = vm.damages.getOrAwait(throwError = false)
+
+        assertEquals(0, damages.size)
+        verify(parent).showError(ERROR)
     }
 }
