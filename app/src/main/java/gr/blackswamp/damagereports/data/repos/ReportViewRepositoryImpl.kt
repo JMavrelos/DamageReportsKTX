@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import gr.blackswamp.core.data.Response
 import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.data.db.AppDatabase
+import gr.blackswamp.damagereports.data.db.entities.ReportDamageEntity
 import gr.blackswamp.damagereports.data.toData
 import gr.blackswamp.damagereports.logic.model.ReportDamageData
 import gr.blackswamp.damagereports.logic.model.ReportData
@@ -27,7 +28,11 @@ class ReportViewRepositoryImpl : BaseRepositoryImpl(), ReportViewRepository, Koi
     }
 
     override fun getDamageHeadersList(id: UUID): Response<DataSource.Factory<Int, ReportDamageData>> {
-        TODO("Not yet implemented")
+        return try {
+            Response.success(db.damageDao.loadDamageHeadersForReport(id).map(ReportDamageEntity::toData))
+        } catch (t: Throwable) {
+            Response.failure(getString(R.string.error_loading_report_damages, id), t)
+        }
     }
 }
 

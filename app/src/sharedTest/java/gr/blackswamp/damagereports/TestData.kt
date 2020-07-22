@@ -23,7 +23,7 @@ object TestData {
 
     val MODELS: List<ModelEntity> by lazy {
         BRANDS.flatMap { brand ->
-            (1 until Random.nextInt(2, 10)).map {
+            (0 until Random.nextInt(2, 10)).map {
                 ModelEntity(UUID.randomUUID(), "${randomString(10)} Model", brand.id, false)
             }
         }
@@ -72,7 +72,7 @@ object TestData {
 
     val DAMAGES: List<DamageEntity> by lazy {
         REPORTS.flatMap { r ->
-            (1 until Random.nextInt(1, 3)).map {
+            (0 until Random.nextInt(1, 3)).map {
                 DamageEntity(UUID.randomUUID(), "${randomString(10)} Damage", "${randomString(10)} Damage Description", r.id)
             }
         }
@@ -81,8 +81,8 @@ object TestData {
     val DAMAGE_PARTS: List<DamagePartEntity> by lazy {
         DAMAGES.flatMap {
             val report = REPORTS.first { r -> r.id == it.report }
-            val part = PARTS.filter { it.brand == report.brand && it.model == report.model }.random().id
-            (1 until Random.nextInt(2, 5)).map { _ ->
+            val part = PARTS.filter { (it.brand == report.brand && it.model == report.model) || (it.brand == null && it.model == null) || (it.brand == report.brand && it.model == null) }.random().id
+            (0 until Random.nextInt(2, 5)).map { _ ->
                 DamagePartEntity(
                     RandomUUID
                     , part
@@ -100,29 +100,41 @@ object TestData {
             .withAdded(Calendar.MILLISECOND, Random.nextInt(-1_000_000, 0)).time
 
     fun initialize(context: Context) {
-        val testDb = Room.inMemoryDatabaseBuilder(context, AppDatabaseImpl::class.java).build()
+        val testDb = Room.databaseBuilder(context, AppDatabaseImpl::class.java, "test.db").build()
         loadKoinModules(module {
             single<AppDatabase>(override = true) { testDb }
         })
+        insertData(testDb)
+
+    }
+
+    fun build(context: Context): AppDatabaseImpl {
+        val testDb = Room.databaseBuilder(context, AppDatabaseImpl::class.java, "test.db").allowMainThreadQueries().build()
+        insertData(testDb)
+        return testDb
+    }
+
+    private fun insertData(db: AppDatabaseImpl) {
         runBlocking {
             BRANDS.forEach {
-                testDb.brandDao.insertBrand(it)
+                db.brandDao.insertBrand(it)
             }
             MODELS.forEach {
-                testDb.modelDao.insertModel(it)
+                db.modelDao.insertModel(it)
+
             }
             REPORTS.forEach {
-                testDb.reportDao.insertReport(it)
+                db.reportDao.insertReport(it)
             }
-//            PARTS.forEach {
-//                testDb.partDao.insertPart(it)
-//            }
-//            DAMAGES.forEach {
-//                testDb.damageDao.insertDamage(it)
-//            }
-//            DAMAGE_PARTS.forEach {
-//                testDb.damagePartDao.insertDamagePart(it)
-//            }
+            PARTS.forEach {
+                db.partDao.insertPart(it)
+            }
+            DAMAGES.forEach {
+                db.damageDao.insertDamage(it)
+            }
+            DAMAGE_PARTS.forEach {
+                db.damagePartDao.insertDamagePart(it)
+            }
         }
     }
 

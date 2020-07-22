@@ -58,4 +58,5 @@
     <string name="symbol_subtract">-</string>
     <string name="image">image</string>
     <string name="error_invalid_report_data">Λήφθηκαν λάθος δεδομένα αναφοράς</string>
+    <string name="error_loading_report_damages">Υπήρξε πρόβλημα κατά την εύρεση των ζημιών της αναφοράς %1$s</string>
 </resources>

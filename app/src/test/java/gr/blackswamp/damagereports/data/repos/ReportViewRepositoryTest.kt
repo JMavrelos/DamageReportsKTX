@@ -1,5 +1,6 @@
 package gr.blackswamp.damagereports.data.repos
 
+import android.database.sqlite.SQLiteException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.*
 import gr.blackswamp.core.coroutines.Dispatcher
@@ -10,6 +11,7 @@ import gr.blackswamp.damagereports.R
 import gr.blackswamp.damagereports.TestData
 import gr.blackswamp.damagereports.data.db.AppDatabase
 import gr.blackswamp.damagereports.data.db.dao.BrandDao
+import gr.blackswamp.damagereports.data.db.dao.DamageDao
 import gr.blackswamp.damagereports.data.db.dao.ModelDao
 import gr.blackswamp.damagereports.data.db.dao.ReportDao
 import gr.blackswamp.damagereports.data.prefs.Preferences
@@ -29,6 +31,7 @@ import org.koin.dsl.module
 class ReportViewRepositoryTest : KoinUnitTest() {
     companion object {
         const val FILTER = "12j3kj1lk23mm.,asd"
+        const val ERROR = "this is an error"
     }
 
     private val db = mock<AppDatabase>()
@@ -37,6 +40,7 @@ class ReportViewRepositoryTest : KoinUnitTest() {
     private val dao = mock<ReportDao>()
     private val mDao = mock<ModelDao>()
     private val bDao = mock<BrandDao>()
+    private val dDao = mock<DamageDao>()
 
     override val modules = module {
         single { db }
@@ -57,6 +61,7 @@ class ReportViewRepositoryTest : KoinUnitTest() {
         whenever(db.reportDao).thenReturn(dao)
         whenever(db.brandDao).thenReturn(bDao)
         whenever(db.modelDao).thenReturn(mDao)
+        whenever(db.damageDao).thenReturn(dDao)
         repo = ReportViewRepositoryImpl()
     }
 
@@ -165,4 +170,36 @@ class ReportViewRepositoryTest : KoinUnitTest() {
             assertEquals(expected, response.get)
         }
     }
+
+    @Test
+    fun `load the damages of a report`() {
+        runBlockingTest {
+            val report = TestData.REPORTS.random()
+
+            whenever(dDao.loadDamageHeadersForReport(report.id)).thenReturn(mock())
+
+            val response = repo.getDamageHeadersList(report.id)
+
+            assertFalse(response.hasError)
+            verify(dDao.loadDamageHeadersForReport(report.id))
+        }
+    }
+
+
+    @Test
+    fun `load the damages of a report with an error`() {
+        runBlockingTest {
+            val report = TestData.REPORTS.random()
+
+            whenever(dDao.loadDamageHeadersForReport(report.id)).thenThrow(SQLiteException(ERROR))
+
+            val response = repo.getDamageHeadersList(report.id)
+
+            assertTrue(response.hasError)
+            verify(dDao.loadDamageHeadersForReport(report.id))
+            verify(app.getString(R.string.error_loading_report_damages, report.id))
+            assertEquals(response.errorMessage, APP_STRING)
+        }
+    }
+
 }
