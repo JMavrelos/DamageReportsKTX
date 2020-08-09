@@ -100,7 +100,7 @@ object TestData {
             .withAdded(Calendar.MILLISECOND, Random.nextInt(-1_000_000, 0)).time
 
     fun initialize(context: Context) {
-        val testDb = Room.databaseBuilder(context, AppDatabaseImpl::class.java, "test.db").build()
+        val testDb = Room.inMemoryDatabaseBuilder(context, AppDatabaseImpl::class.java).build()
         loadKoinModules(module {
             single<AppDatabase>(override = true) { testDb }
         })
@@ -136,10 +136,6 @@ object TestData {
                 db.damagePartDao.insertDamagePart(it)
             }
         }
-    }
-
-    fun finalize(context: Context) {
-        context.deleteDatabase("test.db")
     }
 
 }

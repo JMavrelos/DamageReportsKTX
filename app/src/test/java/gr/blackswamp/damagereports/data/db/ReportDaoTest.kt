@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import gr.blackswamp.core.db.countWhere
 import gr.blackswamp.core.testing.getOrAwait
+import gr.blackswamp.core.util.toDateString
 import gr.blackswamp.damagereports.TestApp
 import gr.blackswamp.damagereports.TestData
 import gr.blackswamp.damagereports.data.db.dao.ReportDao
@@ -264,17 +265,22 @@ class ReportDaoTest {
             initData()
             val source = dao.loadReportHeaders("").toLiveData(1000)
             var value = source.getOrAwait()
+            val separators = TestData.REPORTS.map { it.created.toDateString() }.distinct().count()
 
-            //+1 because of the separator
-            assertEquals(TestData.REPORTS.size + 1, value.size)
+
+            assertEquals(TestData.REPORTS.size + separators, value.size)
 
             val toDelete = TestData.REPORTS.random()
 
             dao.flagReportDeleted(toDelete.id)
 
             value = source.getOrAwait()
-            //+1 because of the separator
-            assertEquals(TestData.REPORTS.size, value.size)
+
+            val newSeparatorCount = TestData.REPORTS.toMutableList().apply {
+                remove(toDelete)
+            }.map { it.created.toDateString() }.distinct().count()
+
+            assertEquals(TestData.REPORTS.size + newSeparatorCount - 1, value.size)
         }
     }
 

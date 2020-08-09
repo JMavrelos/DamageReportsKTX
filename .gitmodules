@@ -7,3 +7,6 @@
 [submodule "core"]
 	path = core
 	url = https://github.com/JMavrelos/core.git
+[submodule "uitesting"]
+	path = uitesting
+	url = https://github.com/JMavrelos/uitesting

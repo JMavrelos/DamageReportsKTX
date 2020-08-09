@@ -196,7 +196,7 @@ class ReportListViewModelTest : KoinUnitTest() {
 
             verify(parent).showLoading(false)
             verify(parent).showError(APP_STRING)
-
+            verify(app).getString(R.string.error_un_deleting_no_saved_value)
             assertFalse(vm.showUndo.value ?: false)
         }
     }
@@ -210,7 +210,7 @@ class ReportListViewModelTest : KoinUnitTest() {
 
             vm.deleteReport(deleted.id)
             vm.undoLastDelete()
-            verify(app).getString(R.string.error_un_deleting_no_saved_value)
+
             verify(repo).restoreReport(deleted.id)
             verify(parent, times(2)).showLoading(false)
             verify(parent).showError(ERROR)
